@@ -1,0 +1,13 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/favicon.ico/route": "/favicon.ico",
+  "/inventory/page": "/inventory",
+  "/login/page": "/login",
+  "/inventory/add/page": "/inventory/add",
+  "/logs/page": "/logs",
+  "/page": "/",
+  "/inventory/[id]/page": "/inventory/[id]",
+  "/register/page": "/register",
+  "/profile/page": "/profile",
+  "/qr-scanner/page": "/qr-scanner"
+}
