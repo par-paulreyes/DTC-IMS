@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { getApiUrl } from "../../config/api";
 
 export default function ProfilePage() {
@@ -20,11 +19,21 @@ export default function ProfilePage() {
       return;
     }
 
-    axios
-      .get(getApiUrl("/users/profile"), { headers: { Authorization: token } })
+    fetch(getApiUrl("/users/profile"), { 
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      } 
+    })
       .then((res) => {
-        setProfile(res.data);
-        setForm({ ...res.data, password: "", confirmPassword: "" });
+        if (res.ok) {
+          return res.json();
+        } else {
+          throw new Error('Failed to load profile');
+        }
+      })
+      .then((data) => {
+        setProfile(data);
+        setForm({ ...data, password: "", confirmPassword: "" });
       })
       .catch((err) => setError("Error loading profile"))
       .finally(() => setLoading(false));
@@ -45,15 +54,27 @@ export default function ProfilePage() {
     setSaving(true);
     const token = localStorage.getItem("token");
     try {
-      await axios.put(
+      const response = await fetch(
         getApiUrl("/users/profile"),
-        form.password ? { ...form, password: form.password } : form,
-        { headers: { Authorization: token } }
+        {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}` 
+          },
+          body: JSON.stringify(form.password ? { ...form, password: form.password } : form)
+        }
       );
-      setSuccess("Profile updated successfully!");
-      setForm({ ...form, password: "", confirmPassword: "" });
+      
+      if (response.ok) {
+        setSuccess("Profile updated successfully!");
+        setForm({ ...form, password: "", confirmPassword: "" });
+      } else {
+        const data = await response.json();
+        setError(data.message || "Error updating profile");
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Error updating profile");
+      setError("Error updating profile");
     } finally {
       setSaving(false);
     }
