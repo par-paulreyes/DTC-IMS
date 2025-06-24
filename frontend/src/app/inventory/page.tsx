@@ -60,8 +60,19 @@ export default function InventoryPage() {
   );
 
   return (
-    <div className="min-h-screen pt-8 pb-20 bg-gray-50">
-      <h1 className="text-2xl font-bold mb-4 text-center">Inventory</h1>
+    <div style={{
+      maxWidth: 700,
+      margin: '40px auto 0 auto',
+      background: '#fff',
+      borderRadius: 24,
+      boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
+      padding: '32px 32px 40px 32px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 32,
+      minHeight: 'calc(100vh - 120px)'
+    }}>
+      <h1 className="text-2xl font-bold mb-4">Inventory</h1>
       {/* Search and Filter Controls */}
       <div className="max-w-xl mx-auto flex flex-col md:flex-row gap-2 mb-4">
         <input
@@ -124,6 +135,15 @@ export default function InventoryPage() {
           ))}
         </ul>
       )}
+      <style jsx>{`
+        @media (max-width: 700px) {
+          div[style] {
+            max-width: 98vw !important;
+            padding-left: 4vw !important;
+            padding-right: 4vw !important;
+          }
+        }
+      `}</style>
     </div>
   );
 } 

@@ -40,8 +40,19 @@ export default function LogsPage() {
   };
 
   return (
-    <div className="min-h-screen pt-8 pb-20 bg-gray-50">
-      <h1 className="text-2xl font-bold mb-4 text-center">Maintenance Logs</h1>
+    <div style={{
+      maxWidth: 700,
+      margin: '40px auto 0 auto',
+      background: '#fff',
+      borderRadius: 24,
+      boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
+      padding: '32px 32px 40px 32px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 32,
+      minHeight: 'calc(100vh - 120px)'
+    }}>
+      <h1 className="text-2xl font-bold mb-4">Maintenance Logs</h1>
       <div className="flex justify-center gap-4 mb-4">
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
@@ -75,6 +86,15 @@ export default function LogsPage() {
           ))}
         </ul>
       )}
+      <style jsx>{`
+        @media (max-width: 700px) {
+          div[style] {
+            max-width: 98vw !important;
+            padding-left: 4vw !important;
+            padding-right: 4vw !important;
+          }
+        }
+      `}</style>
     </div>
   );
 } 

@@ -41,13 +41,18 @@ export default function LoginPage() {
 
   return (
     <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #eef2ff 100%)',
+      maxWidth: 700,
+      margin: '40px auto 0 auto',
+      background: '#fff',
+      borderRadius: 24,
+      boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
+      padding: '32px 32px 40px 32px',
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '2rem'
+      flexDirection: 'column',
+      gap: 32,
+      minHeight: 'calc(100vh - 120px)'
     }}>
+      <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827', marginBottom: '0.25rem' }}>Welcome Back</h1>
       <div style={{
         width: '100%',
         maxWidth: '320px'
@@ -83,12 +88,6 @@ export default function LoginPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h1 style={{
-              fontSize: '1.5rem',
-              fontWeight: 'bold',
-              color: '#111827',
-              marginBottom: '0.25rem'
-            }}>Welcome Back</h1>
             <p style={{
               fontSize: '0.875rem',
               color: '#6b7280'
@@ -363,6 +362,14 @@ export default function LoginPage() {
         @media (min-width: 1024px) {
           div[style*="max-width: 320px"] {
             max-width: 512px !important;
+          }
+        }
+        
+        @media (max-width: 700px) {
+          div[style] {
+            max-width: 98vw !important;
+            padding-left: 4vw !important;
+            padding-right: 4vw !important;
           }
         }
       `}</style>
