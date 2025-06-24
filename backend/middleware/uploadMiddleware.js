@@ -10,11 +10,20 @@ const storage = multer.diskStorage({
   },
 });
 
+const allowedMimeTypes = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'image/bmp',
+  'image/svg+xml'
+];
+
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|gif/;
-  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
-  if (extname && mimetype) {
+  const mimetype = allowedMimeTypes.includes(file.mimetype);
+  console.log('File upload:', file.originalname, file.mimetype, path.extname(file.originalname));
+  if (mimetype) {
     return cb(null, true);
   } else {
     cb(new Error('Only image files are allowed!'));

@@ -31,7 +31,7 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 // Serve static files from uploads directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static('uploads'));
 
 // Test database connection
 db.getConnection((err, connection) => {

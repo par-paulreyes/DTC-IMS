@@ -14,5 +14,6 @@ router.get('/:id', verifyToken, itemController.getItemById);
 router.post('/', verifyToken, upload.single('image'), itemController.createItem);
 router.put('/:id', verifyToken, upload.single('image'), itemController.updateItem);
 router.delete('/:id', verifyToken, isAdmin, itemController.deleteItem);
+router.post('/:id/image', verifyToken, upload.single('image'), itemController.uploadItemImage);
 
 module.exports = router; 
