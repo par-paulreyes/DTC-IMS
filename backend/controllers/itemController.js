@@ -165,12 +165,20 @@ exports.createItem = async (req, res) => {
 };
 
 exports.updateItem = (req, res) => {
-  let updateData = { ...req.body };
+  // Filter out computed fields that don't exist in the items table
+  const { status, system_status, ...updateData } = req.body;
+  
   if (req.file) {
     updateData.image_url = `/uploads/${req.file.filename}`;
   }
+  
+  console.log('Updating item with filtered data:', updateData);
+  
   Item.update(req.params.id, updateData, (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error updating item', error: err });
+    if (err) {
+      console.error('Error updating item:', err);
+      return res.status(500).json({ message: 'Error updating item', error: err.message });
+    }
     res.json({ message: 'Item updated' });
   });
 };
