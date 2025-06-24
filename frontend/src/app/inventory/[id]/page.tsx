@@ -134,6 +134,10 @@ export default function ItemDetailPage() {
     setSaving(true);
     setError("");
     const token = localStorage.getItem("token");
+    
+    // Debug: Log what we're about to send
+    console.log('Sending item update with data:', editingItem);
+    
     try {
       await axios.put(getApiUrl(`/items/${id}`), editingItem, {
         headers: { Authorization: token },
@@ -639,8 +643,8 @@ export default function ItemDetailPage() {
                               <span className="ml-2">{log.user_name}</span>
                             </div>
                             <div>
-                              <span className="font-medium">Maintained By:</span>
-                              <span className="ml-2">{log.maintained_by}</span>
+                              <span className="font-medium">Status:</span>
+                              <span className="ml-2">{log.status === 'completed' ? 'Completed' : 'Pending'}</span>
                             </div>
                             <div>
                               <span className="font-medium">Date:</span>
@@ -684,8 +688,8 @@ export default function ItemDetailPage() {
                               <span className="ml-2">{log.user_name}</span>
                             </div>
                             <div>
-                              <span className="font-medium">Maintained By:</span>
-                              <span className="ml-2">{log.maintained_by}</span>
+                              <span className="font-medium">Status:</span>
+                              <span className="ml-2">{log.status === 'completed' ? 'Completed' : 'Pending'}</span>
                             </div>
                             <div>
                               <span className="font-medium">Date:</span>
