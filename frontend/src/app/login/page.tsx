@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getApiUrl } from '../../config/api';
+import Image from "next/image";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -39,340 +40,227 @@ export default function LoginPage() {
     }
   };
 
+  useEffect(() => {
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      document.body.style.overflow = originalBodyOverflow;
+    };
+  }, []);
+
   return (
     <div style={{
-      maxWidth: 700,
-      margin: '40px auto 0 auto',
-      background: '#fff',
-      borderRadius: 24,
-      boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
-      padding: '32px 32px 40px 32px',
+      minHeight: '100vh',
+      height: '100%',
+      width: '100%',
+      overflow: 'hidden',
       display: 'flex',
-      flexDirection: 'column',
-      gap: 32,
-      minHeight: 'calc(100vh - 120px)'
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #eef2ff 100%)',
     }}>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827', marginBottom: '0.25rem' }}>Welcome Back</h1>
+      {/* Unified Login Box with Top Design and Form */}
       <div style={{
         width: '100%',
-        maxWidth: '320px'
+        maxWidth: 420,
+        borderRadius: 20,
+        overflow: 'hidden',
+        boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
+        background: '#14213d',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
       }}>
-        {/* Unified Container - Matching Navbar Style */}
+        {/* Top with background, logo, and text */}
         <div style={{
-          backgroundColor: 'white',
-          borderRadius: '10px',
-          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-          border: '3px solid #fbbf24',
-          padding: '1.25rem'
+          width: '100%',
+          minHeight: 210,
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}>
-          {/* Header */}
+          <img src="/dtc-bg.png" alt="DTC Background" style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            zIndex: 1,
+            filter: 'brightness(0.7)'
+          }} />
+          <Image src="/dtc-logo.png" alt="DTC Logo" width={160} height={80} style={{
+            width: 160,
+            height: 'auto',
+            marginTop: 24,
+            zIndex: 2,
+            position: 'relative'
+          }} priority />
           <div style={{
+            color: 'white',
+            fontSize: 18,
+            fontWeight: 400,
+            letterSpacing: 1,
+            marginTop: 10,
+            marginBottom: 18,
+            fontFamily: 'Montserrat, Arial, sans-serif',
             textAlign: 'center',
-            marginBottom: '1.5rem'
+            zIndex: 2,
+            position: 'relative',
+            textShadow: '0 2px 8px rgba(0,0,0,0.25)'
           }}>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '3rem',
-              height: '3rem',
-              backgroundColor: '#2563eb',
-              borderRadius: '50%',
-              marginBottom: '0.75rem'
-            }}>
-              <svg style={{
-                width: '1.5rem',
-                height: '1.5rem',
-                color: 'white'
-              }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <p style={{
-              fontSize: '0.875rem',
-              color: '#6b7280'
-            }}>Sign in to your DTC-IMS account</p>
+            DIGITAL TRANSFORMATION CENTER
           </div>
-
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {error && (
-              <div style={{
-                backgroundColor: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: '0.5rem',
-                padding: '0.75rem'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <svg style={{
-                    width: '1rem',
-                    height: '1rem',
-                    color: '#f87171',
-                    marginRight: '0.5rem'
-                  }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span style={{
-                    color: '#b91c1c',
-                    fontSize: '0.75rem',
-                    fontWeight: '500'
-                  }}>{error}</span>
-                </div>
-              </div>
-            )}
-
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '0.25rem'
-              }}>
-                Username
-              </label>
-              <div style={{ position: 'relative' }}>
-                <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '0.5rem',
-                  transform: 'translateY(-50%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  pointerEvents: 'none'
-                }}>
-                  <svg style={{
-                    height: '0.75rem',
-                    width: '0.75rem',
-                    color: '#9ca3af'
-                  }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    paddingLeft: '1.5rem',
-                    paddingRight: '0.75rem',
-                    paddingTop: '0.375rem',
-                    paddingBottom: '0.375rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    fontSize: '0.75rem',
-                    outline: 'none',
-                    transition: 'all 0.2s'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#3b82f6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#d1d5db';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  required
-                />
+        </div>
+        {/* Login Form Section (with semi-transparent overlay for readability) */}
+        <div style={{
+          width: '100%',
+          padding: '32px 20px 28px 20px',
+          background: 'rgba(20,33,61,0.97)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{ width: '100%', maxWidth: 320, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <div style={{ textAlign: 'center', marginBottom: 8, width: '100%' }}>
+              <h2 style={{ color: 'white', fontWeight: 700, fontSize: 22, marginBottom: 4 }}>Welcome back!</h2>
+              <div style={{ color: '#e5e7eb', fontSize: 12, marginBottom: 8 }}>
+                Login to your account to get started.
               </div>
             </div>
-
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '0.25rem'
-              }}>
-                Password
-              </label>
-              <div style={{ position: 'relative' }}>
+            <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
+              {error && (
                 <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '0.5rem',
-                  transform: 'translateY(-50%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  pointerEvents: 'none'
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  borderRadius: '0.5rem',
+                  padding: '0.75rem',
+                  marginBottom: 0,
+                  width: '100%'
                 }}>
-                  <svg style={{
-                    height: '0.75rem',
-                    width: '0.75rem',
-                    color: '#9ca3af'
-                  }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <svg style={{ width: '1rem', height: '1rem', color: '#f87171', marginRight: '0.5rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span style={{ color: '#b91c1c', fontSize: '0.85rem', fontWeight: 500 }}>{error}</span>
+                  </div>
                 </div>
-                <input
-                  type="password"
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    paddingLeft: '1.5rem',
-                    paddingRight: '0.75rem',
-                    paddingTop: '0.375rem',
-                    paddingBottom: '0.375rem',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    fontSize: '0.75rem',
-                    outline: 'none',
-                    transition: 'all 0.2s'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#3b82f6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#d1d5db';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%',
-                backgroundColor: '#2563eb',
-                color: 'white',
-                paddingTop: '0.375rem',
-                paddingBottom: '0.375rem',
-                paddingLeft: '1rem',
-                paddingRight: '1rem',
-                borderRadius: '0.5rem',
-                fontWeight: '500',
-                fontSize: '0.75rem',
-                border: 'none',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.5 : 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.backgroundColor = '#1d4ed8';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.backgroundColor = '#2563eb';
-                }
-              }}
-            >
-              {loading ? (
-                <>
-                  <svg style={{
-                    animation: 'spin 1s linear infinite',
-                    marginRight: '0.5rem',
-                    height: '0.75rem',
-                    width: '0.75rem',
-                    color: 'white'
-                  }} fill="none" viewBox="0 0 24 24">
-                    <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Signing in...
-                </>
-              ) : (
-                "Sign In"
               )}
-            </button>
-          </form>
-
-          {/* Footer */}
-          <div style={{
-            marginTop: '1.5rem',
-            paddingTop: '1.5rem',
-            borderTop: '1px solid #e5e7eb'
-          }}>
-            <p style={{
-              textAlign: 'center',
-              fontSize: '0.75rem',
-              color: '#6b7280',
-              marginBottom: '1rem'
-            }}>
-              Need help? Contact your system administrator
-            </p>
-            <p style={{
-              textAlign: 'center',
-              fontSize: '0.75rem',
-              color: '#9ca3af'
-            }}>
-              © 2024 DTC-IMS. All rights reserved.
-            </p>
+              <div style={{ width: '100%', position: 'relative', marginBottom: 0 }}>
+                <label style={{ color: 'white', fontWeight: 500, fontSize: 14, marginBottom: 4, display: 'block' }}>Username</label>
+                <div style={{ position: 'relative' }}>
+                  <span style={{
+                    position: 'absolute',
+                    left: 12,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    pointerEvents: 'none',
+                    color: '#9ca3af',
+                  }}>
+                    {/* User Icon */}
+                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </span>
+                  <input
+                    type="text"
+                    style={{
+                      width: '90%',
+                      padding: '12px 0 12px 32px',
+                      borderRadius: 8,
+                      border: 'none',
+                      fontSize: 14,
+                      marginTop: 2,
+                      background: 'white',
+                      color: '#22223b',
+                      outline: 'none',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+                    }}
+                    placeholder="Enter your username"
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <div style={{ width: '100%', position: 'relative', marginBottom: 0 }}>
+                <label style={{ color: 'white', fontWeight: 500, fontSize: 14, marginBottom: 4, display: 'block' }}>Password</label>
+                <div style={{ position: 'relative' }}>
+                  <span style={{
+                    position: 'absolute',
+                    left: 12,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    pointerEvents: 'none',
+                    color: '#9ca3af',
+                  }}>
+                    {/* Lock Icon */}
+                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </span>
+                  <input
+                    type="password"
+                    style={{
+                      width: '90%',
+                      padding: '12px 0 12px 32px',
+                      borderRadius: 8,
+                      border: 'none',
+                      fontSize: 14,
+                      marginTop: 2,
+                      background: 'white',
+                      color: '#22223b',
+                      outline: 'none',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+                    }}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  backgroundColor: '#c1121f',
+                  color: 'white',
+                  padding: '12px 0',
+                  borderRadius: 12,
+                  fontWeight: 700,
+                  fontSize: 17,
+                  border: 'none',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  opacity: loading ? 0.7 : 1,
+                  marginTop: 0,
+                  marginBottom: 0,
+                  transition: 'background 0.2s'
+                }}
+              >
+                {loading ? 'Logging in...' : 'Login'}
+              </button>
+            </form>
+            <div style={{ textAlign: 'center', marginTop: 8, width: '100%' }}>
+              <span style={{ color: '#e5e7eb', fontSize: 12 }}>Forgot password? </span>
+              <a href="#" style={{ color: '#c1121f', fontSize: 12, textDecoration: 'underline', cursor: 'pointer' }}>Click here</a>
+            </div>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-        
-        @media (min-width: 640px) {
-          div[style*="max-width: 320px"] {
-            max-width: 384px !important;
-          }
-          div[style*="padding: 1.25rem"] {
-            padding: 1.5rem !important;
-          }
-          h1[style*="font-size: 1.5rem"] {
-            font-size: 1.875rem !important;
-          }
-          p[style*="font-size: 0.875rem"] {
-            font-size: 1rem !important;
-          }
-          div[style*="width: 3rem"] {
-            width: 3.5rem !important;
-            height: 3.5rem !important;
-          }
-          svg[style*="width: 1.5rem"] {
-            width: 1.75rem !important;
-            height: 1.75rem !important;
-          }
-        }
-        
-        @media (min-width: 768px) {
-          div[style*="max-width: 320px"] {
-            max-width: 448px !important;
-          }
-          div[style*="padding: 1.25rem"] {
-            padding: 2rem !important;
-          }
-        }
-        
-        @media (min-width: 1024px) {
-          div[style*="max-width: 320px"] {
-            max-width: 512px !important;
-          }
-        }
-        
-        @media (max-width: 700px) {
-          div[style] {
-            max-width: 98vw !important;
-            padding-left: 4vw !important;
-            padding-right: 4vw !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

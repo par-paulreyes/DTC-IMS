@@ -241,109 +241,95 @@ export default function RegisterPage() {
       gap: 32,
       minHeight: 'calc(100vh - 120px)'
     }}>
-      <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827', marginBottom: '0.25rem' }}>Register New User</h1>
-      {/* Unified Container - Matching Navbar Style */}
+      {/* Header */}
       <div style={{
-        width: '100%',
-        maxWidth: '384px',
-        margin: '0 auto',
-        backgroundColor: 'white',
-        borderRadius: '10px',
-        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-        border: '3px solid #fbbf24',
-        padding: '1.25rem'
+        textAlign: 'center',
+        marginBottom: '1.5rem'
       }}>
-        {/* Header */}
         <div style={{
-          textAlign: 'center',
-          marginBottom: '1.5rem'
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '3rem',
+          height: '3rem',
+          backgroundColor: '#16a34a',
+          borderRadius: '50%',
+          marginBottom: '0.75rem'
         }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '3rem',
-            height: '3rem',
-            backgroundColor: '#16a34a',
-            borderRadius: '50%',
-            marginBottom: '0.75rem'
-          }}>
-            <svg style={{
-              width: '1.5rem',
-              height: '1.5rem',
-              color: 'white'
-            }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-            </svg>
-          </div>
-          <h1 style={{
-            fontSize: '1.5rem',
-            fontWeight: 'bold',
-            color: '#111827',
-            marginBottom: '0.25rem'
-          }}>Register New User</h1>
-          <p style={{
-            fontSize: '0.875rem',
-            color: '#6b7280'
-          }}>Create a new user account for your organization</p>
+          <svg style={{
+            width: '1.5rem',
+            height: '1.5rem',
+            color: 'white'
+          }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+          </svg>
         </div>
-
-        {/* Registration Form */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {error && (
-            <div style={{
-              backgroundColor: '#fef2f2',
-              border: '1px solid #fecaca',
-              borderRadius: '0.5rem',
-              padding: '0.75rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <svg style={{
-                  width: '1rem',
-                  height: '1rem',
-                  color: '#f87171',
-                  marginRight: '0.5rem'
-                }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span style={{
-                  color: '#b91c1c',
-                  fontSize: '0.75rem',
-                  fontWeight: '500'
-                }}>{error}</span>
-              </div>
-            </div>
-          )}
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-            <div>
-              <label style={{
-                display: 'block',
+        <h1 style={{
+          fontSize: '1.5rem',
+          fontWeight: 'bold',
+          color: '#111827',
+          marginBottom: '0.25rem'
+        }}>Register New User</h1>
+        <p style={{
+          fontSize: '0.875rem',
+          color: '#6b7280'
+        }}>Create a new user account for your organization</p>
+      </div>
+      {/* Registration Form */}
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {error && (
+          <div style={{
+            backgroundColor: '#fef2f2',
+            border: '1px solid #fecaca',
+            borderRadius: '0.5rem',
+            padding: '0.75rem'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <svg style={{
+                width: '1rem',
+                height: '1rem',
+                color: '#f87171',
+                marginRight: '0.5rem'
+              }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span style={{
+                color: '#b91c1c',
                 fontSize: '0.75rem',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '0.25rem'
+                fontWeight: '500'
+              }}>{error}</span>
+            </div>
+          </div>
+        )}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+          <div>
+            <label style={{
+              display: 'block',
+              fontSize: '0.75rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '0.25rem'
+            }}>
+              Username
+            </label>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '0.5rem',
+                transform: 'translateY(-50%)',
+                display: 'flex',
+                alignItems: 'center',
+                pointerEvents: 'none'
               }}>
-                Username
-              </label>
-              <div style={{ position: 'relative' }}>
-                <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '0.5rem',
-                  transform: 'translateY(-50%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  pointerEvents: 'none'
-                }}>
-                  <svg style={{
-                    height: '0.75rem',
-                    width: '0.75rem',
-                    color: '#9ca3af'
-                  }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
+                <svg style={{
+                  height: '0.75rem',
+                  width: '0.75rem',
+                  color: '#9ca3af'
+                }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
         <input
           type="text"
           name="username"
@@ -374,36 +360,36 @@ export default function RegisterPage() {
           required
         />
       </div>
-            </div>
+          </div>
 
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '0.25rem'
+          <div>
+            <label style={{
+              display: 'block',
+              fontSize: '0.75rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '0.25rem'
+            }}>
+              Full Name
+            </label>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '0.5rem',
+                transform: 'translateY(-50%)',
+                display: 'flex',
+                alignItems: 'center',
+                pointerEvents: 'none'
               }}>
-                Full Name
-              </label>
-              <div style={{ position: 'relative' }}>
-                <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '0.5rem',
-                  transform: 'translateY(-50%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  pointerEvents: 'none'
-                }}>
-                  <svg style={{
-                    height: '0.75rem',
-                    width: '0.75rem',
-                    color: '#9ca3af'
-                  }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
+                <svg style={{
+                  height: '0.75rem',
+                  width: '0.75rem',
+                  color: '#9ca3af'
+                }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
         <input
           type="text"
           name="full_name"
@@ -434,38 +420,38 @@ export default function RegisterPage() {
           required
         />
       </div>
-            </div>
           </div>
+        </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '0.25rem'
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+          <div>
+            <label style={{
+              display: 'block',
+              fontSize: '0.75rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '0.25rem'
+            }}>
+              Email
+            </label>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '0.5rem',
+                transform: 'translateY(-50%)',
+                display: 'flex',
+                alignItems: 'center',
+                pointerEvents: 'none'
               }}>
-                Email
-              </label>
-              <div style={{ position: 'relative' }}>
-                <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '0.5rem',
-                  transform: 'translateY(-50%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  pointerEvents: 'none'
-                }}>
-                  <svg style={{
-                    height: '0.75rem',
-                    width: '0.75rem',
-                    color: '#9ca3af'
-                  }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
+                <svg style={{
+                  height: '0.75rem',
+                  width: '0.75rem',
+                  color: '#9ca3af'
+                }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
         <input
           type="email"
           name="email"
@@ -496,36 +482,36 @@ export default function RegisterPage() {
           required
         />
       </div>
-            </div>
+          </div>
 
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '0.25rem'
+          <div>
+            <label style={{
+              display: 'block',
+              fontSize: '0.75rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '0.25rem'
+            }}>
+              Company Name
+            </label>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '0.5rem',
+                transform: 'translateY(-50%)',
+                display: 'flex',
+                alignItems: 'center',
+                pointerEvents: 'none'
               }}>
-                Company Name
-              </label>
-              <div style={{ position: 'relative' }}>
-                <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '0.5rem',
-                  transform: 'translateY(-50%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  pointerEvents: 'none'
-                }}>
-                  <svg style={{
-                    height: '0.75rem',
-                    width: '0.75rem',
-                    color: '#9ca3af'
-                  }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                </div>
+                <svg style={{
+                  height: '0.75rem',
+                  width: '0.75rem',
+                  color: '#9ca3af'
+                }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
         <input
           type="text"
           name="company_name"
@@ -556,38 +542,38 @@ export default function RegisterPage() {
           required
         />
       </div>
-            </div>
           </div>
+        </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '0.25rem'
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
+          <div>
+            <label style={{
+              display: 'block',
+              fontSize: '0.75rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '0.25rem'
+            }}>
+              Password
+            </label>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '0.5rem',
+                transform: 'translateY(-50%)',
+                display: 'flex',
+                alignItems: 'center',
+                pointerEvents: 'none'
               }}>
-                Password
-              </label>
-              <div style={{ position: 'relative' }}>
-                <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '0.5rem',
-                  transform: 'translateY(-50%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  pointerEvents: 'none'
-                }}>
-                  <svg style={{
-                    height: '0.75rem',
-                    width: '0.75rem',
-                    color: '#9ca3af'
-                  }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
+                <svg style={{
+                  height: '0.75rem',
+                  width: '0.75rem',
+                  color: '#9ca3af'
+                }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
         <input
           type="password"
           name="password"
@@ -618,36 +604,36 @@ export default function RegisterPage() {
           required
         />
       </div>
-            </div>
+          </div>
 
-            <div>
-              <label style={{
-                display: 'block',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '0.25rem'
+          <div>
+            <label style={{
+              display: 'block',
+              fontSize: '0.75rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '0.25rem'
+            }}>
+              Confirm Password
+            </label>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '0.5rem',
+                transform: 'translateY(-50%)',
+                display: 'flex',
+                alignItems: 'center',
+                pointerEvents: 'none'
               }}>
-                Confirm Password
-              </label>
-              <div style={{ position: 'relative' }}>
-                <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '0.5rem',
-                  transform: 'translateY(-50%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  pointerEvents: 'none'
-                }}>
-                  <svg style={{
-                    height: '0.75rem',
-                    width: '0.75rem',
-                    color: '#9ca3af'
-                  }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
+                <svg style={{
+                  height: '0.75rem',
+                  width: '0.75rem',
+                  color: '#9ca3af'
+                }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
         <input
           type="password"
           name="confirmPassword"
@@ -678,8 +664,8 @@ export default function RegisterPage() {
           required
         />
       </div>
-            </div>
           </div>
+        </div>
 
       <button
         type="submit"
@@ -733,7 +719,6 @@ export default function RegisterPage() {
             )}
       </button>
     </form>
-
     {/* Footer */}
     <div style={{
       marginTop: '1.5rem',
@@ -756,9 +741,7 @@ export default function RegisterPage() {
         © 2024 DTC-IMS. All rights reserved.
       </p>
     </div>
-  </div>
-
-  <style jsx>{`
+    <style jsx>{`
     @keyframes spin {
       from {
         transform: rotate(0deg);

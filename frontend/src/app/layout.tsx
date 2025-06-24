@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import '../../styles/globals.css';
 import NavbarWrapper from '../components/NavbarWrapper';
-import TopNavbar from '../components/TopNavbar';
+import ConditionalTopNavbar from '../components/ConditionalTopNavbar';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,12 +24,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  console.log("RootLayout - Rendering layout");
-  
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <TopNavbar />
+        <ConditionalTopNavbar />
         {children}
         <NavbarWrapper />
       </body>

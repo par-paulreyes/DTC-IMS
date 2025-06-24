@@ -73,10 +73,12 @@ export default function DashboardPage() {
       <div className={styles.dashboardTitle}>Dashboard</div>
       {/* Main Inventory Card */}
       <div className={styles.dashboardCard}>
-        <img
+        <Image
           src="/dtc-bg.png"
           alt="Inventory Background"
           className={styles.dashboardCardBg}
+          fill
+          priority
         />
         <div className={styles.dashboardCardContent}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
