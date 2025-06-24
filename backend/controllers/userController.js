@@ -1,5 +1,7 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
+const path = require('path');
 
 exports.getProfile = (req, res) => {
   User.findById(req.user.id, (err, user) => {
@@ -49,4 +51,34 @@ exports.updateProfile = (req, res) => {
     console.error('❌ Update Profile Error:', error);
     res.status(500).json({ message: 'Internal server error', error: error.message });
   }
+};
+
+exports.uploadProfilePicture = (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file uploaded' });
+  }
+  const imageUrl = `/uploads/${req.file.filename}`;
+  // First, get the previous profile picture
+  User.findById(req.user.id, (err, user) => {
+    if (err || !user) {
+      return res.status(500).json({ message: 'Error finding user for profile picture update' });
+    }
+    const prevImage = user.profile_picture;
+    // Update to new image
+    User.update(req.user.id, { profile_picture: imageUrl }, (err) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error saving profile picture' });
+      }
+      // Delete previous image if it exists and is different
+      if (prevImage && prevImage !== imageUrl && prevImage.startsWith('/uploads/')) {
+        const prevPath = path.join(__dirname, '..', prevImage);
+        fs.unlink(prevPath, (err) => {
+          if (err) {
+            console.warn('Failed to delete previous profile picture:', prevPath, err.message);
+          }
+        });
+      }
+      res.json({ url: imageUrl });
+    });
+  });
 }; 

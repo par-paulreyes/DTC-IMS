@@ -1,6 +1,8 @@
 const Item = require('../models/itemModel');
 const MaintenanceLog = require('../models/maintenanceLogModel');
 const Diagnostic = require('../models/diagnosticModel');
+const fs = require('fs');
+const path = require('path');
 
 exports.getAllItems = (req, res) => {
   console.log('Getting all items for company:', req.user.company_name);
@@ -204,5 +206,38 @@ exports.getUpcomingMaintenance = (req, res) => {
   Item.findUpcomingMaintenance(company_name, (err, items) => {
     if (err) return res.status(500).json({ message: 'Error fetching upcoming maintenance items', error: err });
     res.json(items);
+  });
+};
+
+// Upload item image
+exports.uploadItemImage = (req, res) => {
+  const itemId = req.params.id;
+  if (!req.file) {
+    return res.status(400).json({ message: 'No image file uploaded' });
+  }
+  const imageUrl = `/uploads/${req.file.filename}`;
+  // First, get the previous item image
+  Item.findById(itemId, (err, item) => {
+    if (err || !item) {
+      return res.status(500).json({ message: 'Error finding item for image update' });
+    }
+    const prevImage = item.image_url;
+    // Update to new image
+    Item.update(itemId, { image_url: imageUrl }, (err, result) => {
+      if (err) {
+        console.error('Error updating item image:', err);
+        return res.status(500).json({ message: 'Error updating item image', error: err.message });
+      }
+      // Delete previous image if it exists and is different
+      if (prevImage && prevImage !== imageUrl && prevImage.startsWith('/uploads/')) {
+        const prevPath = path.join(__dirname, '..', prevImage);
+        fs.unlink(prevPath, (err) => {
+          if (err) {
+            console.warn('Failed to delete previous item image:', prevPath, err.message);
+          }
+        });
+      }
+      res.json({ message: 'Item image updated', url: imageUrl });
+    });
   });
 }; 
