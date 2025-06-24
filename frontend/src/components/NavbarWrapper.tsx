@@ -5,8 +5,8 @@ import BottomNavbar from "./BottomNavbar";
 export default function NavbarWrapper() {
   const pathname = usePathname();
   
-  // Hide navbar on login and register pages
-  const hideNavbar = pathname === "/login" || pathname === "/register";
+  // Hide navbar only on login page
+  const hideNavbar = pathname === "/login";
 
   if (hideNavbar) {
     return null;

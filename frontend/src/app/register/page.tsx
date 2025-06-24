@@ -33,11 +33,11 @@ export default function RegisterPage() {
 
   const checkAuth = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        router.push("/login");
-        return;
-      }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
 
       const response = await fetch(getApiUrl("/users/profile"), {
         headers: {
@@ -76,7 +76,7 @@ export default function RegisterPage() {
 
     setSubmitting(true);
     setError("");
-
+    
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(getApiUrl("/auth/register"), {
@@ -86,10 +86,10 @@ export default function RegisterPage() {
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
-          username: formData.username,
-          full_name: formData.full_name,
-          email: formData.email,
-          company_name: formData.company_name,
+        username: formData.username,
+        full_name: formData.full_name,
+        email: formData.email,
+        company_name: formData.company_name,
           password: formData.password
         }),
       });
@@ -230,31 +230,49 @@ export default function RegisterPage() {
 
   return (
     <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #eef2ff 100%)',
+      maxWidth: 700,
+      margin: '40px auto 0 auto',
+      background: '#fff',
+      borderRadius: 24,
+      boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
+      padding: '32px 32px 40px 32px',
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '2rem'
+      flexDirection: 'column',
+      gap: 32,
+      minHeight: 'calc(100vh - 120px)'
     }}>
+      <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827', marginBottom: '0.25rem' }}>Register New User</h1>
       <div style={{
-        width: '100%',
-        maxWidth: '384px'
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #eff6ff 0%, #ffffff 50%, #eef2ff 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        padding: '2rem',
+        paddingLeft: 32,
+        paddingRight: 32,
+        paddingBottom: '6rem',
       }}>
-        {/* Unified Container - Matching Navbar Style */}
         <div style={{
-          backgroundColor: 'white',
-          borderRadius: '10px',
-          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-          border: '3px solid #fbbf24',
-          padding: '1.25rem'
+          width: '100%',
+          maxWidth: '384px'
         }}>
-          {/* Header */}
+          {/* Unified Container - Matching Navbar Style */}
           <div style={{
-            textAlign: 'center',
-            marginBottom: '1.5rem'
+            backgroundColor: 'white',
+            borderRadius: '10px',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+            border: '3px solid #fbbf24',
+            padding: '1.25rem'
           }}>
+            {/* Header */}
             <div style={{
+              textAlign: 'center',
+              marginBottom: '1.5rem'
+            }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -340,9 +358,9 @@ export default function RegisterPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
-                  <input
-                    type="text"
-                    name="username"
+          <input
+            type="text"
+            name="username"
                     style={{
                       display: 'block',
                       width: '100%',
@@ -365,11 +383,11 @@ export default function RegisterPage() {
                       e.target.style.boxShadow = 'none';
                     }}
                     placeholder="Enter username"
-                    value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    required
-                  />
-                </div>
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            required
+          />
+        </div>
               </div>
 
               <div>
@@ -400,9 +418,9 @@ export default function RegisterPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
-                  <input
-                    type="text"
-                    name="full_name"
+          <input
+            type="text"
+            name="full_name"
                     style={{
                       display: 'block',
                       width: '100%',
@@ -425,11 +443,11 @@ export default function RegisterPage() {
                       e.target.style.boxShadow = 'none';
                     }}
                     placeholder="Enter full name"
-                    value={formData.full_name}
-                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    required
-                  />
-                </div>
+            value={formData.full_name}
+            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+            required
+          />
+        </div>
               </div>
             </div>
 
@@ -462,9 +480,9 @@ export default function RegisterPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <input
-                    type="email"
-                    name="email"
+          <input
+            type="email"
+            name="email"
                     style={{
                       display: 'block',
                       width: '100%',
@@ -487,11 +505,11 @@ export default function RegisterPage() {
                       e.target.style.boxShadow = 'none';
                     }}
                     placeholder="Enter email address"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                  />
-                </div>
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            required
+          />
+        </div>
               </div>
 
               <div>
@@ -522,9 +540,9 @@ export default function RegisterPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   </div>
-                  <input
-                    type="text"
-                    name="company_name"
+          <input
+            type="text"
+            name="company_name"
                     style={{
                       display: 'block',
                       width: '100%',
@@ -547,11 +565,11 @@ export default function RegisterPage() {
                       e.target.style.boxShadow = 'none';
                     }}
                     placeholder="e.g., DTC"
-                    value={formData.company_name}
-                    onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                    required
-                  />
-                </div>
+            value={formData.company_name}
+            onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+            required
+          />
+        </div>
               </div>
             </div>
 
@@ -584,9 +602,9 @@ export default function RegisterPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   </div>
-                  <input
-                    type="password"
-                    name="password"
+          <input
+            type="password"
+            name="password"
                     style={{
                       display: 'block',
                       width: '100%',
@@ -609,11 +627,11 @@ export default function RegisterPage() {
                       e.target.style.boxShadow = 'none';
                     }}
                     placeholder="Enter password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    required
-                  />
-                </div>
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            required
+          />
+        </div>
               </div>
 
               <div>
@@ -644,9 +662,9 @@ export default function RegisterPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                   </div>
-                  <input
-                    type="password"
-                    name="confirmPassword"
+          <input
+            type="password"
+            name="confirmPassword"
                     style={{
                       display: 'block',
                       width: '100%',
@@ -669,16 +687,16 @@ export default function RegisterPage() {
                       e.target.style.boxShadow = 'none';
                     }}
                     placeholder="Confirm password"
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    required
-                  />
-                </div>
+            value={formData.confirmPassword}
+            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+            required
+          />
+        </div>
               </div>
             </div>
 
-            <button
-              type="submit"
+        <button
+          type="submit"
               disabled={submitting}
               style={{
                 width: '100%',
@@ -727,8 +745,8 @@ export default function RegisterPage() {
               ) : (
                 "Create User Account"
               )}
-            </button>
-          </form>
+        </button>
+      </form>
 
           {/* Footer */}
           <div style={{
@@ -803,6 +821,13 @@ export default function RegisterPage() {
         @media (min-width: 1024px) {
           div[style*="max-width: 384px"] {
             max-width: 640px !important;
+          }
+        }
+
+        @media (max-width: 700px) {
+          div[style*='min-height: 100vh'] {
+            padding-left: 8px !important;
+            padding-right: 8px !important;
           }
         }
       `}</style>

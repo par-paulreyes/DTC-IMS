@@ -7,12 +7,28 @@ import styles from "./page.module.css";
 import { getApiUrl } from "../config/api";
 
 export default function DashboardPage() {
-  const [totalItems, setTotalItems] = useState(0);
-  const [maintenanceItems, setMaintenanceItems] = useState(0);
-  const [issueItems, setIssueItems] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [totalItems, setTotalItems] = useState(24); // demo value
+  const [recentlyAdded, setRecentlyAdded] = useState(5);
+  const [categoryCount, setCategoryCount] = useState(4);
+  const [lastScan, setLastScan] = useState(2);
+  const [locationCount, setLocationCount] = useState(5);
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+    setLoading(true);
+    axios.get(getApiUrl("/users/profile"), { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => setUser(res.data))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
+  }, [router]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -29,36 +45,11 @@ export default function DashboardPage() {
     ])
       .then(([itemsRes, maintRes]) => {
         setTotalItems(itemsRes.data.length);
-        setMaintenanceItems(maintRes.data.length);
-        // For items with issues, count diagnostics with 'fail' or 'issue' in system_status
-        const itemIds = itemsRes.data.map((item: any) => item.id);
-        if (itemIds.length === 0) {
-          setIssueItems(0);
-          setLoading(false);
-          return;
-        }
-        // Fetch diagnostics for all items
-        Promise.all(
-          itemIds.map((id: number) =>
-            axios.get(getApiUrl(`/diagnostics/item/${id}`), { headers: { Authorization: token } })
-          )
-        )
-          .then((diagResArr) => {
-            const issues = diagResArr.reduce((acc, res) => {
-              return (
-                acc +
-                res.data.filter((d: any) =>
-                  d.system_status &&
-                  (d.system_status.toLowerCase().includes("fail") ||
-                    d.system_status.toLowerCase().includes("issue") ||
-                    d.system_status.toLowerCase().includes("problem"))
-                ).length
-              );
-            }, 0);
-            setIssueItems(issues);
-          })
-          .catch(() => setIssueItems(0))
-          .finally(() => setLoading(false));
+        setRecentlyAdded(itemsRes.data.length - itemsRes.data.filter((item: any) => item.createdAt).length);
+        setCategoryCount(itemsRes.data.filter((item: any) => item.category).length);
+        setLastScan(itemsRes.data.filter((item: any) => item.lastScan).length);
+        setLocationCount(itemsRes.data.filter((item: any) => item.location).length);
+        setLoading(false);
       })
       .catch((err) => {
         setError("Error loading dashboard stats");
@@ -77,26 +68,54 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen pt-8 pb-20 bg-gray-50">
-      <h1 className="text-2xl font-bold mb-6 text-center">Dashboard</h1>
-      {loading && <div className="text-center text-blue-600">Loading...</div>}
-      {error && <div className="text-center text-red-500">{error}</div>}
-      {!loading && !error && (
-        <div className="max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white rounded shadow p-6 flex flex-col items-center">
-            <div className="text-3xl font-bold text-blue-600">{totalItems}</div>
-            <div className="text-gray-600 mt-2 text-center">Total Items</div>
+    <div className={styles.dashboardContainer}>
+      {/* Dashboard Title */}
+      <div className={styles.dashboardTitle}>Dashboard</div>
+      {/* Main Inventory Card */}
+      <div className={styles.dashboardCard}>
+        <img
+          src="/dtc-bg.png"
+          alt="Inventory Background"
+          className={styles.dashboardCardBg}
+        />
+        <div className={styles.dashboardCardContent}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div style={{ fontSize: '2.5rem', fontWeight: 800, lineHeight: 1 }}>{totalItems} <span style={{ fontSize: '1.1rem', fontWeight: 500 }}>Items</span></div>
+              <div style={{ fontSize: '0.95rem', fontWeight: 600, marginTop: 2 }}>Inventory Total</div>
+            </div>
+            <div style={{ fontSize: '0.95rem', fontWeight: 600, opacity: 0.8 }}>Inventory Management System</div>
           </div>
-          <div className="bg-white rounded shadow p-6 flex flex-col items-center">
-            <div className="text-3xl font-bold text-yellow-500">{maintenanceItems}</div>
-            <div className="text-gray-600 mt-2 text-center">Needing Maintenance</div>
-          </div>
-          <div className="bg-white rounded shadow p-6 flex flex-col items-center">
-            <div className="text-3xl font-bold text-red-500">{issueItems}</div>
-            <div className="text-gray-600 mt-2 text-center">Items with Issues</div>
-          </div>
+          <div style={{ fontSize: '0.85rem', marginTop: 18, opacity: 0.8 }}>Updated: June 14, 2025</div>
         </div>
-      )}
+      </div>
+      {/* Stats Grid */}
+      <div className={styles.dashboardStatsGrid}>
+        <StatCard label="Recently Added" value={recentlyAdded} date="June 17, 2025" />
+        <StatCard label="Category" value={categoryCount} date="June 17, 2025" />
+        <StatCard label="Last Scan" value={lastScan} date="June 17, 2025" />
+        <StatCard label="Location" value={locationCount} date="June 17, 2025" />
+      </div>
+      {/* Recent Section */}
+      <div className={styles.dashboardRecent}>
+        <div className={styles.dashboardRecentTitle}>Recent</div>
+        <div className={styles.dashboardRecentList}>
+          <div className={styles.dashboardRecentCard}></div>
+          <div className={styles.dashboardRecentCard}></div>
+          <div className={styles.dashboardRecentCard}></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value, date }: { label: string; value: number; date: string }) {
+  const styles = require("./page.module.css");
+  return (
+    <div className={styles.dashboardStatCard}>
+      <div className={styles.dashboardStatValue}>{value}</div>
+      <div className={styles.dashboardStatLabel}>{label}</div>
+      <div className={styles.dashboardStatDate}>Updated: {date}</div>
     </div>
   );
 }

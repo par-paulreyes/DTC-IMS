@@ -245,48 +245,30 @@ export default function ItemDetailPage() {
   };
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Loading item details...</p>
-      </div>
-    </div>
+    <div className="min-h-screen flex items-center justify-center">Loading...</div>
   );
   
-  if (error && !isEditing) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center max-w-md mx-auto px-4">
-        <div className="text-red-500 text-6xl mb-4">⚠️</div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">Error Loading Item</h2>
-        <p className="text-gray-600 mb-6">{error}</p>
-        <button
-          onClick={() => router.push("/inventory")}
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-        >
-          Back to Inventory
-        </button>
-      </div>
-    </div>
+  if (error) return (
+    <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>
   );
   
   if (!item) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <div className="text-gray-400 text-6xl mb-4">📦</div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">Item Not Found</h2>
-        <p className="text-gray-600 mb-6">The item you're looking for doesn't exist or has been removed.</p>
-        <button
-          onClick={() => router.push("/inventory")}
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-        >
-          Back to Inventory
-        </button>
-      </div>
-    </div>
+    <div className="min-h-screen flex items-center justify-center text-gray-500">Item not found.</div>
   );
 
   return (
-    <div className="min-h-screen pt-8 pb-20 bg-gray-50">
+    <div style={{
+      maxWidth: 700,
+      margin: '40px auto 0 auto',
+      background: '#fff',
+      borderRadius: 24,
+      boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
+      padding: '32px 32px 40px 32px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 32,
+      minHeight: 'calc(100vh - 120px)'
+    }}>
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -714,6 +696,15 @@ export default function ItemDetailPage() {
           )}
         </div>
       </div>
+      <style jsx>{`
+        @media (max-width: 700px) {
+          div[style] {
+            max-width: 98vw !important;
+            padding-left: 4vw !important;
+            padding-right: 4vw !important;
+          }
+        }
+      `}</style>
     </div>
   );
 } 
