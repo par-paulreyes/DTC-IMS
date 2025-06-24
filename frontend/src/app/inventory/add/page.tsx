@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Webcam from "react-webcam";
 import axios from "axios";
-import { getApiUrl } from "../../../config/api";
+import { getApiUrl, getImageUrl } from "../../../config/api";
 
 interface MaintenanceTask {
   id: string;
@@ -266,6 +266,8 @@ export default function AddItemPage() {
     </button>
   );
 
+  const previewSrc = getImageUrl(imagePreview || capturedImage);
+
   return (
     <div className="min-h-screen pt-8 pb-20 bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="max-w-4xl mx-auto px-4">
@@ -415,11 +417,11 @@ export default function AddItemPage() {
                 <div>
                   <label className="block mb-4 font-semibold text-gray-700">Item Picture</label>
                   <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 bg-gray-50 hover:bg-gray-100 transition-colors">
-                    {imagePreview || capturedImage ? (
+                    {previewSrc && (
                       <div className="space-y-6">
                         <div className="flex justify-center">
                           <img 
-                            src={imagePreview || capturedImage} 
+                            src={previewSrc} 
                             alt="Preview" 
                             className="w-80 h-80 max-w-[320px] max-h-[320px] object-cover rounded-lg shadow-lg border" 
                             style={{ width: 320, height: 320 }}
@@ -437,96 +439,6 @@ export default function AddItemPage() {
                             Remove Image
                           </button>
                         </div>
-                      </div>
-                    ) : showCamera ? (
-                      <div className="space-y-6">
-                        <div className="relative">
-                          <div className="flex justify-center">
-                            <div className="webcam-container relative rounded-lg overflow-hidden shadow-lg z-50">
-                              <Webcam
-                                ref={webcamRef}
-                                screenshotFormat="image/png"
-                                videoConstraints={{ facingMode: "environment" }}
-                                className="w-80 h-80 max-w-[320px] max-h-[320px] object-cover"
-                                style={{ width: 320, height: 320 }}
-                              />
-                              {/* Cancel button - top right corner */}
-                              <div className="absolute top-4 right-4 z-50">
-                                <button
-                                  type="button"
-                                  onClick={() => setShowCamera(false)}
-                                  className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg transition-colors duration-200"
-                                >
-                                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                  </svg>
-                                </button>
-                              </div>
-                              {/* Capture button overlay - positioned inside camera view */}
-                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
-                                <div className="absolute top-8 left-1/2 transform -translate-x-1/2 pointer-events-auto z-10">
-                                  <button
-                                    type="button"
-                                    onClick={capturePhoto}
-                                    className="bg-white p-4 rounded-full shadow-2xl hover:bg-gray-100 transition-all duration-200 hover:scale-110 border-4 border-white"
-                                  >
-                                    <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                                      <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                      </svg>
-                                    </div>
-                                  </button>
-                                </div>
-                                {/* Camera frame overlay */}
-                                <div className="absolute inset-4 border-2 border-white rounded-lg pointer-events-none opacity-50 z-5"></div>
-                                {/* Capture instruction text */}
-                                <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 pointer-events-auto z-10">
-                                  <div className="bg-black bg-opacity-70 text-white px-6 py-3 rounded-full text-base font-medium shadow-lg">
-                                    📸 Tap the button above to capture
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center space-y-6">
-                        <div className="flex justify-center gap-6">
-                          <div>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImageChange}
-                              className="hidden"
-                              id="image-upload"
-                            />
-                            <label
-                              htmlFor="image-upload"
-                              className="cursor-pointer inline-flex items-center px-6 py-4 border-2 border-gray-300 rounded-lg shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
-                            >
-                              <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                              </svg>
-                              Upload Image
-                            </label>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setShowCamera(true)}
-                            className="inline-flex items-center px-6 py-4 border-2 border-gray-300 rounded-lg shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
-                          >
-                            <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            Capture Photo
-                          </button>
-                        </div>
-                        <p className="text-gray-500 text-lg">
-                          Upload an image file or capture a photo using your camera
-                        </p>
                       </div>
                     )}
                   </div>

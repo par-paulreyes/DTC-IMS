@@ -1,8 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { getApiUrl, getImageUrl } from "../../../config/api";
+import imageCompression from 'browser-image-compression';
 
 // Helper to format date for <input type="date">
 function formatDateForInput(dateString: string) {
@@ -28,6 +29,8 @@ export default function ItemDetailPage() {
   const [diagnosticsError, setDiagnosticsError] = useState("");
   const [editingDiagnostics, setEditingDiagnostics] = useState<any[]>([]);
   const [editingLogs, setEditingLogs] = useState<any[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -244,6 +247,41 @@ export default function ItemDetailPage() {
     setEditingLogs(prev => prev.map((l, i) => i === index ? { ...l, [field]: value, maintenance_date: new Date().toISOString().split('T')[0], user_name: localStorage.getItem('username') || l.user_name } : l));
   };
 
+  // Handle image upload for inventory item
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 800,
+      useWebWorker: true,
+    };
+    setUploadingImage(true);
+    try {
+      const compressedFile = await imageCompression(file, options);
+      const formData = new FormData();
+      formData.append('image', compressedFile, file.name || 'item.png');
+      const token = localStorage.getItem('token');
+      const response = await axios.post(getApiUrl(`/items/${id}/image`), formData, {
+        headers: {
+          Authorization: token,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      if (response.data.url) {
+        setEditingItem((prev: any) => ({ ...prev, image_url: response.data.url }));
+      }
+    } catch (err) {
+      alert('Failed to upload image.');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const imgSrc = isEditing
+    ? (editingItem && getImageUrl(editingItem.image_url))
+    : (item && getImageUrl(item.image_url));
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">Loading...</div>
   );
@@ -328,21 +366,39 @@ export default function ItemDetailPage() {
           {error && <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">{error}</div>}
 
           {/* Item Image */}
-        {item.image_url && (
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-700 mb-3">Item Image</h3>
-              <div className="flex justify-center">
-                <img 
-                  src={getImageUrl(item.image_url)} 
-                  alt={item.property_no} 
-                  className="w-80 h-80 max-w-[320px] max-h-[320px] object-cover rounded-lg border shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+          <div className="mb-6">
+            <h3 className="font-semibold text-gray-700 mb-3">Item Image</h3>
+            <div className="flex flex-col items-center gap-2">
+              {imgSrc && (
+                <img
+                  src={imgSrc}
+                  alt={item?.property_no || 'Item'}
+                  className="w-80 h-80 max-w-[320px] max-h-[320px] object-cover rounded-lg border shadow-lg hover:shadow-xl transition-shadow"
                   style={{ width: 320, height: 320 }}
-                  onClick={() => window.open(getImageUrl(item.image_url), '_blank')}
-                  title="Click to view full size"
+                  title="Item image"
                 />
-              </div>
+              )}
+              {isEditing && (
+                <>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    onChange={handleImageChange}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition"
+                    disabled={uploadingImage}
+                  >
+                    {uploadingImage ? 'Uploading...' : 'Change Picture'}
+                  </button>
+                </>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Item Details */}
           {isEditing ? (
@@ -551,7 +607,7 @@ export default function ItemDetailPage() {
                         onChange={e => handleDiagnosticChange(i, 'recommendations', e.target.value)}
                       />
                     </div>
-      </div>
+                  </div>
                 )) : <div className="text-gray-500 italic text-center py-4">No diagnostics found.</div>
               ) : (
                 diagnostics.length > 0 ? diagnostics.map((diag, i) => (
@@ -579,8 +635,8 @@ export default function ItemDetailPage() {
                 )) : <div className="text-gray-500 italic text-center py-4">No diagnostics found.</div>
               )}
             </div>
-        )}
-      </div>
+          )}
+        </div>
 
         {/* Maintenance Logs */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">

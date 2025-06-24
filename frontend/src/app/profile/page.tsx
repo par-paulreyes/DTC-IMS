@@ -1,7 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { getApiUrl } from "../../config/api";
+import { getApiUrl, getImageUrl } from "../../config/api";
+import imageCompression from 'browser-image-compression';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
@@ -11,6 +12,8 @@ export default function ProfilePage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -121,6 +124,48 @@ export default function ProfilePage() {
     router.push("/login");
   };
 
+  // Handle profile picture upload
+  const handleProfilePicChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+
+    // Compress the image
+    const options = {
+      maxSizeMB: 1, // Target max size in MB
+      maxWidthOrHeight: 800, // Resize to max 800px width or height
+      useWebWorker: true,
+    };
+    setUploading(true);
+    setError("");
+    setSuccess("");
+    try {
+      const compressedFile = await imageCompression(file, options);
+      const formData = new FormData();
+      formData.append('profile_picture', compressedFile, file.name || 'profile.png');
+      const token = localStorage.getItem("token");
+      const response = await fetch(getApiUrl("/users/profile-picture"), {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      } as any); // as any to allow FormData
+      if (response.ok) {
+        const data = await response.json();
+        setProfile((prev: any) => ({ ...prev, profile_picture: data.url }));
+        setForm((prev: any) => ({ ...prev, profile_picture: data.url }));
+        setSuccess("Profile picture updated!");
+      } else {
+        setError("Failed to upload profile picture");
+      }
+    } catch (err) {
+      setError("Network error. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Helper to get the correct image URL
+  const imageUrl = getImageUrl(form.profile_picture);
+
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
   if (!profile) return <div className="min-h-screen flex items-center justify-center text-gray-500">Profile not found.</div>;
@@ -139,6 +184,37 @@ export default function ProfilePage() {
       minHeight: 'calc(100vh - 120px)'
     }}>
       <h1 className="text-2xl font-bold mb-4">Profile</h1>
+      {/* Profile Picture Section */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
+        {imageUrl && (
+          <img
+            src={imageUrl}
+            alt="Profile"
+            className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+            style={{ marginBottom: 12, width: 96, height: 96 }}
+          />
+        )}
+        {isEditing && !success && (
+          <>
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleProfilePicChange}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition"
+              disabled={uploading}
+              style={{ marginBottom: 4 }}
+            >
+              {uploading ? 'Uploading...' : 'Change Photo'}
+            </button>
+          </>
+        )}
+      </div>
       <form
         onSubmit={handleSubmit}
         className="max-w-md bg-white rounded shadow p-6"
