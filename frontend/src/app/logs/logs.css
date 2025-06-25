@@ -1,0 +1,204 @@
+.page-container {
+    min-height: 100vh;
+    padding-top: 1.5rem;
+    padding-bottom: 5rem;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.content-wrapper {
+    max-width: 64rem;
+    margin: 0 auto;
+}
+.main-container {
+    max-width: 700px;
+    margin: 40px auto 70px auto;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+    padding: 32px 16px 40px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-height: calc(100vh - 120px);
+}
+@media (max-width: 700px) {
+.main-container {
+    max-width: 98vw !important;
+    padding-left: 4vw !important;
+    padding-right: 4vw !important;
+}
+}
+.header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+@media (min-width: 768px) {
+.header {
+    flex-direction: row;
+}
+}
+.title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+}
+@media (min-width: 768px) {
+.title {
+    text-align: left;
+}
+}
+.export-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+.export-btn {
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.export-btn-csv {
+    background-color: #2563eb;
+}
+.export-btn-csv:hover {
+    background-color: #1d4ed8;
+}
+.export-btn-pdf {
+    background-color: #16a34a;
+}
+.export-btn-pdf:hover {
+    background-color: #15803d;
+}
+.loading {
+    text-align: center;
+    color: #2563eb;
+    margin-top: 1rem;
+}
+.error {
+    text-align: center;
+    color: #ef4444;
+}
+.logs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.no-logs {
+    padding: 1.5rem;
+    text-align: center;
+    color: #6b7280;
+    background-color: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+.log-card {
+    display: flex;
+    flex-direction: column;
+    background-color: #e8e8e8;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    padding: 1rem;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+.log-card-main-row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
+}
+.log-image {
+    width: 3.2rem;
+    height: 3.2rem;
+    background-color: #9ca3af;
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.log-main-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+.property-no {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 0.1rem;
+}
+.article-type {
+    color: #222;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+.log-details {
+    margin-left: 0.1rem;
+    margin-top: 0.5rem;
+    width: 100%;
+}
+.maintenance-date {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.1rem;
+}
+.divider {
+    border-color: gray;
+    margin-bottom: 0.3rem;
+}
+.detail-row {
+    font-size: 0.85rem;
+    margin-bottom: 0.1rem;
+}
+.detail-label {
+    font-weight: bold;
+}
+.search-container {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+.search-input {
+    width: 100%;
+    padding: 0.5rem 0.5rem 0.5rem 2.5rem;
+    border-radius: 1rem;
+    border: none;
+    outline: none;
+    background-color: #e5e7eb;
+    font-size: 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03);
+    height: 25px;
+}
+.search-icon {
+    position: relative;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    background-color: #e5e7eb;
+    font-size: 1.25rem;
+    pointer-events: none;
+}
+.icon-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e5e7eb;
+    border-radius: 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03);
+    margin-left: 0.25rem;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.icon-btn:active {
+    background-color: #d1d5db;
+} 
