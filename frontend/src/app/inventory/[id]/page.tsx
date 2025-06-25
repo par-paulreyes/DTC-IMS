@@ -704,28 +704,14 @@ export default function ItemDetailPage() {
                         <div><span style={{ fontWeight: 500 }}>User:</span> {log.user_name}</div>
                         <div><span style={{ fontWeight: 500 }}>Status:</span> {log.status === 'completed' ? 'Completed' : 'Pending'}</div>
                         <div><span style={{ fontWeight: 500 }}>Date:</span> {log.maintenance_date}</div>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
-                            <div>
-                              <span className="font-medium">User:</span>
-                              <span className="ml-2">{log.user_name}</span>
-                            </div>
-                            <div>
-                              <span className="font-medium">Status:</span>
-                              <span className="ml-2">{log.status === 'completed' ? 'Completed' : 'Pending'}</span>
-                            </div>
-                            <div>
-                              <span className="font-medium">Date:</span>
-                              <span className="ml-2">{log.maintenance_date}</span>
-                            </div>
-                          </div>
-                          <div className="bg-gray-50 p-3 rounded-lg">
-                            <span className="font-medium text-gray-700">Notes:</span>
-                            <textarea
+                      </div>
+                      <div style={{ background: '#f3f4f6', borderRadius: 6, padding: 8, marginTop: 8 }}>
+                        <span style={{ fontWeight: 600, color: '#b91c1c' }}>Notes:</span>
+                        <textarea
                           style={{ width: '100%', borderRadius: 6, border: '1px solid #ccc', padding: 8, marginTop: 4 }}
-                              value={log.notes || ''}
-                              onChange={e => handleLogChange(i, 'notes', e.target.value)}
-                            />
+                          value={log.notes || ''}
+                          onChange={e => handleLogChange(i, 'notes', e.target.value)}
+                        />
                       </div>
                     </div>
                   )) : <div style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', padding: 16 }}>No maintenance logs found.</div>
@@ -744,26 +730,12 @@ export default function ItemDetailPage() {
                           {getTaskStatusIcon(log.status)} {log.status === 'completed' ? 'Completed' : 'Pending'}
                         </span>
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className={`font-semibold text-lg ${log.status === 'completed' ? 'line-through text-gray-500' : 'text-gray-800'}`}>{log.task_performed}</span>
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${getTaskStatusClass(log.status)}`}>{log.status === 'completed' ? '✅ Completed' : '⏳ Pending'}</span>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
-                            <div>
-                              <span className="font-medium">User:</span>
-                              <span className="ml-2">{log.user_name}</span>
-                            </div>
-                            <div>
-                              <span className="font-medium">Status:</span>
-                              <span className="ml-2">{log.status === 'completed' ? 'Completed' : 'Pending'}</span>
-                            </div>
-                            <div>
-                              <span className="font-medium">Date:</span>
-                              <span className="ml-2">{log.maintenance_date}</span>
-                            </div>
-                          </div>
-                          {log.notes && (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 14, color: '#555', marginBottom: 8 }}>
+                        <div><span style={{ fontWeight: 500 }}>User:</span> {log.user_name}</div>
+                        <div><span style={{ fontWeight: 500 }}>Status:</span> {log.status === 'completed' ? 'Completed' : 'Pending'}</div>
+                        <div><span style={{ fontWeight: 500 }}>Date:</span> {log.maintenance_date}</div>
+                      </div>
+                      {log.notes && (
                         <div style={{ background: '#f3f4f6', borderRadius: 6, padding: 8, marginTop: 8 }}>
                           <span style={{ fontWeight: 600, color: '#b91c1c' }}>Notes:</span>
                           <div style={{ marginTop: 4, fontSize: 14, color: '#555', whiteSpace: 'pre-wrap' }}>{log.notes}</div>
