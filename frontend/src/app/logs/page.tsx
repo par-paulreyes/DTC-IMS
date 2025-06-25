@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { getApiUrl } from "../../config/api";
 import "./logs.css";
+import "../inventory/inventory.css";
 
 interface Log {
   id: number;
@@ -18,6 +19,7 @@ export default function LogsPage() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -39,6 +41,13 @@ export default function LogsPage() {
     window.open(`${getApiUrl("/logs/export")}?format=${format}&token=${token}`, "_blank");
   };
 
+  // Filter logs by search
+  const filteredLogs = logs.filter(
+    (log) =>
+      log.property_no.toLowerCase().includes(search.toLowerCase()) ||
+      log.article_type.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="main-container">
       <div className="header">
@@ -58,16 +67,34 @@ export default function LogsPage() {
           </button>
         </div>
       </div>
+      {/* Search Bar */}
+      <div className="searchbar-row">
+        <div className="searchbar-pill">
+          <div className="searchbar-icon-bg">
+            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            placeholder="Search by property no or article type..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="searchbar-input"
+          />
+        </div>
+      </div>
       
       {loading && <div className="loading">Loading...</div>}
       {error && <div className="error">{error}</div>}
       
       {!loading && !error && (
         <div className="logs-container">
-          {logs.length === 0 && (
+          {filteredLogs.length === 0 && (
             <div className="no-logs">No logs found.</div>
           )}
-          {logs.map((log) => (
+          {filteredLogs.map((log) => (
             <div key={log.id} className="log-card">
               <div className="log-card-main-row">
                 <div className="log-image">
