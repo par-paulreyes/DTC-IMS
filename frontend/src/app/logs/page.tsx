@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { getApiUrl } from "../../config/api";
+import "./logs.css";
 
 interface Log {
   id: number;
@@ -39,61 +40,109 @@ export default function LogsPage() {
   };
 
   return (
-    <div style={{
-      maxWidth: 700,
-      margin: '40px auto 0 auto',
-      background: '#fff',
-      borderRadius: 24,
-      boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
-      padding: '32px 32px 40px 32px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 32,
-      minHeight: 'calc(100vh - 120px)'
-    }}>
-      <h1 className="text-2xl font-bold mb-4">Maintenance Logs</h1>
-      <div className="flex justify-center gap-4 mb-4">
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-          onClick={() => handleExport("csv")}
-        >
-          Export CSV
-        </button>
-        <button
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-          onClick={() => handleExport("pdf")}
-        >
-          Export PDF
-        </button>
+    <div className="main-container">
+      <div className="header">
+        <h1 className="title">Maintenance Logs</h1>
+        <div className="export-buttons">
+          <button
+            className="export-btn export-btn-csv"
+            onClick={() => handleExport("csv")}
+          >
+            Export CSV
+          </button>
+          <button
+            className="export-btn export-btn-pdf"
+            onClick={() => handleExport("pdf")}
+          >
+            Export PDF
+          </button>
+        </div>
       </div>
-      {loading && <div className="text-center text-blue-600">Loading...</div>}
-      {error && <div className="text-center text-red-500">{error}</div>}
+      
+      {loading && <div className="loading">Loading...</div>}
+      {error && <div className="error">{error}</div>}
+      
       {!loading && !error && (
-        <ul className="max-w-2xl mx-auto divide-y divide-gray-200 bg-white rounded shadow">
+        <div className="logs-container">
           {logs.length === 0 && (
-            <li className="p-6 text-center text-gray-500">No logs found.</li>
+            <div className="no-logs">No logs found.</div>
           )}
           {logs.map((log) => (
-            <li key={log.id} className="p-4">
-              <div className="font-semibold text-gray-800">
-                {log.property_no} ({log.article_type})
+            <div key={log.id} className="log-card">
+              <div className="log-card-main-row">
+                <div className="log-image">
+                  {log.article_type.toLowerCase().includes('desktop') && (
+                    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                      <line x1="8" y1="21" x2="16" y2="21"/>
+                      <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                  )}
+                  {log.article_type.toLowerCase().includes('laptop') && (
+                    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                      <line x1="2" y1="10" x2="22" y2="10"/>
+                    </svg>
+                  )}
+                  {log.article_type.toLowerCase().includes('printer') && (
+                    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <polyline points="6,9 6,2 18,2 18,9"/>
+                      <path d="M6,18H4a2,2 0 0,1 -2,-2v-5a2,2 0 0,1 2,-2h16a2,2 0 0,1 2,2v5a2,2 0 0,1 -2,2h-2"/>
+                      <rect x="6" y="14" width="12" height="8"/>
+                    </svg>
+                  )}
+                  {log.article_type.toLowerCase().includes('keyboard') && (
+                    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <rect x="2" y="4" width="20" height="16" rx="2" ry="2"/>
+                      <line x1="6" y1="8" x2="6" y2="8"/>
+                      <line x1="10" y1="8" x2="10" y2="8"/>
+                      <line x1="14" y1="8" x2="14" y2="8"/>
+                      <line x1="18" y1="8" x2="18" y2="8"/>
+                      <line x1="6" y1="12" x2="6" y2="12"/>
+                      <line x1="10" y1="12" x2="10" y2="12"/>
+                      <line x1="14" y1="12" x2="14" y2="12"/>
+                      <line x1="18" y1="12" x2="18" y2="12"/>
+                      <line x1="6" y1="16" x2="6" y2="16"/>
+                      <line x1="10" y1="16" x2="10" y2="16"/>
+                      <line x1="14" y1="16" x2="14" y2="16"/>
+                      <line x1="18" y1="16" x2="18" y2="16"/>
+                    </svg>
+                  )}
+                  {log.article_type.toLowerCase().includes('pc') && (
+                    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                      <line x1="8" y1="21" x2="16" y2="21"/>
+                      <line x1="12" y1="17" x2="12" y2="21"/>
+                      <circle cx="12" cy="8" r="1"/>
+                    </svg>
+                  )}
+                  {!log.article_type.toLowerCase().includes('desktop') && 
+                   !log.article_type.toLowerCase().includes('laptop') && 
+                   !log.article_type.toLowerCase().includes('printer') && 
+                   !log.article_type.toLowerCase().includes('keyboard') && 
+                   !log.article_type.toLowerCase().includes('pc') && (
+                    <span className="text-xl">📷</span>
+                  )}
+                </div>
+                <div className="log-main-info">
+                  <div className="property-no">{log.property_no}</div>
+                  <div className="article-type">{log.article_type}</div>
+                </div>
               </div>
-              <div className="text-gray-500 text-sm">{log.maintenance_date}</div>
-              <div className="text-gray-600">Task: {log.task_performed}</div>
-              <div className="text-gray-400 text-xs">Maintained By: {log.maintained_by}</div>
-            </li>
+              <div className="log-details">
+                <div className="maintenance-date">{log.maintenance_date}</div>
+                <hr className="divider" />
+                <div className="detail-row">
+                  <span className="detail-label">Task:</span> {log.task_performed}
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Maintained By:</span> {log.maintained_by}
+                </div>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
-      <style jsx>{`
-        @media (max-width: 700px) {
-          div[style] {
-            max-width: 98vw !important;
-            padding-left: 4vw !important;
-            padding-right: 4vw !important;
-          }
-        }
-      `}</style>
     </div>
   );
 } 

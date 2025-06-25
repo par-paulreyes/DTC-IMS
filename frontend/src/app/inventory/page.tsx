@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { getApiUrl, getImageUrl } from "../../config/api";
+import './inventory.css';
 
 interface Item {
   id: number;
@@ -87,20 +88,57 @@ export default function InventoryPage() {
   );
 
   return (
-    <div style={{
-      maxWidth: 700,
-      margin: '40px auto 0 auto',
-      background: '#fff',
-      borderRadius: 24,
-      boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
-      padding: '32px 32px 40px 32px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 32,
-      minHeight: 'calc(100vh - 120px)'
-    }}>
-      <h1 className="text-2xl font-bold mb-4">Inventory</h1>
-      
+    <div className="main-container">
+      <div className="inventory-header-row">
+        <h1 className="inventory-title">Inventory</h1>
+      </div>
+      {/* Search Bar */}
+      <div className="searchbar-row">
+        <div className="searchbar-pill">
+          <div className="searchbar-icon-bg">
+            🔍
+          </div>
+          <input
+            type="text"
+            placeholder="Search by property no or article type..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="searchbar-input"
+          />
+        </div>
+      </div>
+      {/* Filter Bar */}
+      <div className="filterbar-row">
+        <select
+          value={articleType}
+          onChange={(e) => setArticleType(e.target.value)}
+          className="filterbar-select"
+        >
+          <option value="">All Types</option>
+          {articleTypes.map((type) => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+        </select>
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="filterbar-select"
+        >
+          <option value="">All System Statuses</option>
+          {statuses.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+        <select
+          value={maintenanceFilter}
+          onChange={(e) => setMaintenanceFilter(e.target.value)}
+          className="filterbar-select"
+        >
+          <option value="">All Maintenance Status</option>
+          <option value="pending">Pending Maintenance</option>
+          <option value="completed">Completed Maintenance</option>
+        </select>
+      </div>
       {/* Filter Status Display */}
       {maintenanceFilter === "pending" && (
         <div style={{
@@ -131,76 +169,32 @@ export default function InventoryPage() {
           </button>
         </div>
       )}
-      
-      {/* Search and Filter Controls */}
-      <div className="max-w-xl mx-auto flex flex-col gap-2 mb-4">
-        <div className="flex flex-col md:flex-row gap-2">
-          <input
-            type="text"
-            placeholder="Search by property no or article type..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <select
-            value={articleType}
-            onChange={(e) => setArticleType(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">All Types</option>
-            {articleTypes.map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex flex-col md:flex-row gap-2">
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">All System Statuses</option>
-            {statuses.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-          <select
-            value={maintenanceFilter}
-            onChange={(e) => setMaintenanceFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">All Maintenance Status</option>
-            <option value="pending">Pending Maintenance</option>
-            <option value="completed">Completed Maintenance</option>
-          </select>
-        </div>
-      </div>
       {loading && <div className="text-center text-blue-600">Loading...</div>}
       {error && <div className="text-center text-red-500">{error}</div>}
       {!loading && !error && (
-        <ul className="max-w-xl mx-auto divide-y divide-gray-200 bg-white rounded shadow">
+        <div>
           {filteredItems.length === 0 && (
-            <li className="p-6 text-center text-gray-500">No items found.</li>
+            <div className="text-center text-gray-500 p-6">No items found.</div>
           )}
           {filteredItems.map((item) => (
-            <li key={item.id} className="flex items-center p-4 hover:bg-gray-50 transition">
+            <div key={item.id} className="inventory-card">
               <Link href={`/inventory/${item.id}`} className="flex items-center w-full">
                 {item.image_url ? (
                   <img
                     src={getImageUrl(item.image_url)}
                     alt={item.property_no}
-                    className="w-16 h-16 max-w-[64px] max-h-[64px] object-cover rounded-lg mr-4 border shadow-sm"
-                    style={{ width: 64, height: 64 }}
+                    className="inventory-icon"
+                    style={{ objectFit: 'cover' }}
                   />
                 ) : (
-                  <div className="w-16 h-16 bg-gray-200 rounded-lg mr-4 flex items-center justify-center text-gray-400 border shadow-sm">
-                    <span className="text-xl">📷</span>
+                  <div className="inventory-icon">
+                    📷
                   </div>
                 )}
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-800">{item.property_no}</div>
-                  <div className="text-gray-500 text-sm">{item.article_type}</div>
-                  <div className="text-gray-400 text-xs">System Status: {item.system_status ? item.system_status : "Unknown"}</div>
+                <div className="inventory-info">
+                  <div className="inventory-propno">{item.property_no}</div>
+                  <div className="inventory-type">{item.article_type}</div>
+                  <div className="inventory-status">System Status: {item.system_status ? item.system_status : "Unknown"}</div>
                   {item.has_pending_maintenance && (
                     <div className="text-red-500 text-xs font-medium mt-1">
                       ⚠️ Pending Maintenance ({item.pending_maintenance_count || 1} task{item.pending_maintenance_count > 1 ? 's' : ''})
@@ -208,19 +202,10 @@ export default function InventoryPage() {
                   )}
                 </div>
               </Link>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
-      <style jsx>{`
-        @media (max-width: 700px) {
-          div[style] {
-            max-width: 98vw !important;
-            padding-left: 4vw !important;
-            padding-right: 4vw !important;
-          }
-        }
-      `}</style>
     </div>
   );
 } 
