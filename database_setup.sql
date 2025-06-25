@@ -44,6 +44,8 @@ CREATE TABLE items (
     company_name VARCHAR(255) NOT NULL,
     image_url VARCHAR(255),
     next_maintenance_date DATE,
+    pending_maintenance_count INT DEFAULT 0,
+    maintenance_status VARCHAR(50) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -123,4 +125,4 @@ SELECT 'Items:' as info;
 SELECT id, property_no, article_type, company_name FROM items;
 
 SELECT 'Companies:' as info;
-SELECT * FROM companies; 
+SELECT * FROM companies;
