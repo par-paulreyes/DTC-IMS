@@ -7,17 +7,20 @@ import imageCompression from 'browser-image-compression';
 import styles from "./page.module.css";
 import { FaEdit, FaSave, FaTrash, FaTimes, FaClipboardList, FaStethoscope, FaInfoCircle, FaCog, FaCheckCircle, FaExclamationTriangle, FaTimesCircle, FaHeartbeat, FaClock, FaRegSquare, FaRegCheckSquare } from "react-icons/fa";
 
+
 // Helper to format date for <input type="date">
 function formatDateForInput(dateString: string) {
   if (!dateString) return "";
   return dateString.split("T")[0];
 }
 
+
 function formatDisplayDate(dateString: string) {
   if (!dateString) return '';
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
+
 
 export default function ItemDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -44,6 +47,7 @@ export default function ItemDetailPage() {
   const [activeTab, setActiveTab] = useState<'diagnostics' | 'logs'>('diagnostics');
   const [diagnosticsFilter, setDiagnosticsFilter] = useState('all');
 
+
   useEffect(() => {
     if (!id) return;
     const token = localStorage.getItem("token");
@@ -51,19 +55,19 @@ export default function ItemDetailPage() {
       router.push("/login");
       return;
     }
-    
+   
     setLoading(true);
     setLoadingLogs(true);
     setLoadingDiagnostics(true);
     setError("");
     setLogsError("");
     setDiagnosticsError("");
-    
+   
     // Fetch item details
     const fetchItem = async () => {
       try {
-        const response = await axios.get(getApiUrl(`/items/${id}`), { 
-          headers: { Authorization: token } 
+        const response = await axios.get(getApiUrl(`/items/${id}`), {
+          headers: { Authorization: token }
         });
         setItem(response.data);
         setEditingItem(response.data);
@@ -83,11 +87,12 @@ export default function ItemDetailPage() {
       }
     };
 
+
     // Fetch maintenance logs
     const fetchLogs = async () => {
       try {
-        const response = await axios.get(getApiUrl(`/logs/item/${id}`), { 
-          headers: { Authorization: token } 
+        const response = await axios.get(getApiUrl(`/logs/item/${id}`), {
+          headers: { Authorization: token }
         });
         setLogs(response.data);
         console.log('Maintenance logs loaded:', response.data);
@@ -104,11 +109,12 @@ export default function ItemDetailPage() {
       }
     };
 
+
     // Fetch diagnostics
     const fetchDiagnostics = async () => {
       try {
-        const response = await axios.get(getApiUrl(`/diagnostics/item/${id}`), { 
-          headers: { Authorization: token } 
+        const response = await axios.get(getApiUrl(`/diagnostics/item/${id}`), {
+          headers: { Authorization: token }
         });
         setDiagnostics(response.data);
         console.log('Diagnostics loaded:', response.data);
@@ -125,11 +131,13 @@ export default function ItemDetailPage() {
       }
     };
 
+
     // Fetch all data
     fetchItem();
     fetchLogs();
     fetchDiagnostics();
   }, [id, router]);
+
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -138,21 +146,23 @@ export default function ItemDetailPage() {
     setEditingLogs(logs.map(l => ({ ...l })));
   };
 
+
   const handleCancel = () => {
     setIsEditing(false);
     setEditingItem(item);
     setError("");
   };
 
+
   const handleSave = async () => {
     if (!editingItem) return;
     setSaving(true);
     setError("");
     const token = localStorage.getItem("token");
-    
+   
     // Debug: Log what we're about to send
     console.log('Sending item update with data:', editingItem);
-    
+   
     try {
       await axios.put(getApiUrl(`/items/${id}`), editingItem, {
         headers: { Authorization: token },
@@ -194,15 +204,16 @@ export default function ItemDetailPage() {
     }
   };
 
+
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this item? This action cannot be undone.")) {
       return;
     }
-    
+   
     setDeleting(true);
     setError("");
     const token = localStorage.getItem("token");
-    
+   
     try {
       await axios.delete(getApiUrl(`/items/${id}`), {
         headers: { Authorization: token },
@@ -220,9 +231,11 @@ export default function ItemDetailPage() {
     }
   };
 
+
   const handleInputChange = (field: string, value: string) => {
     setEditingItem({ ...editingItem, [field]: value });
   };
+
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -234,6 +247,7 @@ export default function ItemDetailPage() {
     }
   };
 
+
   const getTaskStatusIcon = (status: string) => {
     switch (status) {
       case 'completed': return <FaCheckCircle className={styles.taskIcon} style={{color:'#22c55e'}} title="Completed"/>;
@@ -241,6 +255,7 @@ export default function ItemDetailPage() {
       default: return <FaClock className={styles.taskIcon} style={{color:'#888'}} title="Unknown"/>;
     }
   };
+
 
   const getTaskStatusClass = (status: string) => {
     switch (status) {
@@ -250,13 +265,16 @@ export default function ItemDetailPage() {
     }
   };
 
+
   const handleDiagnosticChange = (index: number, field: string, value: any) => {
     setEditingDiagnostics(prev => prev.map((d, i) => i === index ? { ...d, [field]: value, diagnostics_date: new Date().toISOString().split('T')[0] } : d));
   };
 
+
   const handleLogChange = (index: number, field: string, value: any) => {
     setEditingLogs(prev => prev.map((l, i) => i === index ? { ...l, [field]: value, maintenance_date: new Date().toISOString().split('T')[0] } : l));
   };
+
 
   // Handle image upload for inventory item
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -289,18 +307,22 @@ export default function ItemDetailPage() {
     }
   };
 
+
   const imgSrc = isEditing
     ? (editingItem && getImageUrl(editingItem.image_url))
     : (item && getImageUrl(item.image_url));
+
 
   // Use editingDiagnostics/logs in edit mode, diagnostics/logs in view mode
   const diagnosticsToShow = isEditing ? editingDiagnostics : diagnostics;
   const logsToShow = isEditing ? editingLogs : logs;
 
+
   // Diagnostics filter logic
   const filteredDiagnostics = diagnosticsToShow.filter(d =>
     diagnosticsFilter === 'all' ? true : d.system_status === diagnosticsFilter
   );
+
 
   // Checklist for logs
   const checklist = logsToShow.map((log, i) => ({
@@ -308,9 +330,11 @@ export default function ItemDetailPage() {
     completed: log.status === 'completed',
   }));
 
+
   const handleImageButtonClick = () => {
     if (fileInputRef.current) fileInputRef.current.click();
   };
+
 
   // Checklist toggle logic (checkbox only)
   const handleChecklistToggle = (i: number) => {
@@ -318,17 +342,19 @@ export default function ItemDetailPage() {
     setEditingLogs(prev => prev.map((log, idx) => idx === i ? { ...log, status: log.status === 'completed' ? 'pending' : 'completed' } : log));
   };
 
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">Loading...</div>
   );
-  
+ 
   if (error) return (
     <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>
   );
-  
+ 
   if (!item) return (
     <div className="min-h-screen flex items-center justify-center text-gray-500">Item not found.</div>
   );
+
 
   return (
     <div className={styles.detailContainer}>
@@ -570,4 +596,5 @@ export default function ItemDetailPage() {
       </div>
     </div>
   );
-} 
+}
+
