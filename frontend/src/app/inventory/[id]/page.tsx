@@ -164,31 +164,20 @@ export default function ItemDetailPage() {
     console.log('Sending item update with data:', editingItem);
    
     try {
-      await axios.put(getApiUrl(`/items/${id}`), editingItem, {
+      // Recalculate maintenance_status and pending_maintenance_count
+      const pendingCount = editingLogs.filter(log => log.status === 'pending').length;
+      const newStatus = pendingCount > 0 ? 'pending' : 'up_to_date';
+      const updatedItem = {
+        ...editingItem,
+        pending_maintenance_count: pendingCount,
+        maintenance_status: newStatus,
+      };
+      // Sync updated fields to backend
+      await axios.put(getApiUrl(`/items/${id}`), updatedItem, {
         headers: { Authorization: token },
       });
-      // Save diagnostics (send all required fields)
-      await Promise.all(editingDiagnostics.map(diag =>
-        axios.put(getApiUrl(`/diagnostics/${diag.id}`), {
-          item_id: diag.item_id,
-          diagnostics_date: diag.diagnostics_date,
-          system_status: diag.system_status,
-          findings: diag.findings,
-          recommendations: diag.recommendations,
-        }, { headers: { Authorization: token } })
-      ));
-      // Save maintenance logs (send all required fields)
-      await Promise.all(editingLogs.map(log =>
-        axios.put(getApiUrl(`/logs/${log.id}`), {
-          item_id: log.item_id,
-          maintenance_date: log.maintenance_date,
-          task_performed: log.task_performed,
-          maintained_by: log.maintained_by,
-          notes: log.notes,
-          status: log.status,
-        }, { headers: { Authorization: token } })
-      ));
-      setItem(editingItem);
+      setItem(updatedItem);
+      setEditingItem(updatedItem);
       setDiagnostics(editingDiagnostics);
       setLogs(editingLogs);
       setIsEditing(false);
@@ -392,43 +381,7 @@ export default function ItemDetailPage() {
               </>
             ) : (
               <>
-                <button className={styles.saveBtn} onClick={async () => {
-                  setSaving(true);
-                  setError("");
-                  const token = localStorage.getItem("token");
-                  try {
-                    await axios.put(getApiUrl(`/items/${id}`), editingItem, {
-                      headers: { Authorization: token },
-                    });
-                    await Promise.all(editingDiagnostics.map(diag =>
-                      axios.put(getApiUrl(`/diagnostics/${diag.id}`), {
-                        item_id: diag.item_id,
-                        diagnostics_date: diag.diagnostics_date,
-                        system_status: diag.system_status,
-                        findings: diag.findings,
-                        recommendations: diag.recommendations,
-                      }, { headers: { Authorization: token } })
-                    ));
-                    await Promise.all(editingLogs.map(log =>
-                      axios.put(getApiUrl(`/logs/${log.id}`), {
-                        item_id: log.item_id,
-                        maintenance_date: log.maintenance_date,
-                        task_performed: log.task_performed,
-                        maintained_by: log.maintained_by,
-                        notes: log.notes,
-                        status: log.status,
-                      }, { headers: { Authorization: token } })
-                    ));
-                    setItem(editingItem);
-                    setDiagnostics(editingDiagnostics);
-                    setLogs(editingLogs);
-                    setIsEditing(false);
-                  } catch (err) {
-                    setError("Error updating item. Please try again.");
-                  } finally {
-                    setSaving(false);
-                  }
-                }} disabled={saving}><FaSave style={{marginRight: 8}}/>{saving ? 'Saving...' : 'Save'}</button>
+                <button className={styles.saveBtn} onClick={handleSave} disabled={saving}><FaSave style={{marginRight: 8}}/>{saving ? 'Saving...' : 'Save'}</button>
                 <button className={styles.cancelBtn} onClick={handleCancel}><FaTimes style={{marginRight: 8}}/>Cancel</button>
               </>
             )}
@@ -517,7 +470,7 @@ export default function ItemDetailPage() {
                     </div>
                   </div>
                 ) : (
-                  <div style={{
+                  <div key={diag.id} style={{
                     borderRadius:'16px',
                     background:'#eaf0ff',
                     padding:'18px 20px',
