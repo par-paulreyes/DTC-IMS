@@ -69,7 +69,7 @@ exports.createItem = async (req, res) => {
     if (maintenance_tasks && maintenance_date) {
       try {
         const maintenanceTasks = JSON.parse(maintenance_tasks);
-        const maintainedBy = maintained_by || req.user.full_name || req.user.username;
+        const maintainedBy = req.user.username;
         
         console.log('Creating maintenance logs for tasks:', maintenanceTasks);
         
@@ -80,7 +80,6 @@ exports.createItem = async (req, res) => {
               item_id: itemId,
               maintenance_date: maintenance_date,
               task_performed: task.task,
-              user_name: req.user.username || req.user.full_name || 'System User',
               maintained_by: maintainedBy,
               notes: task.notes || '',
               status: task.completed ? 'completed' : 'pending'
@@ -205,6 +204,14 @@ exports.getUpcomingMaintenance = (req, res) => {
   const company_name = req.user.company_name;
   Item.findUpcomingMaintenance(company_name, (err, items) => {
     if (err) return res.status(500).json({ message: 'Error fetching upcoming maintenance items', error: err });
+    res.json(items);
+  });
+};
+
+exports.getItemsNeedingMaintenance = (req, res) => {
+  const company_name = req.user.company_name;
+  Item.findItemsNeedingMaintenance(company_name, (err, items) => {
+    if (err) return res.status(500).json({ message: 'Error fetching items needing maintenance', error: err });
     res.json(items);
   });
 };

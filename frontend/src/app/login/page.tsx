@@ -96,13 +96,24 @@ export default function LoginPage() {
             zIndex: 1,
             filter: 'brightness(0.7)'
           }} />
-          <Image src="/dtc-logo.png" alt="DTC Logo" width={160} height={80} style={{
+          <div style={{
+            position: 'relative',
             width: 160,
-            height: 'auto',
+            height: 80,
             marginTop: 24,
             zIndex: 2,
-            position: 'relative'
-          }} priority />
+          }}>
+            <Image 
+              src="/dtc-logo.png" 
+              alt="DTC Logo" 
+              fill
+              sizes="160px"
+              style={{
+                objectFit: 'contain'
+              }}
+              priority 
+            />
+          </div>
           <div style={{
             color: 'white',
             fontSize: 18,

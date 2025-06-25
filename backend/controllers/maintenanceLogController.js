@@ -24,8 +24,8 @@ exports.getLogsByItem = (req, res) => {
 };
 
 exports.createLog = (req, res) => {
-  const user_id = req.user.id;
-  const log = { ...req.body, user_id };
+  const username = req.user.username;
+  const log = { ...req.body, maintained_by: username };
   MaintenanceLog.create(log, (err, logId) => {
     if (err) return res.status(500).json({ message: 'Error creating log', error: err });
     res.status(201).json({ message: 'Log created', logId });
@@ -33,7 +33,9 @@ exports.createLog = (req, res) => {
 };
 
 exports.updateLog = (req, res) => {
-  MaintenanceLog.update(req.params.id, req.body, (err, result) => {
+  const username = req.user.username;
+  const logData = { ...req.body, maintained_by: username };
+  MaintenanceLog.update(req.params.id, logData, (err, result) => {
     if (err) return res.status(500).json({ message: 'Error updating log', error: err });
     res.json({ message: 'Log updated' });
   });
@@ -64,7 +66,6 @@ exports.exportLogs = (req, res) => {
           doc.text(`Item: ${log.property_no || 'N/A'} (${log.article_type || 'N/A'})`);
           doc.text(`Task: ${log.task_performed}`);
           doc.text(`Date: ${log.maintenance_date}`);
-          doc.text(`User: ${log.user_name}`);
           doc.text(`Maintained By: ${log.maintained_by}`);
           doc.text(`Created At: ${log.created_at}`);
           doc.moveDown();
@@ -76,7 +77,7 @@ exports.exportLogs = (req, res) => {
     } else {
       try {
         const fields = [
-          'id', 'item_id', 'property_no', 'article_type', 'user_name',
+          'id', 'item_id', 'property_no', 'article_type',
           'task_performed', 'maintenance_date', 'maintained_by', 'created_at'
         ];
         const parser = new Parser({ fields });

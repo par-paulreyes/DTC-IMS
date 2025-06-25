@@ -6,6 +6,7 @@ const upload = require('../middleware/uploadMiddleware');
 
 // Specific routes first to avoid conflicts
 router.get('/maintenance/upcoming', verifyToken, itemController.getUpcomingMaintenance);
+router.get('/maintenance/needed', verifyToken, itemController.getItemsNeedingMaintenance);
 router.get('/qr/:code', verifyToken, itemController.getItemByQRCode);
 
 // General routes

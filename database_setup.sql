@@ -54,7 +54,6 @@ CREATE TABLE maintenance_logs (
     item_id INT NOT NULL,
     maintenance_date DATE NOT NULL,
     task_performed TEXT NOT NULL,
-    user_name VARCHAR(100) NOT NULL,
     maintained_by VARCHAR(100) NOT NULL,
     notes TEXT,
     status ENUM('pending', 'completed') DEFAULT 'pending',
@@ -80,25 +79,31 @@ INSERT INTO companies (name, description) VALUES ('DTC', 'Department of Technolo
 -- Step 9: Insert default admin user
 -- Username: admin Password: 123456 (hashed with bcrypt) 
 INSERT INTO users (username, full_name, email, password, company_name, role) VALUES 
-('admin', 'System Administrator', 'admin@dtc.com', '$2b$10$sErKBNh.d6PzRTNNpT07GuWfd1T6V/sGC2js/f.b2QfKoeAllKLeK', 'DTC', 'admin');
+('admin', 'System Administrator', 'admin@dtc.com', '$2b$10$SMLogd9V0jzJyyorAIoejOpc98XJ1Vw5xPAWM5lP07XWyALG9SoJa', 'DTC', 'admin');
 
 -- Step 10: Insert sample items
 INSERT INTO items (property_no, article_type, specifications, date_acquired, end_user, price, location, supply_officer, company_name) VALUES 
 ('ICTCE-PC-001', 'Desktop Computer', 'Intel i7, 16GB RAM, 512GB SSD', '2024-01-15', 'John Doe', 45000.00, 'IT Office', 'Supply Officer 1', 'DTC'),
 ('ICTCE-PC-002', 'Laptop', 'Dell Latitude, Intel i5, 8GB RAM', '2024-02-20', 'Jane Smith', 35000.00, 'Admin Office', 'Supply Officer 1', 'DTC'),
-('ICTCE-PR-001', 'Printer', 'HP LaserJet Pro, Wireless', '2024-03-10', 'Print Room', 25000.00, 'Print Room', 'Supply Officer 2', 'DTC');
+('ICTCE-PR-001', 'Printer', 'HP LaserJet Pro, Wireless', '2024-03-10', 'Print Room', 25000.00, 'Print Room', 'Supply Officer 2', 'DTC'),
+('ICTCE-PC-003', 'Desktop Computer', 'Intel i3, 4GB RAM, 256GB HDD', '2023-06-15', 'Mike Johnson', 25000.00, 'HR Office', 'Supply Officer 1', 'DTC'),
+('ICTCE-PR-002', 'Printer', 'Canon Printer, Basic Model', '2023-08-20', 'Finance Office', 15000.00, 'Finance Office', 'Supply Officer 2', 'DTC');
 
 -- Step 11: Insert sample maintenance logs
-INSERT INTO maintenance_logs (item_id, maintenance_date, task_performed, user_name, maintained_by, status) VALUES 
-(1, '2024-06-01', 'Regular cleaning and software update', 'admin', 'IT Staff', 'completed'),
-(2, '2024-06-05', 'Hardware inspection and cleaning', 'admin', 'IT Staff', 'completed'),
-(3, '2024-06-10', 'Printer maintenance and cartridge replacement', 'admin', 'IT Staff', 'completed');
+INSERT INTO maintenance_logs (item_id, maintenance_date, task_performed, maintained_by, status) VALUES 
+(1, '2024-06-01', 'Regular cleaning and software update', 'admin', 'completed'),
+(2, '2024-06-05', 'Hardware inspection and cleaning', 'admin', 'completed'),
+(3, '2024-06-10', 'Printer maintenance and cartridge replacement', 'admin', 'completed'),
+(4, '2024-06-20', 'System check and repair needed', 'admin', 'pending'),
+(5, '2024-06-18', 'Printer repair and maintenance', 'admin', 'pending');
 
 -- Step 12: Insert sample diagnostics
 INSERT INTO diagnostics (item_id, diagnostics_date, system_status, findings, recommendations) VALUES 
 (1, '2024-06-15', 'Good', 'System running optimally', 'Continue regular maintenance'),
 (2, '2024-06-15', 'Good', 'All systems operational', 'No issues detected'),
-(3, '2024-06-15', 'Good', 'Printer functioning normally', 'Replace cartridges when needed');
+(3, '2024-06-15', 'Good', 'Printer functioning normally', 'Replace cartridges when needed'),
+(4, '2024-06-20', 'Poor', 'System running slowly, hardware issues detected', 'Immediate maintenance required'),
+(5, '2024-06-18', 'Fair', 'Printer has minor issues, needs attention', 'Schedule maintenance soon');
 
 -- Step 13: Create indexes for better performance
 CREATE INDEX idx_items_company ON items(company_name);
