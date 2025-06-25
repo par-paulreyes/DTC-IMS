@@ -10,7 +10,6 @@ interface Log {
   article_type: string;
   maintenance_date: string;
   task_performed: string;
-  user_name: string;
   maintained_by: string;
 }
 
@@ -81,7 +80,7 @@ export default function LogsPage() {
               </div>
               <div className="text-gray-500 text-sm">{log.maintenance_date}</div>
               <div className="text-gray-600">Task: {log.task_performed}</div>
-              <div className="text-gray-400 text-xs">User: {log.user_name} | Maintained By: {log.maintained_by}</div>
+              <div className="text-gray-400 text-xs">Maintained By: {log.maintained_by}</div>
             </li>
           ))}
         </ul>

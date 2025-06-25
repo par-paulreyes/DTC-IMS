@@ -34,6 +34,8 @@ export default function AddItemPage() {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [capturedImage, setCapturedImage] = useState<string>("");
   const [showCamera, setShowCamera] = useState(false);
+  const [cameraError, setCameraError] = useState<string>("");
+  const [cameraLoading, setCameraLoading] = useState(false);
   const [maintenanceTasks, setMaintenanceTasks] = useState<MaintenanceTask[]>([
     { id: '1', task: 'Antivirus Check', completed: false, notes: '' },
     { id: '2', task: 'Uninstalled Programs', completed: false, notes: '' },
@@ -69,8 +71,21 @@ export default function AddItemPage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError("Please select a valid image file");
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Image file size must be less than 5MB");
+        return;
+      }
+      
       setImageFile(file);
       setCapturedImage(""); // Clear captured image when uploading
+      setError(""); // Clear any previous errors
       const reader = new FileReader();
       reader.onload = (e) => {
         setImagePreview(e.target?.result as string);
@@ -94,12 +109,30 @@ export default function AddItemPage() {
   const retakePhoto = () => {
     setCapturedImage("");
     setShowCamera(true);
+    setCameraError("");
   };
 
   const removeImage = () => {
     setImageFile(null);
     setImagePreview("");
     setCapturedImage("");
+    setCameraError("");
+  };
+
+  const handleCameraError = (error: string) => {
+    setCameraError(error);
+    setCameraLoading(false);
+    console.error('Camera error:', error);
+  };
+
+  const handleCameraStart = () => {
+    setCameraError("");
+    setCameraLoading(true);
+    setShowCamera(true);
+  };
+
+  const handleCameraReady = () => {
+    setCameraLoading(false);
   };
 
   const handleMaintenanceTaskChange = (id: string, field: keyof MaintenanceTask, value: string | boolean) => {
@@ -209,7 +242,6 @@ export default function AddItemPage() {
       // Add maintenance data with automatic date and user info
       const maintenanceDate = new Date().toISOString().split('T')[0];
       formData.append('maintenance_date', maintenanceDate);
-      formData.append('maintained_by', 'Current User'); // Will be set from backend
       formData.append('maintenance_tasks', JSON.stringify(maintenanceTasks));
       formData.append('diagnostic', JSON.stringify(diagnostic));
 
@@ -269,409 +301,553 @@ export default function AddItemPage() {
   const previewSrc = getImageUrl(imagePreview || capturedImage);
 
   return (
-    <div className="min-h-screen pt-8 pb-20 bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-xl shadow-xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-3xl font-bold">Add New Item</h1>
-                <p className="text-blue-100 mt-2 text-lg">Register a new item in the inventory system</p>
-              </div>
-              <button
-                onClick={handleCancel}
-                className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 shadow-lg"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Cancel
-              </button>
+    <div style={{
+      maxWidth: 700,
+      margin: '40px auto 0 auto',
+      background: '#fff',
+      borderRadius: 24,
+      boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
+      padding: '32px 32px 40px 32px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 32,
+      minHeight: 'calc(100vh - 120px)'
+    }}>
+      <div className="bg-white rounded-xl shadow-xl overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold">Add New Item</h1>
+              <p className="text-blue-100 mt-2 text-lg">Register a new item in the inventory system</p>
             </div>
+            <button
+              onClick={handleCancel}
+              className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 shadow-lg"
+            >
+              <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Cancel
+            </button>
           </div>
-
-          {/* Tab Navigation */}
-          <div className="flex gap-3 p-6 bg-gray-50 border-b">
-            <TabButton tab="details" label="Item Details" icon="📋" />
-            <TabButton tab="maintenance" label="Maintenance Tasks" icon="🔧" />
-            <TabButton tab="diagnostics" label="System Diagnostics" icon="💻" />
-          </div>
-
-          <form onSubmit={handleSubmit} className="p-8">
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {error}
-              </div>
-            )}
-
-            {/* Item Details Tab */}
-            {activeTab === 'details' && (
-              <div className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block mb-3 font-semibold text-gray-700">Property No. *</label>
-          <input
-            type="text"
-            name="property_no"
-                      className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            value={form.property_no}
-            onChange={handleChange}
-            required
-          />
-        </div>
-                  
-                  <div>
-                    <label className="block mb-3 font-semibold text-gray-700">Article Type *</label>
-                    <select
-            name="article_type"
-                      className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            value={form.article_type}
-            onChange={handleChange}
-            required
-                    >
-                      <option value="">Select Article Type</option>
-                      <option value="Desktop Computer">Desktop Computer</option>
-                      <option value="Laptop">Laptop</option>
-                      <option value="Monitor">Monitor</option>
-                      <option value="Printer">Printer</option>
-                      <option value="Scanner">Scanner</option>
-                      <option value="Network Equipment">Network Equipment</option>
-                      <option value="Server">Server</option>
-                      <option value="Other">Other</option>
-                    </select>
         </div>
 
-                  <div>
-                    <label className="block mb-3 font-semibold text-gray-700">Date Acquired</label>
-          <input
-            type="date"
-            name="date_acquired"
-                      className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            value={form.date_acquired}
-            onChange={handleChange}
-          />
+        {/* Tab Navigation */}
+        <div className="flex gap-3 p-6 bg-gray-50 border-b">
+          <TabButton tab="details" label="Item Details" icon="📋" />
+          <TabButton tab="maintenance" label="Maintenance Tasks" icon="🔧" />
+          <TabButton tab="diagnostics" label="System Diagnostics" icon="💻" />
         </div>
 
-                  <div>
-                    <label className="block mb-3 font-semibold text-gray-700">Price (₱)</label>
-                    <input
-                      type="number"
-                      name="price"
-                      step="0.01"
-                      className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      value={form.price}
-                      onChange={handleChange}
-                    />
-                  </div>
+        <form onSubmit={handleSubmit} className="p-8">
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 flex items-center gap-2">
+              <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {error}
+            </div>
+          )}
 
-                  <div>
-                    <label className="block mb-3 font-semibold text-gray-700">End User</label>
-          <input
-            type="text"
-            name="end_user"
-                      className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            value={form.end_user}
-            onChange={handleChange}
-          />
-        </div>
-
-                  <div>
-                    <label className="block mb-3 font-semibold text-gray-700">Location</label>
-          <input
-            type="text"
-            name="location"
-                      className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            value={form.location}
-            onChange={handleChange}
-          />
-        </div>
-
-                  <div>
-                    <label className="block mb-3 font-semibold text-gray-700">Supply Officer</label>
-          <input
-            type="text"
-            name="supply_officer"
-                      className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            value={form.supply_officer}
-            onChange={handleChange}
-          />
-        </div>
+          {/* Item Details Tab */}
+          {activeTab === 'details' && (
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block mb-3 font-semibold text-gray-700">Property No. *</label>
+                  <input
+                    type="text"
+                    name="property_no"
+                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={form.property_no}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block mb-3 font-semibold text-gray-700">Article Type *</label>
+                  <select
+                    name="article_type"
+                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={form.article_type}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Article Type</option>
+                    <option value="Desktop Computer">Desktop Computer</option>
+                    <option value="Laptop">Laptop</option>
+                    <option value="Monitor">Monitor</option>
+                    <option value="Printer">Printer</option>
+                    <option value="Scanner">Scanner</option>
+                    <option value="Network Equipment">Network Equipment</option>
+                    <option value="Server">Server</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
 
                 <div>
-                  <label className="block mb-3 font-semibold text-gray-700">Specifications</label>
-                  <textarea
-                    name="specifications"
-                    rows={4}
-                    placeholder="CPU, RAM, Storage, OS, etc."
-                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-                    value={form.specifications}
+                  <label className="block mb-3 font-semibold text-gray-700">Date Acquired</label>
+                  <input
+                    type="date"
+                    name="date_acquired"
+                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={form.date_acquired}
                     onChange={handleChange}
                   />
                 </div>
 
                 <div>
-                  <label className="block mb-4 font-semibold text-gray-700">Item Picture</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 bg-gray-50 hover:bg-gray-100 transition-colors">
-                    {previewSrc && (
-                      <div className="space-y-6">
-                        <div className="flex justify-center">
-                          <img 
-                            src={previewSrc} 
-                            alt="Preview" 
-                            className="w-80 h-80 max-w-[320px] max-h-[320px] object-cover rounded-lg shadow-lg border" 
-                            style={{ width: 320, height: 320 }}
-                          />
-                        </div>
-                        <div className="flex justify-center">
-                          <button
-                            type="button"
-                            onClick={removeImage}
-                            className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                            Remove Image
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Maintenance Tasks Tab */}
-            {activeTab === 'maintenance' && (
-              <div className="space-y-8">
-                <div className="bg-blue-50 p-6 rounded-xl border border-blue-200">
-                  <h3 className="font-semibold text-blue-800 mb-3 text-lg flex items-center gap-2">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Maintenance Information
-                  </h3>
-                  <p className="text-blue-700">
-                    Maintenance date and maintainer will be automatically set to today's date and your user account.
-                  </p>
-                </div>
-
-                {/* Maintenance Summary */}
-                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h4 className="font-semibold text-green-800">Maintenance Summary</h4>
-                      <p className="text-green-700 text-sm">
-                        {maintenanceTasks.filter(task => task.completed).length} of {maintenanceTasks.length} tasks completed
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-green-600">
-                        {Math.round((maintenanceTasks.filter(task => task.completed).length / maintenanceTasks.length) * 100)}%
-                      </div>
-                      <div className="text-xs text-green-600">Completion</div>
-                    </div>
-                  </div>
+                  <label className="block mb-3 font-semibold text-gray-700">Price (₱)</label>
+                  <input
+                    type="number"
+                    name="price"
+                    step="0.01"
+                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={form.price}
+                    onChange={handleChange}
+                  />
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    Maintenance Tasks Checklist
-                  </h3>
-                  <div className="space-y-4">
-                    {maintenanceTasks.map((task) => (
-                      <div key={task.id} className="border-2 border-gray-200 rounded-xl p-6 hover:border-blue-300 transition-colors">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center space-x-4">
-                            <input
-                              type="checkbox"
-                              checked={task.completed}
-                              onChange={(e) => handleMaintenanceTaskChange(task.id, 'completed', e.target.checked)}
-                              className="w-6 h-6 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                            />
-                            <span className={`font-semibold text-lg ${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
-                              {task.task}
-                            </span>
-                            {task.completed && (
-                              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
-                                ✅ Completed
-                              </span>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeTask(task.id)}
-                            className="text-red-600 hover:text-red-800 text-sm bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
-                        <textarea
-                          placeholder="Add notes for this task..."
-                          value={task.notes}
-                          onChange={(e) => handleMaintenanceTaskChange(task.id, 'notes', e.target.value)}
-                          className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-                          rows={3}
+                  <label className="block mb-3 font-semibold text-gray-700">End User</label>
+                  <input
+                    type="text"
+                    name="end_user"
+                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={form.end_user}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-3 font-semibold text-gray-700">Location</label>
+                  <input
+                    type="text"
+                    name="location"
+                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={form.location}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-3 font-semibold text-gray-700">Supply Officer</label>
+                  <input
+                    type="text"
+                    name="supply_officer"
+                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    value={form.supply_officer}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-3 font-semibold text-gray-700">Specifications</label>
+                <textarea
+                  name="specifications"
+                  rows={4}
+                  placeholder="CPU, RAM, Storage, OS, etc."
+                  className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                  value={form.specifications}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label className="block mb-4 font-semibold text-gray-700">Item Picture</label>
+                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 bg-gray-50 hover:bg-gray-100 transition-colors">
+                  {(imagePreview || capturedImage) ? (
+                    <div className="space-y-6">
+                      <div className="flex justify-center">
+                        <img 
+                          src={imagePreview || capturedImage} 
+                          alt="Preview" 
+                          className="w-80 h-80 max-w-[320px] max-h-[320px] object-cover rounded-lg shadow-lg border" 
+                          style={{ width: 320, height: 320 }}
                         />
                       </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 flex gap-4">
-                    <input
-                      type="text"
-                      placeholder="Add custom task..."
-                      value={customTask}
-                      onChange={(e) => setCustomTask(e.target.value)}
-                      className="flex-1 border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    />
-                    <button
-                      type="button"
-                      onClick={addCustomTask}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium"
-                    >
-                      Add Task
-                    </button>
-                  </div>
+                      <div className="flex justify-center gap-4">
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2"
+                        >
+                          <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          Remove Image
+                        </button>
+                        {capturedImage && (
+                          <button
+                            type="button"
+                            onClick={retakePhoto}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2"
+                          >
+                            <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Retake Photo
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ) : showCamera ? (
+                    <div className="space-y-6">
+                      {cameraError ? (
+                        <div className="text-center space-y-4">
+                          <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+                            <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-red-700 mb-2">Camera Error</h3>
+                            <p className="text-red-600 mb-4">{cameraError}</p>
+                            <div className="flex justify-center gap-4">
+                              <button
+                                type="button"
+                                onClick={() => setShowCamera(false)}
+                                className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium"
+                              >
+                                Try Upload Instead
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleCameraStart}
+                                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium"
+                              >
+                                Try Again
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex justify-center">
+                            <div className="relative">
+                              {cameraLoading && (
+                                <div className="absolute inset-0 bg-gray-900 bg-opacity-50 rounded-lg flex items-center justify-center z-10">
+                                  <div className="text-white text-center">
+                                    <svg className="animate-spin h-3 w-3 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <p className="text-sm">Initializing camera...</p>
+                                  </div>
+                                </div>
+                              )}
+                              <Webcam
+                                ref={webcamRef}
+                                screenshotFormat="image/png"
+                                className="w-80 h-80 max-w-[320px] max-h-[320px] object-cover rounded-lg shadow-lg border"
+                                style={{ width: 320, height: 320 }}
+                                onUserMediaError={(error) => handleCameraError("Camera access denied. Please allow camera permissions.")}
+                                onUserMedia={() => handleCameraReady()}
+                              />
+                              <div className="absolute inset-0 border-4 border-blue-500 rounded-lg pointer-events-none"></div>
+                            </div>
+                          </div>
+                          <div className="flex justify-center gap-4">
+                            <button
+                              type="button"
+                              onClick={capturePhoto}
+                              disabled={cameraLoading}
+                              className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 disabled:cursor-not-allowed"
+                            >
+                              <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                              {cameraLoading ? 'Initializing...' : 'Capture Photo'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setShowCamera(false)}
+                              className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2"
+                            >
+                              <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                              Cancel
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center space-y-6">
+                      <div className="flex justify-center">
+                        <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
+                          <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-700 mb-2">Add Item Picture</h3>
+                        <p className="text-gray-500 mb-6">Upload an image or capture a photo using your camera</p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                          <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center justify-center gap-2">
+                            <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            Upload Image
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageChange}
+                              className="hidden"
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={handleCameraStart}
+                            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center justify-center gap-2"
+                          >
+                            <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            Take Photo
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
-
-            {/* System Diagnostics Tab */}
-            {activeTab === 'diagnostics' && (
-              <div className="space-y-8">
-                <div>
-                  <label className="block mb-3 font-semibold text-gray-700">System Status</label>
-                  <div className="relative">
-                    <select
-                      className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors z-10"
-                      value={diagnostic.system_status}
-                      onChange={(e) => setDiagnostic(prev => ({ ...prev, system_status: e.target.value }))}
-                    >
-                      <option value="Good">✅ Good</option>
-                      <option value="Fair">⚠️ Fair</option>
-                      <option value="Poor">❌ Poor</option>
-                      <option value="Critical">🚨 Critical</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block mb-3 font-semibold text-gray-700">Findings</label>
-                  <textarea
-                    rows={4}
-                    placeholder="Describe any issues or observations..."
-                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-                    value={diagnostic.findings}
-                    onChange={(e) => setDiagnostic(prev => ({ ...prev, findings: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-3 font-semibold text-gray-700">Recommendations</label>
-                  <textarea
-                    rows={4}
-                    placeholder="Suggest actions or improvements..."
-                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-                    value={diagnostic.recommendations}
-                    onChange={(e) => setDiagnostic(prev => ({ ...prev, recommendations: e.target.value }))}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Navigation and Submit */}
-            <div className="flex justify-between items-center pt-8 border-t mt-8">
-              <div className="flex gap-3">
-                {activeTab === 'maintenance' && (
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('details')}
-                    className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Back to Details
-                  </button>
-                )}
-                {activeTab === 'diagnostics' && (
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('maintenance')}
-                    className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Back to Maintenance
-                  </button>
-                )}
-              </div>
-
-              <div className="flex gap-3">
-                {activeTab === 'details' && (
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('maintenance')}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 shadow-lg"
-                  >
-                    Next: Maintenance
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                )}
-                {activeTab === 'maintenance' && (
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('diagnostics')}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 shadow-lg"
-                  >
-                    Next: Diagnostics
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                )}
-                {activeTab === 'diagnostics' && (
-        <button
-          type="submit"
-          disabled={loading}
-                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-                    {loading ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        Save Item
-                      </>
-                    )}
-        </button>
-                )}
               </div>
             </div>
-      </form>
-        </div>
+          )}
+
+          {/* Maintenance Tasks Tab */}
+          {activeTab === 'maintenance' && (
+            <div className="space-y-8">
+              <div className="bg-blue-50 p-6 rounded-xl border border-blue-200">
+                <h3 className="font-semibold text-blue-800 mb-3 text-lg flex items-center gap-2">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Maintenance Information
+                </h3>
+                <p className="text-blue-700">
+                  Maintenance date and maintainer will be automatically set to today's date and your user account.
+                </p>
+              </div>
+
+              {/* Maintenance Summary */}
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h4 className="font-semibold text-green-800">Maintenance Summary</h4>
+                    <p className="text-green-700 text-sm">
+                      {maintenanceTasks.filter(task => task.completed).length} of {maintenanceTasks.length} tasks completed
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-green-600">
+                      {Math.round((maintenanceTasks.filter(task => task.completed).length / maintenanceTasks.length) * 100)}%
+                    </div>
+                    <div className="text-xs text-green-600">Completion</div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Maintenance Tasks Checklist
+                </h3>
+                <div className="space-y-4">
+                  {maintenanceTasks.map((task) => (
+                    <div key={task.id} className="border-2 border-gray-200 rounded-xl p-6 hover:border-blue-300 transition-colors">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-4">
+                          <input
+                            type="checkbox"
+                            checked={task.completed}
+                            onChange={(e) => handleMaintenanceTaskChange(task.id, 'completed', e.target.checked)}
+                            className="w-6 h-6 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                          />
+                          <span className={`font-semibold text-lg ${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+                            {task.task}
+                          </span>
+                          {task.completed && (
+                            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
+                              ✅ Completed
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeTask(task.id)}
+                          className="text-red-600 hover:text-red-800 text-sm bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors"
+                        >
+                          <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                      <textarea
+                        placeholder="Add notes for this task..."
+                        value={task.notes}
+                        onChange={(e) => handleMaintenanceTaskChange(task.id, 'notes', e.target.value)}
+                        className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                        rows={3}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 flex gap-4">
+                  <input
+                    type="text"
+                    placeholder="Add custom task..."
+                    value={customTask}
+                    onChange={(e) => setCustomTask(e.target.value)}
+                    className="flex-1 border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={addCustomTask}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium"
+                  >
+                    Add Task
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* System Diagnostics Tab */}
+          {activeTab === 'diagnostics' && (
+            <div className="space-y-8">
+              <div>
+                <label className="block mb-3 font-semibold text-gray-700">System Status</label>
+                <div className="relative">
+                  <select
+                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors z-10"
+                    value={diagnostic.system_status}
+                    onChange={(e) => setDiagnostic(prev => ({ ...prev, system_status: e.target.value }))}
+                  >
+                    <option value="Good">✅ Good</option>
+                    <option value="Fair">⚠️ Fair</option>
+                    <option value="Poor">❌ Poor</option>
+                    <option value="Critical">🚨 Critical</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-3 font-semibold text-gray-700">Findings</label>
+                <textarea
+                  rows={4}
+                  placeholder="Describe any issues or observations..."
+                  className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                  value={diagnostic.findings}
+                  onChange={(e) => setDiagnostic(prev => ({ ...prev, findings: e.target.value }))}
+                />
+              </div>
+
+              <div>
+                <label className="block mb-3 font-semibold text-gray-700">Recommendations</label>
+                <textarea
+                  rows={4}
+                  placeholder="Suggest actions or improvements..."
+                  className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                  value={diagnostic.recommendations}
+                  onChange={(e) => setDiagnostic(prev => ({ ...prev, recommendations: e.target.value }))}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Navigation and Submit */}
+          <div className="flex justify-between items-center pt-8 border-t mt-8">
+            <div className="flex gap-3">
+              {activeTab === 'maintenance' && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('details')}
+                  className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2"
+                >
+                  <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Back to Details
+                </button>
+              )}
+              {activeTab === 'diagnostics' && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('maintenance')}
+                  className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2"
+                >
+                  <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Back to Maintenance
+                </button>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              {activeTab === 'details' && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('maintenance')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 shadow-lg"
+                >
+                  Next: Maintenance
+                  <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              )}
+              {activeTab === 'maintenance' && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('diagnostics')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 shadow-lg"
+                >
+                  Next: Diagnostics
+                  <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              )}
+              {activeTab === 'diagnostics' && (
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-2 w-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Save Item
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   );

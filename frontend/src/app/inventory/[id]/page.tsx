@@ -161,7 +161,6 @@ export default function ItemDetailPage() {
           item_id: log.item_id,
           maintenance_date: log.maintenance_date,
           task_performed: log.task_performed,
-          user_name: log.user_name,
           maintained_by: log.maintained_by,
           notes: log.notes,
           status: log.status,
@@ -244,7 +243,7 @@ export default function ItemDetailPage() {
   };
 
   const handleLogChange = (index: number, field: string, value: any) => {
-    setEditingLogs(prev => prev.map((l, i) => i === index ? { ...l, [field]: value, maintenance_date: new Date().toISOString().split('T')[0], user_name: localStorage.getItem('username') || l.user_name } : l));
+    setEditingLogs(prev => prev.map((l, i) => i === index ? { ...l, [field]: value, maintenance_date: new Date().toISOString().split('T')[0] } : l));
   };
 
   // Handle image upload for inventory item
@@ -530,6 +529,18 @@ export default function ItemDetailPage() {
                   <span className="font-semibold text-gray-700">Company:</span>
                   <span className="text-gray-900">{item.company_name}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span className="font-semibold text-gray-700">Maintenance Status:</span>
+                  <span className={`font-medium ${item.maintenance_status === 'pending' ? 'text-red-600' : 'text-green-600'}`}>
+                    {item.maintenance_status === 'pending' ? '⚠️ Pending' : '✅ Up to Date'}
+                  </span>
+                </div>
+                {item.pending_maintenance_count > 0 && (
+                  <div className="flex justify-between">
+                    <span className="font-semibold text-gray-700">Pending Tasks:</span>
+                    <span className="text-red-600 font-medium">{item.pending_maintenance_count} task{item.pending_maintenance_count > 1 ? 's' : ''}</span>
+                  </div>
+                )}
               </div>
               {item.specifications && (
                 <div className="md:col-span-2">
@@ -677,8 +688,8 @@ export default function ItemDetailPage() {
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
                             <div>
-                              <span className="font-medium">User:</span>
-                              <span className="ml-2">{log.user_name}</span>
+                              <span className="font-medium">Maintained By:</span>
+                              <span className="ml-2">{log.maintained_by}</span>
                             </div>
                             <div>
                               <span className="font-medium">Status:</span>
@@ -722,8 +733,8 @@ export default function ItemDetailPage() {
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
                             <div>
-                              <span className="font-medium">User:</span>
-                              <span className="ml-2">{log.user_name}</span>
+                              <span className="font-medium">Maintained By:</span>
+                              <span className="ml-2">{log.maintained_by}</span>
                             </div>
                             <div>
                               <span className="font-medium">Status:</span>

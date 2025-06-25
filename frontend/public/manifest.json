@@ -1,0 +1,20 @@
+{
+  "name": "Digital Transformation Center - IMS",
+  "short_name": "DTC IMS",
+  "description": "Inventory Management System for Digital Transformation Center",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/dtc-logo.png",
+      "type": "image/png"
+    }
+  ]
+} 
