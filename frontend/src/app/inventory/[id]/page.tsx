@@ -4,12 +4,31 @@ import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { getApiUrl, getImageUrl } from "../../../config/api";
 import imageCompression from 'browser-image-compression';
+import styles from '../../page.module.css';
+import Tabs from './Tabs';
 
 // Helper to format date for <input type="date">
 function formatDateForInput(dateString: string) {
   if (!dateString) return "";
   return dateString.split("T")[0];
 }
+
+// SVG ICONS
+const IconCheck = () => (
+  <svg width="22" height="22" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="#16a34a"/><path d="M6 10.5L9 13.5L14 8.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+);
+const IconWarning = () => (
+  <svg width="22" height="22" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="#f59e42"/><path d="M10 6V11" stroke="#fff" strokeWidth="2" strokeLinecap="round"/><circle cx="10" cy="14" r="1" fill="#fff"/></svg>
+);
+const IconCross = () => (
+  <svg width="22" height="22" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="#b91c1c"/><path d="M7 7L13 13M13 7L7 13" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
+);
+const IconAlert = () => (
+  <svg width="22" height="22" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="#eab308"/><path d="M10 6V11" stroke="#fff" strokeWidth="2" strokeLinecap="round"/><circle cx="10" cy="14" r="1" fill="#fff"/></svg>
+);
+const IconPending = () => (
+  <svg width="22" height="22" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="#64748b"/><path d="M10 5V10L13 13" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
+);
 
 export default function ItemDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +50,11 @@ export default function ItemDetailPage() {
   const [editingLogs, setEditingLogs] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  // Accordion state
+  const [openAccordion, setOpenAccordion] = useState<'general' | 'specs' | null>('general');
+  const toggleAccordion = (section: 'general' | 'specs') => {
+    setOpenAccordion(openAccordion === section ? null : section);
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -214,19 +238,19 @@ export default function ItemDetailPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'Good': return '✅';
-      case 'Fair': return '⚠️';
-      case 'Poor': return '❌';
-      case 'Critical': return '🚨';
-      default: return '❓';
+      case 'Good': return <IconCheck />;
+      case 'Fair': return <IconWarning />;
+      case 'Poor': return <IconCross />;
+      case 'Critical': return <IconAlert />;
+      default: return <IconWarning />;
     }
   };
 
   const getTaskStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return '✅';
-      case 'pending': return '⏳';
-      default: return '❓';
+      case 'completed': return <IconCheck />;
+      case 'pending': return <IconPending />;
+      default: return <IconWarning />;
     }
   };
 
@@ -282,15 +306,15 @@ export default function ItemDetailPage() {
     : (item && getImageUrl(item.image_url));
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">Loading...</div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: '#182848' }}>Loading...</div>
   );
   
   if (error) return (
-    <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: '#b91c1c' }}>{error}</div>
   );
   
   if (!item) return (
-    <div className="min-h-screen flex items-center justify-center text-gray-500">Item not found.</div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: '#888' }}>Item not found.</div>
   );
 
   return (
@@ -529,18 +553,6 @@ export default function ItemDetailPage() {
                   <span className="font-semibold text-gray-700">Company:</span>
                   <span className="text-gray-900">{item.company_name}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="font-semibold text-gray-700">Maintenance Status:</span>
-                  <span className={`font-medium ${item.maintenance_status === 'pending' ? 'text-red-600' : 'text-green-600'}`}>
-                    {item.maintenance_status === 'pending' ? '⚠️ Pending' : '✅ Up to Date'}
-                  </span>
-                </div>
-                {item.pending_maintenance_count > 0 && (
-                  <div className="flex justify-between">
-                    <span className="font-semibold text-gray-700">Pending Tasks:</span>
-                    <span className="text-red-600 font-medium">{item.pending_maintenance_count} task{item.pending_maintenance_count > 1 ? 's' : ''}</span>
-                  </div>
-                )}
               </div>
               {item.specifications && (
                 <div className="md:col-span-2">
@@ -553,37 +565,48 @@ export default function ItemDetailPage() {
             </div>
           )}
         </div>
-
-        {/* System Diagnostics */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            💻 System Diagnostics
-          </h2>
-          
+        <style>{`
+          @media (max-width: 900px) {
+            div[style*='display: flex'][style*='row'][style*='0 auto 32px auto'] {
+              flex-direction: column !important;
+              gap: 12px !important;
+              width: 100% !important;
+            }
+            div[style*='max-width: 500px'] {
+              max-width: 100% !important;
+              width: 100% !important;
+            }
+          }
+        `}</style>
+      </div>
+      {/* Tabs for Diagnostics and Logs */}
+      <div style={{ marginTop: 32 }}>
+        <Tabs tabs={['Diagnostics', 'Logs']}>
+          {/* Diagnostics Tab Content */}
+          <div>
           {loadingDiagnostics ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading diagnostics...</p>
+              <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                <div style={{ width: 32, height: 32, border: '4px solid #b91c1c', borderRadius: '50%', borderTop: '4px solid #fff', margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
+                <p style={{ color: '#888' }}>Loading diagnostics...</p>
             </div>
           ) : diagnosticsError ? (
-            <div className="text-center py-8">
-              <div className="text-red-500 text-4xl mb-3">⚠️</div>
-              <p className="text-red-600 mb-2">Error loading diagnostics</p>
-              <p className="text-sm text-gray-500">{diagnosticsError}</p>
+              <div style={{ textAlign: 'center', padding: '32px 0', color: '#b91c1c' }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}><IconWarning /></div>
+                <p style={{ marginBottom: 8 }}>Error loading diagnostics</p>
+                <p style={{ fontSize: 14, color: '#888' }}>{diagnosticsError}</p>
             </div>
           ) : (
-            <div className="space-y-4">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {isEditing ? (
                 editingDiagnostics.length > 0 ? editingDiagnostics.map((diag, i) => (
-                  <div key={diag.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl">{getStatusIcon(diag.system_status)}</span>
-                        <label htmlFor={`diag-status-${diag.id}`} className="sr-only">System Status</label>
-                        <div className="relative">
+                    <div key={diag.id} style={{ border: '1px solid #eee', borderRadius: 10, padding: 16, background: '#fafbfc' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 22 }}>{getStatusIcon(diag.system_status)}</span>
+                          <label htmlFor={`diag-status-${diag.id}`} style={{ display: 'none' }}>System Status</label>
                           <select
                             id={`diag-status-${diag.id}`}
-                            className="border rounded px-2 py-1"
+                            style={{ borderRadius: 6, padding: '4px 8px', border: '1px solid #ccc' }}
                             value={diag.system_status}
                             aria-label="System Status"
                             onChange={e => handleDiagnosticChange(i, 'system_status', e.target.value)}
@@ -594,102 +617,98 @@ export default function ItemDetailPage() {
                             <option value="Critical">Critical</option>
                           </select>
                         </div>
+                        <span style={{ fontSize: 13, color: '#888' }}>{diag.diagnostics_date}</span>
                       </div>
-                      <span className="text-sm text-gray-500">{diag.diagnostics_date}</span>
-                    </div>
-                    <div className="mb-1 text-xs text-gray-400">Select the current system status.</div>
-                    <div className="mb-3">
-                      <label htmlFor={`diag-findings-${diag.id}`} className="font-semibold text-gray-700">Findings:</label>
+                      <div style={{ fontSize: 12, color: '#bbb', marginBottom: 8 }}>Select the current system status.</div>
+                      <div style={{ marginBottom: 12 }}>
+                        <label htmlFor={`diag-findings-${diag.id}`} style={{ fontWeight: 600, color: '#b91c1c' }}>Findings:</label>
                       <textarea
                         id={`diag-findings-${diag.id}`}
-                        className="w-full border rounded p-2 mt-1"
+                          style={{ width: '100%', borderRadius: 6, border: '1px solid #ccc', padding: 8, marginTop: 4 }}
                         value={diag.findings || ''}
                         aria-label="Findings"
                         onChange={e => handleDiagnosticChange(i, 'findings', e.target.value)}
                       />
                     </div>
                     <div>
-                      <label htmlFor={`diag-recommendations-${diag.id}`} className="font-semibold text-gray-700">Recommendations:</label>
+                        <label htmlFor={`diag-recommendations-${diag.id}`} style={{ fontWeight: 600, color: '#b91c1c' }}>Recommendations:</label>
                       <textarea
                         id={`diag-recommendations-${diag.id}`}
-                        className="w-full border rounded p-2 mt-1"
+                          style={{ width: '100%', borderRadius: 6, border: '1px solid #ccc', padding: 8, marginTop: 4 }}
                         value={diag.recommendations || ''}
                         aria-label="Recommendations"
                         onChange={e => handleDiagnosticChange(i, 'recommendations', e.target.value)}
                       />
                     </div>
                   </div>
-                )) : <div className="text-gray-500 italic text-center py-4">No diagnostics found.</div>
+                  )) : <div style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', padding: 16 }}>No diagnostics found.</div>
               ) : (
                 diagnostics.length > 0 ? diagnostics.map((diag, i) => (
-                  <div key={diag.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl">{getStatusIcon(diag.system_status)}</span>
-                        <span className="font-semibold text-lg">{diag.system_status}</span>
+                    <div key={diag.id} style={{ border: '1px solid #eee', borderRadius: 10, padding: 16, background: '#fafbfc' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 22 }}>{getStatusIcon(diag.system_status)}</span>
+                          <span style={{ fontWeight: 600, fontSize: 16 }}>{diag.system_status}</span>
                       </div>
-                      <span className="text-sm text-gray-500">{diag.diagnostics_date}</span>
+                        <span style={{ fontSize: 13, color: '#888' }}>{diag.diagnostics_date}</span>
                     </div>
                     {diag.findings && (
-                      <div className="mb-3">
-                        <span className="font-semibold text-gray-700">Findings:</span>
-                        <div className="mt-1 p-2 bg-gray-50 rounded text-sm">{diag.findings}</div>
+                        <div style={{ marginBottom: 12 }}>
+                          <span style={{ fontWeight: 600, color: '#b91c1c' }}>Findings:</span>
+                          <div style={{ marginTop: 4, background: '#f3f4f6', borderRadius: 6, padding: 8, fontSize: 14 }}>{diag.findings}</div>
                       </div>
                     )}
                     {diag.recommendations && (
                       <div>
-                        <span className="font-semibold text-gray-700">Recommendations:</span>
-                        <div className="mt-1 p-2 bg-blue-50 rounded text-sm">{diag.recommendations}</div>
+                          <span style={{ fontWeight: 600, color: '#b91c1c' }}>Recommendations:</span>
+                          <div style={{ marginTop: 4, background: '#e0f2fe', borderRadius: 6, padding: 8, fontSize: 14 }}>{diag.recommendations}</div>
                       </div>
                     )}
                   </div>
-                )) : <div className="text-gray-500 italic text-center py-4">No diagnostics found.</div>
+                  )) : <div style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', padding: 16 }}>No diagnostics found.</div>
               )}
             </div>
           )}
         </div>
-
-        {/* Maintenance Logs */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            🔧 Maintenance Tasks & Logs
-          </h2>
-          
+          {/* Logs Tab Content */}
+          <div>
           {loadingLogs ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading maintenance logs...</p>
+              <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                <div style={{ width: 32, height: 32, border: '4px solid #182848', borderRadius: '50%', borderTop: '4px solid #fff', margin: '0 auto 16px', animation: 'spin 1s linear infinite' }} />
+                <p style={{ color: '#888' }}>Loading maintenance logs...</p>
             </div>
           ) : logsError ? (
-            <div className="text-center py-8">
-              <div className="text-red-500 text-4xl mb-3">⚠️</div>
-              <p className="text-red-600 mb-2">Error loading maintenance logs</p>
-              <p className="text-sm text-gray-500">{logsError}</p>
+              <div style={{ textAlign: 'center', padding: '32px 0', color: '#b91c1c' }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}><IconWarning /></div>
+                <p style={{ marginBottom: 8 }}>Error loading maintenance logs</p>
+                <p style={{ fontSize: 14, color: '#888' }}>{logsError}</p>
             </div>
           ) : (
-            <div className="space-y-6">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {isEditing ? (
                 editingLogs.length > 0 ? editingLogs.map((log, i) => (
-                  <div key={log.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-3 flex-1">
-                        <div className="flex items-center mt-1">
+                    <div key={log.id} style={{ border: '1px solid #eee', borderRadius: 10, padding: 16, background: '#fafbfc' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                           <input
                             type="checkbox"
                             checked={log.status === 'completed'}
                             onChange={e => handleLogChange(i, 'status', e.target.checked ? 'completed' : 'pending')}
-                            className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          style={{ width: 18, height: 18, accentColor: '#182848', marginRight: 8 }}
                           />
+                        <span style={{ fontWeight: 600, fontSize: 16, textDecoration: log.status === 'completed' ? 'line-through' : 'none', color: log.status === 'completed' ? '#888' : '#222' }}>{log.task_performed}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 6, fontSize: 12, fontWeight: 600, background: log.status === 'completed' ? '#d1fae5' : '#fef9c3', color: log.status === 'completed' ? '#065f46' : '#92400e', marginLeft: 8 }}>
+                          {getTaskStatusIcon(log.status)} {log.status === 'completed' ? 'Completed' : 'Pending'}
+                        </span>
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className={`font-semibold text-lg ${log.status === 'completed' ? 'line-through text-gray-500' : 'text-gray-800'}`}>{log.task_performed}</span>
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${getTaskStatusClass(log.status)}`}>{log.status === 'completed' ? '✅ Completed' : '⏳ Pending'}</span>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 14, color: '#555', marginBottom: 8 }}>
+                        <div><span style={{ fontWeight: 500 }}>User:</span> {log.user_name}</div>
+                        <div><span style={{ fontWeight: 500 }}>Status:</span> {log.status === 'completed' ? 'Completed' : 'Pending'}</div>
+                        <div><span style={{ fontWeight: 500 }}>Date:</span> {log.maintenance_date}</div>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
                             <div>
-                              <span className="font-medium">Maintained By:</span>
-                              <span className="ml-2">{log.maintained_by}</span>
+                              <span className="font-medium">User:</span>
+                              <span className="ml-2">{log.user_name}</span>
                             </div>
                             <div>
                               <span className="font-medium">Status:</span>
@@ -703,28 +722,27 @@ export default function ItemDetailPage() {
                           <div className="bg-gray-50 p-3 rounded-lg">
                             <span className="font-medium text-gray-700">Notes:</span>
                             <textarea
-                              className="w-full border rounded p-2 mt-1"
+                          style={{ width: '100%', borderRadius: 6, border: '1px solid #ccc', padding: 8, marginTop: 4 }}
                               value={log.notes || ''}
                               onChange={e => handleLogChange(i, 'notes', e.target.value)}
                             />
-                          </div>
-                        </div>
                       </div>
                     </div>
-                  </div>
-                )) : <div className="text-gray-500">No maintenance logs found.</div>
+                  )) : <div style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', padding: 16 }}>No maintenance logs found.</div>
               ) : (
                 logs.length > 0 ? logs.map((log, i) => (
-                  <div key={log.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-3 flex-1">
-                        <div className="flex items-center mt-1">
+                    <div key={log.id} style={{ border: '1px solid #eee', borderRadius: 10, padding: 16, background: '#fafbfc' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                           <input
                             type="checkbox"
                             checked={log.status === 'completed'}
                             disabled
-                            className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          style={{ width: 18, height: 18, accentColor: '#182848', marginRight: 8 }}
                           />
+                        <span style={{ fontWeight: 600, fontSize: 16, textDecoration: log.status === 'completed' ? 'line-through' : 'none', color: log.status === 'completed' ? '#888' : '#222' }}>{log.task_performed}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 6, fontSize: 12, fontWeight: 600, background: log.status === 'completed' ? '#d1fae5' : '#fef9c3', color: log.status === 'completed' ? '#065f46' : '#92400e', marginLeft: 8 }}>
+                          {getTaskStatusIcon(log.status)} {log.status === 'completed' ? 'Completed' : 'Pending'}
+                        </span>
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
@@ -733,8 +751,8 @@ export default function ItemDetailPage() {
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
                             <div>
-                              <span className="font-medium">Maintained By:</span>
-                              <span className="ml-2">{log.maintained_by}</span>
+                              <span className="font-medium">User:</span>
+                              <span className="ml-2">{log.user_name}</span>
                             </div>
                             <div>
                               <span className="font-medium">Status:</span>
@@ -746,32 +764,19 @@ export default function ItemDetailPage() {
                             </div>
                           </div>
                           {log.notes && (
-                            <div className="bg-gray-50 p-3 rounded-lg">
-                              <span className="font-medium text-gray-700">Notes:</span>
-                              <div className="mt-1 text-sm text-gray-600 whitespace-pre-wrap">
-                                {log.notes}
-                              </div>
-                            </div>
-                          )}
+                        <div style={{ background: '#f3f4f6', borderRadius: 6, padding: 8, marginTop: 8 }}>
+                          <span style={{ fontWeight: 600, color: '#b91c1c' }}>Notes:</span>
+                          <div style={{ marginTop: 4, fontSize: 14, color: '#555', whiteSpace: 'pre-wrap' }}>{log.notes}</div>
                         </div>
-                      </div>
+                      )}
                     </div>
-                  </div>
-                )) : <div className="text-gray-500">No maintenance logs found.</div>
+                  )) : <div style={{ color: '#888', fontStyle: 'italic', textAlign: 'center', padding: 16 }}>No maintenance logs found.</div>
               )}
             </div>
           )}
         </div>
+        </Tabs>
       </div>
-      <style jsx>{`
-        @media (max-width: 700px) {
-          div[style] {
-            max-width: 98vw !important;
-            padding-left: 4vw !important;
-            padding-right: 4vw !important;
-          }
-        }
-      `}</style>
     </div>
   );
 } 
