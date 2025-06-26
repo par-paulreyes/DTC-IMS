@@ -56,7 +56,17 @@ export default function TopNavbar() {
         {/* Left-aligned logo and greeting */}
         <div style={{ display: 'flex', alignItems: 'center', height: '100%', minWidth: 0 }}>
           <Image src="/dtc-logo.png" alt="DTC Logo" width={40} height={40} style={{ objectFit: 'contain', flexShrink: 0 }} priority />
-          <div style={{ marginLeft: 14, color: '#fff', fontWeight: 600, fontSize: '1.1rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', minWidth: 0 }}>
+          <div style={{ 
+            marginLeft: 14, 
+            color: '#fff', 
+            fontWeight: 600, 
+            fontSize: '1.1rem', 
+            whiteSpace: 'nowrap', 
+            textOverflow: 'ellipsis', 
+            overflow: 'hidden', 
+            minWidth: 0,
+            fontFamily: 'Poppins, sans-serif'
+          }}>
             Hello{user ? `! ` : '!' }
             {user && <span style={{ color: '#e11d48', fontWeight: 700 }}>{user.full_name || user.username}</span>}
           </div>
