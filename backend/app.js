@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 const db = require('./db');
 const authRoutes = require('./routes/authRoutes');
 const companyRoutes = require('./routes/companyRoutes');
@@ -56,6 +57,13 @@ app.use('/api/users', userRoutes);
 
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || '0.0.0.0'; // Listen on all network interfaces
-app.listen(PORT, HOST, () => {
-  console.log(`Server running on http://${HOST}:${PORT}`);
+
+// HTTPS certificate and key
+const certPath = path.join(__dirname, '192.168.100.188+2.pem');
+const keyPath = path.join(__dirname, '192.168.100.188+2-key.pem');
+const cert = fs.readFileSync(certPath);
+const key = fs.readFileSync(keyPath);
+
+https.createServer({ key, cert }, app).listen(PORT, HOST, () => {
+  console.log(`HTTPS Server running on https://${HOST}:${PORT}`);
 }); 
