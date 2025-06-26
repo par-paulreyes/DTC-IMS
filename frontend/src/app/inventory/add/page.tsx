@@ -4,6 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Webcam from "react-webcam";
 import axios from "axios";
 import { getApiUrl, getImageUrl } from "../../../config/api";
+import { Camera, Upload, X, Check, Plus, Trash2, ArrowRight, ArrowLeft, Info, Settings, CheckCircle } from "lucide-react";
+import styles from './page.module.css';
 
 interface MaintenanceTask {
   id: string;
@@ -283,83 +285,97 @@ export default function AddItemPage() {
     }
   };
 
-  const TabButton = ({ tab, label, icon }: { tab: string; label: string; icon: string }) => (
+  const TabButton = ({ tab, label, icon: Icon, isActive, className }: { tab: string; label: string; icon: any; isActive: boolean; className: string }) => (
     <button
       type="button"
       onClick={() => setActiveTab(tab as any)}
-      className={`flex-1 py-3 px-4 text-sm font-medium rounded-lg transition-colors duration-200 ${
-        activeTab === tab
-          ? 'bg-blue-600 text-white shadow-md'
-          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-      }`}
+      className={`${className}`}
     >
-      <span className="mr-2">{icon}</span>
+      <Icon size={18} />
       {label}
     </button>
   );
 
+  const completedTasks = maintenanceTasks.filter(task => task.completed).length;
+  const completionPercentage = maintenanceTasks.length > 0 ? Math.round((completedTasks / maintenanceTasks.length) * 100) : 0;
+
   const previewSrc = getImageUrl(imagePreview || capturedImage);
 
   return (
-    <div style={{
-      maxWidth: 700,
-      margin: '40px auto 0 auto',
-      background: '#fff',
-      borderRadius: 24,
-      boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
-      padding: '32px 32px 40px 32px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 32,
-      minHeight: 'calc(100vh - 120px)'
-    }}>
-      <div className="bg-white rounded-xl shadow-xl overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">Add New Item</h1>
-              <p className="text-blue-100 mt-2 text-lg">Register a new item in the inventory system</p>
-            </div>
-            <button
-              onClick={handleCancel}
-              className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 shadow-lg"
-            >
-              <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              Cancel
-            </button>
+    <div className={styles.container}>
+      {/* Header Card */}
+      <div className={styles.headerCard}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+          <div>
+            <h1 className={styles.headerTitle}>Add New Item</h1>
+            <p className={styles.headerSubtitle}>Register a new item in the inventory system</p>
           </div>
+          <button
+            onClick={handleCancel}
+            className={styles.cancelBtnHeader}
+          >
+            <X size={18} />
+            Cancel
+          </button>
         </div>
+      </div>
 
+      {/* Main Content Card */}
+      <div className={styles.mainCard}>
         {/* Tab Navigation */}
-        <div className="flex gap-3 p-6 bg-gray-50 border-b">
-          <TabButton tab="details" label="Item Details" icon="📋" />
-          <TabButton tab="maintenance" label="Maintenance Tasks" icon="🔧" />
-          <TabButton tab="diagnostics" label="System Diagnostics" icon="💻" />
+        <div className={styles.tabNav}>
+          <TabButton 
+            tab="details" 
+            label="Item Details" 
+            icon={Info} 
+            isActive={activeTab === 'details'} 
+            className={activeTab === 'details' ? styles.tabBtnActive : styles.tabBtn}
+          />
+          <TabButton 
+            tab="maintenance" 
+            label="Maintenance Tasks" 
+            icon={Settings} 
+            isActive={activeTab === 'maintenance'} 
+            className={activeTab === 'maintenance' ? styles.tabBtnActive : styles.tabBtn}
+          />
+          <TabButton 
+            tab="diagnostics" 
+            label="System Diagnostics" 
+            icon={CheckCircle} 
+            isActive={activeTab === 'diagnostics'} 
+            className={activeTab === 'diagnostics' ? styles.tabBtnActive : styles.tabBtn}
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="p-8">
+        {/* Main Form Content */}
+        <div className="p-8">
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 flex items-center gap-2">
-              <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {error}
+            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+              <div className="flex items-center">
+                <X className="text-red-500 mr-3" size={20} />
+                <p className="text-red-700 font-medium">{error}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Camera/Capture UI Placeholder */}
+          {showCamera && (
+            <div className="mb-8 p-6 bg-gray-100 rounded-xl flex flex-col items-center justify-center">
+              <p className="mb-4 text-gray-700">[Camera capture UI goes here]</p>
+              <button type="button" onClick={() => setShowCamera(false)} className="bg-red-500 text-white px-4 py-2 rounded-lg">Close Camera</button>
             </div>
           )}
 
           {/* Item Details Tab */}
           {activeTab === 'details' && (
             <div className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className={styles.formGrid}>
                 <div>
-                  <label className="block mb-3 font-semibold text-gray-700">Property No. *</label>
+                  <label className={styles.label}>Property No. *</label>
                   <input
                     type="text"
                     name="property_no"
-                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className={styles.input}
                     value={form.property_no}
                     onChange={handleChange}
                     required
@@ -367,10 +383,10 @@ export default function AddItemPage() {
                 </div>
                 
                 <div>
-                  <label className="block mb-3 font-semibold text-gray-700">Article Type *</label>
+                  <label className={styles.label}>Article Type *</label>
                   <select
                     name="article_type"
-                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className={styles.select}
                     value={form.article_type}
                     onChange={handleChange}
                     required
@@ -388,56 +404,56 @@ export default function AddItemPage() {
                 </div>
 
                 <div>
-                  <label className="block mb-3 font-semibold text-gray-700">Date Acquired</label>
+                  <label className={styles.label}>Date Acquired</label>
                   <input
                     type="date"
                     name="date_acquired"
-                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className={styles.input}
                     value={form.date_acquired}
                     onChange={handleChange}
                   />
                 </div>
 
                 <div>
-                  <label className="block mb-3 font-semibold text-gray-700">Price (₱)</label>
+                  <label className={styles.label}>Price (₱)</label>
                   <input
                     type="number"
                     name="price"
                     step="0.01"
-                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className={styles.input}
                     value={form.price}
                     onChange={handleChange}
                   />
                 </div>
 
                 <div>
-                  <label className="block mb-3 font-semibold text-gray-700">End User</label>
+                  <label className={styles.label}>End User</label>
                   <input
                     type="text"
                     name="end_user"
-                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className={styles.input}
                     value={form.end_user}
                     onChange={handleChange}
                   />
                 </div>
 
                 <div>
-                  <label className="block mb-3 font-semibold text-gray-700">Location</label>
+                  <label className={styles.label}>Location</label>
                   <input
                     type="text"
                     name="location"
-                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className={styles.input}
                     value={form.location}
                     onChange={handleChange}
                   />
                 </div>
 
                 <div>
-                  <label className="block mb-3 font-semibold text-gray-700">Supply Officer</label>
+                  <label className={styles.label}>Supply Officer</label>
                   <input
                     type="text"
                     name="supply_officer"
-                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className={styles.input}
                     value={form.supply_officer}
                     onChange={handleChange}
                   />
@@ -445,179 +461,36 @@ export default function AddItemPage() {
               </div>
 
               <div>
-                <label className="block mb-3 font-semibold text-gray-700">Specifications</label>
+                <label className={styles.specsLabel}>Specifications</label>
                 <textarea
                   name="specifications"
                   rows={4}
                   placeholder="CPU, RAM, Storage, OS, etc."
-                  className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                  className={styles.textarea}
                   value={form.specifications}
                   onChange={handleChange}
                 />
               </div>
 
               <div>
-                <label className="block mb-4 font-semibold text-gray-700">Item Picture</label>
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 bg-gray-50 hover:bg-gray-100 transition-colors">
-                  {(imagePreview || capturedImage) ? (
-                    <div className="space-y-6">
-                      <div className="flex justify-center">
-                        <img 
-                          src={imagePreview || capturedImage} 
-                          alt="Preview" 
-                          className="w-80 h-80 max-w-[320px] max-h-[320px] object-cover rounded-lg shadow-lg border" 
-                          style={{ width: 320, height: 320 }}
-                        />
-                      </div>
-                      <div className="flex justify-center gap-4">
-                        <button
-                          type="button"
-                          onClick={removeImage}
-                          className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2"
-                        >
-                          <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                          Remove Image
-                        </button>
-                        {capturedImage && (
-                          <button
-                            type="button"
-                            onClick={retakePhoto}
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2"
-                          >
-                            <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            Retake Photo
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ) : showCamera ? (
-                    <div className="space-y-6">
-                      {cameraError ? (
-                        <div className="text-center space-y-4">
-                          <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-                            <svg className="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                            </svg>
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold text-red-700 mb-2">Camera Error</h3>
-                            <p className="text-red-600 mb-4">{cameraError}</p>
-                            <div className="flex justify-center gap-4">
-                              <button
-                                type="button"
-                                onClick={() => setShowCamera(false)}
-                                className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium"
-                              >
-                                Try Upload Instead
-                              </button>
-                              <button
-                                type="button"
-                                onClick={handleCameraStart}
-                                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium"
-                              >
-                                Try Again
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="flex justify-center">
-                            <div className="relative">
-                              {cameraLoading && (
-                                <div className="absolute inset-0 bg-gray-900 bg-opacity-50 rounded-lg flex items-center justify-center z-10">
-                                  <div className="text-white text-center">
-                                    <svg className="animate-spin h-3 w-3 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    <p className="text-sm">Initializing camera...</p>
-                                  </div>
-                                </div>
-                              )}
-                              <Webcam
-                                ref={webcamRef}
-                                screenshotFormat="image/png"
-                                className="w-80 h-80 max-w-[320px] max-h-[320px] object-cover rounded-lg shadow-lg border"
-                                style={{ width: 320, height: 320 }}
-                                onUserMediaError={(error) => handleCameraError("Camera access denied. Please allow camera permissions.")}
-                                onUserMedia={() => handleCameraReady()}
-                              />
-                              <div className="absolute inset-0 border-4 border-blue-500 rounded-lg pointer-events-none"></div>
-                            </div>
-                          </div>
-                          <div className="flex justify-center gap-4">
-                            <button
-                              type="button"
-                              onClick={capturePhoto}
-                              disabled={cameraLoading}
-                              className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 disabled:cursor-not-allowed"
-                            >
-                              <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                              </svg>
-                              {cameraLoading ? 'Initializing...' : 'Capture Photo'}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setShowCamera(false)}
-                              className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2"
-                            >
-                              <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                              Cancel
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-center space-y-6">
-                      <div className="flex justify-center">
-                        <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center">
-                          <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-700 mb-2">Add Item Picture</h3>
-                        <p className="text-gray-500 mb-6">Upload an image or capture a photo using your camera</p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                          <label className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center justify-center gap-2">
-                            <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                            </svg>
-                            Upload Image
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImageChange}
-                              className="hidden"
-                            />
-                          </label>
-                          <button
-                            type="button"
-                            onClick={handleCameraStart}
-                            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center justify-center gap-2"
-                          >
-                            <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            Take Photo
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                <label className={styles.itemPictureLabel}>Item Picture</label>
+                <div className={styles.imageUpload}>
+                  <div className={styles.imageUploadIcon}>
+                    <Camera size={40} />
+                  </div>
+                  <div className={styles.imageUploadTitle}>Add Item Picture</div>
+                  <div className={styles.imageUploadDesc}>Capture or upload an image to help identify this item</div>
+                  <div className={styles.imageUploadActions}>
+                    <label className={styles.uploadLabel}>
+                      <Upload size={18} style={{marginRight: 6}} />
+                      Upload Image
+                      <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} />
+                    </label>
+                    <button type="button" className={styles.takePhotoBtn} onClick={handleCameraStart}>
+                      <Camera size={18} style={{marginRight: 6}} />
+                      Capture Photo
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -626,100 +499,91 @@ export default function AddItemPage() {
           {/* Maintenance Tasks Tab */}
           {activeTab === 'maintenance' && (
             <div className="space-y-8">
-              <div className="bg-blue-50 p-6 rounded-xl border border-blue-200">
-                <h3 className="font-semibold text-blue-800 mb-3 text-lg flex items-center gap-2">
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Maintenance Information
-                </h3>
-                <p className="text-blue-700">
-                  Maintenance date and maintainer will be automatically set to today's date and your user account.
-                </p>
-              </div>
-
-              {/* Maintenance Summary */}
-              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h4 className="font-semibold text-green-800">Maintenance Summary</h4>
-                    <p className="text-green-700 text-sm">
-                      {maintenanceTasks.filter(task => task.completed).length} of {maintenanceTasks.length} tasks completed
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-green-600">
-                      {Math.round((maintenanceTasks.filter(task => task.completed).length / maintenanceTasks.length) * 100)}%
-                    </div>
-                    <div className="text-xs text-green-600">Completion</div>
+              {/* Info Card */}
+              <div style={{ background: '#e8f0fe', borderRadius: 16, padding: 24, display: 'flex', alignItems: 'center', gap: 16, border: '1.5px solid #b6d0fe', color: '#264072', fontWeight: 600, fontSize: 18, boxShadow: '0 1px 4px rgba(38,64,114,0.04)' }}>
+                <Info size={24} style={{ color: '#264072', flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 18 }}>Maintenance Information</div>
+                  <div style={{ fontWeight: 400, fontSize: 15, color: '#264072', marginTop: 2 }}>
+                    Maintenance date and maintainer will be automatically set to today's date and your user account.
                   </div>
                 </div>
               </div>
 
-              <div>
-                <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  Maintenance Tasks Checklist
-                </h3>
-                <div className="space-y-4">
-                  {maintenanceTasks.map((task) => (
-                    <div key={task.id} className="border-2 border-gray-200 rounded-xl p-6 hover:border-blue-300 transition-colors">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-4">
-                          <input
-                            type="checkbox"
-                            checked={task.completed}
-                            onChange={(e) => handleMaintenanceTaskChange(task.id, 'completed', e.target.checked)}
-                            className="w-6 h-6 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                          />
-                          <span className={`font-semibold text-lg ${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
-                            {task.task}
+              {/* Progress Card */}
+              <div style={{ background: '#e6fbe8', borderRadius: 16, padding: 24, border: '1.5px solid #a7f3d0', boxShadow: '0 1px 4px rgba(16,185,129,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 20, color: '#166534' }}>Progress Overview</div>
+                  <div style={{ fontWeight: 400, fontSize: 15, color: '#166534', marginTop: 2 }}>{completedTasks} of {maintenanceTasks.length} tasks completed</div>
+                  <div style={{ marginTop: 16, width: 320, maxWidth: '100%' }}>
+                    <div style={{ background: '#fff', borderRadius: 8, height: 10, width: '100%', overflow: 'hidden', boxShadow: '0 1px 2px rgba(16,185,129,0.06)' }}>
+                      <div style={{ background: '#22c55e', height: '100%', width: `${completionPercentage}%`, borderRadius: 8, transition: 'width 0.3s' }} />
+                    </div>
+                  </div>
+                </div>
+                <div style={{ fontWeight: 700, fontSize: 32, color: '#22c55e', minWidth: 80, textAlign: 'right' }}>{completionPercentage}%</div>
+              </div>
+
+              {/* Checklist Title */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 22, color: '#222b3a', marginBottom: 8 }}>
+                <Settings size={22} style={{ color: '#222b3a' }} />
+                Maintenance Tasks Checklist
+              </div>
+
+              {/* Checklist Items */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                {maintenanceTasks.map((task, idx) => (
+                  <div key={task.id} style={{ background: task.completed ? '#e6fbe8' : '#fff', border: `1.5px solid ${task.completed ? '#a7f3d0' : '#e5e7eb'}`, borderRadius: 16, boxShadow: '0 1px 4px rgba(16,185,129,0.04)', padding: 18, marginBottom: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#f3f4f6', color: '#222b3a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 16 }}>{idx + 1}</div>
+                        <span style={{ fontWeight: 700, fontSize: 18, color: task.completed ? '#166534' : '#222b3a', textDecoration: task.completed ? 'line-through' : 'none' }}>{task.task}</span>
+                        {task.completed && (
+                          <span style={{ display: 'flex', alignItems: 'center', background: '#bbf7d0', color: '#16a34a', borderRadius: 12, fontWeight: 600, fontSize: 13, padding: '2px 10px', marginLeft: 6 }}>
+                            <Check size={16} style={{ marginRight: 4 }} /> Completed
                           </span>
-                          {task.completed && (
-                            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
-                              ✅ Completed
-                            </span>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeTask(task.id)}
-                          className="text-red-600 hover:text-red-800 text-sm bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors"
-                        >
-                          <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <input
+                          type="checkbox"
+                          checked={task.completed}
+                          onChange={e => handleMaintenanceTaskChange(task.id, 'completed', e.target.checked)}
+                          style={{ width: 22, height: 22, accentColor: '#22c55e', borderRadius: 6, border: '2px solid #a7f3d0', background: '#fff' }}
+                        />
+                        <button type="button" onClick={() => removeTask(task.id)} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', padding: 0 }}>
+                          <Trash2 size={20} />
                         </button>
                       </div>
-                      <textarea
-                        placeholder="Add notes for this task..."
-                        value={task.notes}
-                        onChange={(e) => handleMaintenanceTaskChange(task.id, 'notes', e.target.value)}
-                        className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-                        rows={3}
-                      />
                     </div>
-                  ))}
-                </div>
+                    <textarea
+                      placeholder="Add notes for this task..."
+                      value={task.notes}
+                      onChange={e => handleMaintenanceTaskChange(task.id, 'notes', e.target.value)}
+                      className={styles.notesInput}
+                      rows={2}
+                      style={{ width: '100%', minHeight: 38, borderRadius: 10, border: '1.5px solid #cbd5e1', fontSize: 15, marginTop: 0, marginBottom: 0, background: '#f8fafc', color: '#222', padding: 10, fontFamily: 'Poppins, sans-serif', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+                    />
+                  </div>
+                ))}
+              </div>
 
-                <div className="mt-6 flex gap-4">
-                  <input
-                    type="text"
-                    placeholder="Add custom task..."
-                    value={customTask}
-                    onChange={(e) => setCustomTask(e.target.value)}
-                    className="flex-1 border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  />
-                  <button
-                    type="button"
-                    onClick={addCustomTask}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium"
-                  >
-                    Add Task
-                  </button>
-                </div>
+              {/* Add Custom Task */}
+              <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
+                <input
+                  type="text"
+                  placeholder="Add custom task..."
+                  value={customTask}
+                  onChange={e => setCustomTask(e.target.value)}
+                  style={{ flex: 1, borderRadius: 10, border: '1.5px solid #cbd5e1', fontSize: 15, padding: 12, fontFamily: 'Poppins, sans-serif', background: '#fff', color: '#222', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+                />
+                <button
+                  type="button"
+                  onClick={addCustomTask}
+                  style={{ background: 'linear-gradient(90deg, #d32d23 0%, #c02425 100%)', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 15, padding: '0 22px', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 2px 8px rgba(211,45,35,0.10)', cursor: 'pointer' }}
+                >
+                  <Plus size={18} /> Add Task
+                </button>
               </div>
             </div>
           )}
@@ -728,38 +592,38 @@ export default function AddItemPage() {
           {activeTab === 'diagnostics' && (
             <div className="space-y-8">
               <div>
-                <label className="block mb-3 font-semibold text-gray-700">System Status</label>
+                <label className={styles.label}>System Status</label>
                 <div className="relative">
                   <select
-                    className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors z-10"
+                    className={styles.select}
                     value={diagnostic.system_status}
                     onChange={(e) => setDiagnostic(prev => ({ ...prev, system_status: e.target.value }))}
                   >
                     <option value="Good">✅ Good</option>
                     <option value="Fair">⚠️ Fair</option>
                     <option value="Poor">❌ Poor</option>
-                    <option value="Critical">🚨 Critical</option>
+                    <option value="Critical">�� Critical</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block mb-3 font-semibold text-gray-700">Findings</label>
+                <label className={styles.label}>Findings</label>
                 <textarea
                   rows={4}
                   placeholder="Describe any issues or observations..."
-                  className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                  className={styles.textarea}
                   value={diagnostic.findings}
                   onChange={(e) => setDiagnostic(prev => ({ ...prev, findings: e.target.value }))}
                 />
               </div>
 
               <div>
-                <label className="block mb-3 font-semibold text-gray-700">Recommendations</label>
+                <label className={styles.label}>Recommendations</label>
                 <textarea
                   rows={4}
                   placeholder="Suggest actions or improvements..."
-                  className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                  className={styles.textarea}
                   value={diagnostic.recommendations}
                   onChange={(e) => setDiagnostic(prev => ({ ...prev, recommendations: e.target.value }))}
                 />
@@ -767,18 +631,16 @@ export default function AddItemPage() {
             </div>
           )}
 
-          {/* Navigation and Submit */}
-          <div className="flex justify-between items-center pt-8 border-t mt-8">
+          {/* Navigation Footer */}
+          <div className={styles.footerNav}>
             <div className="flex gap-3">
               {activeTab === 'maintenance' && (
                 <button
                   type="button"
                   onClick={() => setActiveTab('details')}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2"
+                  className={styles.backBtn}
                 >
-                  <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
+                  <ArrowLeft size={18} />
                   Back to Details
                 </button>
               )}
@@ -786,11 +648,9 @@ export default function AddItemPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab('maintenance')}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2"
+                  className={styles.backBtn}
                 >
-                  <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
+                  <ArrowLeft size={18} />
                   Back to Maintenance
                 </button>
               )}
@@ -801,45 +661,36 @@ export default function AddItemPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab('maintenance')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 shadow-lg"
+                  className={styles.nextBtn}
                 >
                   Next: Maintenance
-                  <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  <ArrowRight size={18} />
                 </button>
               )}
               {activeTab === 'maintenance' && (
                 <button
                   type="button"
                   onClick={() => setActiveTab('diagnostics')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 shadow-lg"
+                  className={styles.nextBtn}
                 >
                   Next: Diagnostics
-                  <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  <ArrowRight size={18} />
                 </button>
               )}
               {activeTab === 'diagnostics' && (
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg transition-colors duration-200 font-medium flex items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={styles.submitBtn}
                 >
                   {loading ? (
                     <>
-                      <svg className="animate-spin -ml-1 mr-3 h-2 w-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                       Saving...
                     </>
                   ) : (
                     <>
-                      <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <Check size={18} />
                       Save Item
                     </>
                   )}
@@ -847,7 +698,7 @@ export default function AddItemPage() {
               )}
             </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
