@@ -1,0 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+.dashboardContainer {
+  max-width: 700px;
+  margin: 40px auto 0 auto;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+  padding: 32px 32px 40px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.dashboardTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 32px 0 8px 0;
+  font-family: 'Poppins', sans-serif;
+  color: #1f2937;
+}
+
+.dashboardCard {
+  position: relative;
+  background: linear-gradient(90deg, #b91c1c 60%, #ef4444 100%);
+  border-radius: 18px;
+  overflow: hidden;
+  min-height: 130px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  color: #fff;
+  padding: 28px 32px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: 'Poppins', sans-serif;
+}
+
+.dashboardCardBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.18;
+  z-index: 0;
+}
+
+.dashboardCardContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+  font-family: 'Poppins', sans-serif;
+}
+
+.dashboardStatsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.dashboardStatCard {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+  padding: 18px 0 14px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 90px;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.dashboardStatCard:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.dashboardStatValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #b91c1c;
+  font-family: 'Poppins', sans-serif;
+}
+
+.dashboardStatLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #222;
+  margin-top: 4px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.dashboardStatDate {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 2px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.dashboardRecent {
+  margin-top: 8px;
+}
+
+.dashboardRecentTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  font-family: 'Poppins', sans-serif;
+  color: #1f2937;
+}
+
+.dashboardRecentList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashboardRecentCard {
+  background: #f3f4f6;
+  border-radius: 12px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  padding-left: 18px;
+  color: #444;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dashboardRecentCard:hover {
+  background: #e5e7eb;
+  transform: translateX(4px);
+}
+
+@media (max-width: 800px) {
+  .dashboardContainer {
+    max-width: 98vw;
+    padding: 16px 4vw 32px 4vw;
+  }
+  
+  .dashboardCard {
+    padding: 18px 12px 14px 12px;
+  }
+  
+  .dashboardStatsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .dashboardTitle {
+    font-size: 1.3rem;
+    margin: 24px 0 6px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboardContainer {
+    margin: 20px auto 0 auto;
+    padding: 16px 16px 24px 16px;
+    gap: 24px;
+  }
+  
+  .dashboardCard {
+    min-height: 110px;
+    padding: 20px 16px 16px 16px;
+  }
+  
+  .dashboardStatCard {
+    padding: 16px 0 12px 0;
+    min-height: 80px;
+  }
+  
+  .dashboardStatValue {
+    font-size: 1.8rem;
+  }
+  
+  .dashboardStatLabel {
+    font-size: 0.9rem;
+  }
+} 

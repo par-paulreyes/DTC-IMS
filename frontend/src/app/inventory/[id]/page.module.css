@@ -399,6 +399,7 @@
     font-weight: 700;
     font-size: 1.1rem;
     text-transform: uppercase;
+    text-align: center;
     letter-spacing: 1px;
     border-radius: 14px 14px 0 0;
     padding: 14px 0 14px 18px;
@@ -406,9 +407,8 @@
     margin-bottom: 0;
   }
   .solidBlueHeaderLogs {
-    text-align: right;
     padding-left: 0;
-    padding-right: 18px;
+    padding-right: 0;
   }
   
   

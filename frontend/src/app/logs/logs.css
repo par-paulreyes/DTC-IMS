@@ -4,10 +4,12 @@
     padding-bottom: 5rem;
     padding-left: 10px;
     padding-right: 10px;
+    font-family: 'Poppins', sans-serif;
 }
 .content-wrapper {
     max-width: 64rem;
     margin: 0 auto;
+    font-family: 'Poppins', sans-serif;
 }
 .main-container {
     max-width: 700px;
@@ -20,6 +22,7 @@
     flex-direction: column;
     gap: 5px;
     min-height: calc(100vh - 120px);
+    font-family: 'Poppins', sans-serif;
 }
 @media (max-width: 700px) {
 .main-container {
@@ -44,6 +47,7 @@
     font-size: 1.5rem;
     font-weight: bold;
     text-align: center;
+    font-family: 'Poppins', sans-serif;
 }
 @media (min-width: 768px) {
 .title {
@@ -61,6 +65,7 @@
     border: none;
     cursor: pointer;
     transition: background-color 0.2s;
+    font-family: 'Poppins', sans-serif;
 }
 .export-btn-csv {
     background-color: #2563eb;
@@ -78,10 +83,12 @@
     text-align: center;
     color: #2563eb;
     margin-top: 1rem;
+    font-family: 'Poppins', sans-serif;
 }
 .error {
     text-align: center;
     color: #ef4444;
+    font-family: 'Poppins', sans-serif;
 }
 .logs-container {
     display: flex;
@@ -95,6 +102,7 @@
     background-color: white;
     border-radius: 0.75rem;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    font-family: 'Poppins', sans-serif;
 }
 .log-card {
     display: flex;
@@ -105,6 +113,7 @@
     padding: 1rem;
     gap: 0.5rem;
     align-items: flex-start;
+    font-family: 'Poppins', sans-serif;
 }
 .log-card-main-row {
     display: flex;
@@ -131,11 +140,13 @@
     font-weight: bold;
     font-size: 1.1rem;
     margin-bottom: 0.1rem;
+    font-family: 'Poppins', sans-serif;
 }
 .article-type {
     color: #222;
     font-size: 0.95rem;
     margin-bottom: 0;
+    font-family: 'Poppins', sans-serif;
 }
 .log-details {
     margin-left: 0.1rem;
@@ -146,6 +157,7 @@
     font-size: 0.8rem;
     font-weight: 600;
     margin-bottom: 0.1rem;
+    font-family: 'Poppins', sans-serif;
 }
 .divider {
     border-color: gray;
@@ -154,9 +166,11 @@
 .detail-row {
     font-size: 0.85rem;
     margin-bottom: 0.1rem;
+    font-family: 'Poppins', sans-serif;
 }
 .detail-label {
     font-weight: bold;
+    font-family: 'Poppins', sans-serif;
 }
 .search-container {
     position: relative;
@@ -174,6 +188,7 @@
     font-size: 1rem;
     box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03);
     height: 25px;
+    font-family: 'Poppins', sans-serif;
 }
 .search-icon {
     position: relative;
@@ -198,6 +213,7 @@
     border: none;
     cursor: pointer;
     transition: background 0.2s;
+    font-family: 'Poppins', sans-serif;
 }
 .icon-btn:active {
     background-color: #d1d5db;

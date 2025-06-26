@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { FaHome, FaClipboardList, FaHistory, FaUser } from "react-icons/fa";
 
 export default function BottomNavbar() {
   const pathname = usePathname();
@@ -48,12 +49,12 @@ export default function BottomNavbar() {
           pointerEvents: 'auto',
         }}>
           {/* Left nav */}
-          <div style={{ display: 'flex', gap: 40, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 40  , alignItems: 'center' }}>
             <NavItem href="/" label="Home" active={pathname === "/"} icon={
-              <svg width="24" height="24" fill="none" stroke={pathname === "/" ? '#e11d48' : '#fff'} strokeWidth="2" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/></svg>
+              <FaHome size={24} color={pathname === "/" ? '#e11d48' : '#fff'} />
             } />
             <NavItem href="/inventory" label="Inventory" active={pathname.startsWith("/inventory")} icon={
-              <svg width="24" height="24" fill="none" stroke={pathname.startsWith("/inventory") ? '#e11d48' : '#fff'} strokeWidth="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+              <FaClipboardList size={24} color={pathname.startsWith("/inventory") ? '#e11d48' : '#fff'} />
             } />
           </div>
           {/* Center cutout for QR button */}
@@ -84,10 +85,10 @@ export default function BottomNavbar() {
           {/* Right nav */}
           <div style={{ display: 'flex', gap: 40, alignItems: 'center' }}>
             <NavItem href="/logs" label="Logs" active={pathname.startsWith("/logs")} icon={
-              <svg width="24" height="24" fill="none" stroke={pathname.startsWith("/logs") ? '#e11d48' : '#fff'} strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              <FaHistory size={24} color={pathname.startsWith("/logs") ? '#e11d48' : '#fff'} />
             } />
             <NavItem href="/profile" label="Profile" active={pathname.startsWith("/profile")} icon={
-              <svg width="24" height="24" fill="none" stroke={pathname.startsWith("/profile") ? '#e11d48' : '#fff'} strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20v-1a4 4 0 014-4h8a4 4 0 014 4v1"/></svg>
+              <FaUser size={24} color={pathname.startsWith("/profile") ? '#e11d48' : '#fff'} />
             } />
           </div>
         </div>
@@ -127,13 +128,14 @@ function NavItem({ href, label, active, icon }: { href: string, label: string, a
       color: active ? '#e11d48' : '#fff',
       fontSize: 13,
       fontWeight: 500,
+      fontFamily: 'Poppins, sans-serif',
       textDecoration: 'none',
       gap: 2,
       minWidth: 48,
       pointerEvents: 'auto',
     }}>
       {icon}
-      <span style={{ fontSize: 12, marginTop: 2 }}>{label}</span>
+      <span style={{ fontSize: 12, marginTop: 2, fontFamily: 'Poppins, sans-serif' }}>{label}</span>
     </Link>
   );
 } 
