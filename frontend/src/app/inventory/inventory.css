@@ -206,3 +206,7 @@
       margin-top: 8px;
     }
   }
+
+.inventory-card a, .inventory-card .inventory-type, .inventory-card .inventory-status {
+  text-decoration: none !important;
+}
