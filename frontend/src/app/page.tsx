@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Image from "next/image";
-import styles from "./page.module.css";
+import styles from "./dashboard.module.css";
 import { getApiUrl, getImageUrl } from "../config/api";
 
 interface Item {
@@ -277,34 +277,14 @@ function StatCard({ label, value, date, priority = false, description, onClick }
   description?: string;
   onClick?: () => void;
 }) {
-  const styles = require("./page.module.css");
   return (
     <div 
       className={styles.dashboardStatCard} 
       style={{
         borderLeft: priority ? '4px solid #dc2626' : undefined,
         backgroundColor: priority ? '#fef2f2' : undefined,
-        cursor: onClick ? 'pointer' : 'default',
-        transition: onClick ? 'all 0.2s ease' : undefined,
-        transform: onClick ? 'scale(1)' : undefined,
-        ':hover': onClick ? {
-          transform: 'scale(1.02)',
-          boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
-        } : undefined
       }}
       onClick={onClick}
-      onMouseEnter={(e) => {
-        if (onClick) {
-          e.currentTarget.style.transform = 'scale(1.02)';
-          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (onClick) {
-          e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.boxShadow = '';
-        }
-      }}
     >
       <div className={styles.dashboardStatValue} style={{
         color: priority ? '#dc2626' : undefined,
@@ -316,7 +296,8 @@ function StatCard({ label, value, date, priority = false, description, onClick }
           fontSize: '0.75rem',
           color: '#6b7280',
           marginTop: '2px',
-          fontStyle: 'italic'
+          fontStyle: 'italic',
+          fontFamily: 'Poppins, sans-serif'
         }}>
           {description}
         </div>
@@ -327,7 +308,8 @@ function StatCard({ label, value, date, priority = false, description, onClick }
           fontSize: '0.75rem',
           color: '#dc2626',
           fontWeight: '600',
-          marginTop: '4px'
+          marginTop: '4px',
+          fontFamily: 'Poppins, sans-serif'
         }}>
           ⚠️ Requires Attention
         </div>
@@ -337,7 +319,8 @@ function StatCard({ label, value, date, priority = false, description, onClick }
           fontSize: '0.75rem',
           color: '#3b82f6',
           fontWeight: '500',
-          marginTop: '4px'
+          marginTop: '4px',
+          fontFamily: 'Poppins, sans-serif'
         }}>
           Click to view →
         </div>
