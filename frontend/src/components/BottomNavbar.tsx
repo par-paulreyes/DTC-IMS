@@ -6,6 +6,39 @@ import { FaHome, FaClipboardList, FaHistory, FaUser } from "react-icons/fa";
 export default function BottomNavbar() {
   const pathname = usePathname();
 
+  // Define nav items, with QR scanner in the center
+  const navItems = [
+    {
+      href: "/",
+      label: "Home",
+      icon: <FaHome size={24} color={pathname === "/" ? '#e11d48' : '#fff'} />,
+      active: pathname === "/"
+    },
+    {
+      href: "/inventory",
+      label: "Inventory",
+      icon: <FaClipboardList size={24} color={pathname.startsWith("/inventory") ? '#e11d48' : '#fff'} />,
+      active: pathname.startsWith("/inventory")
+    },
+    {
+      href: "/qr-scanner",
+      label: "Scan",
+      isQR: true
+    },
+    {
+      href: "/logs",
+      label: "Logs",
+      icon: <FaHistory size={24} color={pathname.startsWith("/logs") ? '#e11d48' : '#fff'} />,
+      active: pathname.startsWith("/logs")
+    },
+    {
+      href: "/profile",
+      label: "Profile",
+      icon: <FaUser size={24} color={pathname.startsWith("/profile") ? '#e11d48' : '#fff'} />,
+      active: pathname.startsWith("/profile")
+    }
+  ];
+
   return (
     <>
       {/* Spacer to prevent content from being hidden behind the navbar */}
@@ -34,7 +67,7 @@ export default function BottomNavbar() {
           boxShadow: '0 0 16px rgba(0,0,0,0.12)',
           zIndex: 1,
         }} />
-        {/* Centered nav content */}
+        {/* Evenly spaced nav content */}
         <div style={{
           position: 'relative',
           width: '100%',
@@ -43,54 +76,43 @@ export default function BottomNavbar() {
           height: 70,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 32px',
+          justifyContent: 'space-evenly',
           zIndex: 2,
           pointerEvents: 'auto',
         }}>
-          {/* Left nav */}
-          <div style={{ display: 'flex', gap: 40  , alignItems: 'center' }}>
-            <NavItem href="/" label="Home" active={pathname === "/"} icon={
-              <FaHome size={24} color={pathname === "/" ? '#e11d48' : '#fff'} />
-            } />
-            <NavItem href="/inventory" label="Inventory" active={pathname.startsWith("/inventory")} icon={
-              <FaClipboardList size={24} color={pathname.startsWith("/inventory") ? '#e11d48' : '#fff'} />
-            } />
-          </div>
-          {/* Center cutout for QR button */}
-          <div style={{ position: 'absolute', left: '50%', top: -36, transform: 'translateX(-50%)', zIndex: 3 }}>
-            <Link href="/qr-scanner" style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 72,
-              height: 72,
-              background: '#b91c1c',
-              borderRadius: '50%',
-              border: '7px solid #fff',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
-              color: '#fff',
-              fontSize: 36,
-              pointerEvents: 'auto',
-              transition: 'box-shadow 0.2s',
-            }}>
-              <svg width="36" height="36" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="7" height="7" rx="2"/>
-                <rect x="14" y="3" width="7" height="7" rx="2"/>
-                <rect x="14" y="14" width="7" height="7" rx="2"/>
-                <rect x="3" y="14" width="7" height="7" rx="2"/>
-              </svg>
-            </Link>
-          </div>
-          {/* Right nav */}
-          <div style={{ display: 'flex', gap: 40, alignItems: 'center' }}>
-            <NavItem href="/logs" label="Logs" active={pathname.startsWith("/logs")} icon={
-              <FaHistory size={24} color={pathname.startsWith("/logs") ? '#e11d48' : '#fff'} />
-            } />
-            <NavItem href="/profile" label="Profile" active={pathname.startsWith("/profile")} icon={
-              <FaUser size={24} color={pathname.startsWith("/profile") ? '#e11d48' : '#fff'} />
-            } />
-          </div>
+          {navItems.map((item, idx) =>
+            item.isQR ? (
+              <Link
+                key={item.href}
+                href={item.href}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 72,
+                  height: 72,
+                  background: '#b91c1c',
+                  borderRadius: '50%',
+                  border: '7px solid #fff',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
+                  color: '#fff',
+                  fontSize: 36,
+                  pointerEvents: 'auto',
+                  marginTop: -36,
+                  transition: 'box-shadow 0.2s',
+                }}
+              >
+                <svg width="36" height="36" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="7" height="7" rx="2" />
+                  <rect x="14" y="3" width="7" height="7" rx="2" />
+                  <rect x="14" y="14" width="7" height="7" rx="2" />
+                  <rect x="3" y="14" width="7" height="7" rx="2" />
+                </svg>
+              </Link>
+            ) : (
+              <NavItem key={item.href} href={item.href} label={item.label} active={item.active} icon={item.icon} />
+            )
+          )}
         </div>
       </div>
       <style jsx>{`
