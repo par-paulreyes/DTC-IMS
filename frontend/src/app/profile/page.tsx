@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getApiUrl, getImageUrl } from "../../config/api";
 import imageCompression from 'browser-image-compression';
+import './profile.css';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
@@ -171,188 +172,178 @@ export default function ProfilePage() {
   if (!profile) return <div className="min-h-screen flex items-center justify-center text-gray-500">Profile not found.</div>;
 
   return (
-    <div style={{
-      maxWidth: 700,
-      margin: '40px auto 0 auto',
-      background: '#fff',
-      borderRadius: 24,
-      boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
-      padding: '32px 32px 40px 32px',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 32,
-      minHeight: 'calc(100vh - 120px)'
-    }}>
-      <h1 className="text-2xl font-bold mb-4">Profile</h1>
+    <div className="main-container">
       {/* Profile Picture Section */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
-        {imageUrl && (
-          <img
-            src={imageUrl}
-            alt="Profile"
-            className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
-            style={{ marginBottom: 12, width: 96, height: 96 }}
-          />
-        )}
-        {isEditing && !success && (
-          <>
-            <input
-              type="file"
-              accept="image/*"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              onChange={handleProfilePicChange}
+      <div className="top-card">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
+          {imageUrl && (
+            <img
+              src={imageUrl}
+              alt="Profile"
+              className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+              style={{ marginBottom: 12, width: 96, height: 96 }}
             />
+          )}
+          {isEditing && !success && (
+            <>
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                onChange={handleProfilePicChange}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition"
+                disabled={uploading}
+                style={{ marginBottom: 4 }}
+              >
+                {uploading ? 'Uploading...' : 'Change Photo'}
+              </button>
+            </>
+          )}
+        </div>
+        {/* Logout button */}
+        <div className="max-w-md mx-auto mt-6">
+          <button
+            onClick={handleLogout}
+            className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 transition"
+          >
+            Logout
+          </button>
+        </div>
+        {/* Admin-only section */}
+        {profile?.role === 'admin' && (
+          <div className="max-w-md mx-auto bg-white rounded shadow p-6 mt-6">
             <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition"
-              disabled={uploading}
-              style={{ marginBottom: 4 }}
+              onClick={() => router.push("/register")}
+              className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
             >
-              {uploading ? 'Uploading...' : 'Change Photo'}
-            </button>
-          </>
-        )}
-      </div>
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-md bg-white rounded shadow p-6"
-        style={{ marginLeft: 0 }}
-      >
-        {error && <div className="mb-4 text-red-500">{error}</div>}
-        {success && <div className="mb-4 text-green-600">{success}</div>}
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">Username</label>
-          <input
-            type="text"
-            name="username"
-            className="w-full border rounded px-3 py-2 bg-gray-100"
-            value={form.username || ""}
-            disabled
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">Full Name</label>
-          <input
-            type="text"
-            name="full_name"
-            className="w-full border rounded px-3 py-2"
-            value={form.full_name || ""}
-            onChange={handleChange}
-            disabled={!isEditing}
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">Email</label>
-          <input
-            type="email"
-            name="email"
-            className="w-full border rounded px-3 py-2"
-            value={form.email || ""}
-            onChange={handleChange}
-            disabled={!isEditing}
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">Role</label>
-          <input
-            type="text"
-            name="role"
-            className="w-full border rounded px-3 py-2 bg-gray-100"
-            value={form.role || ""}
-            disabled
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">Company</label>
-          <input
-            type="text"
-            name="company_name"
-            className="w-full border rounded px-3 py-2 bg-gray-100"
-            value={form.company_name || ""}
-            disabled
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block mb-1 font-medium">New Password</label>
-          <input
-            type="password"
-            name="password"
-            className="w-full border rounded px-3 py-2"
-            value={form.password || ""}
-            onChange={handleChange}
-            disabled={!isEditing}
-            placeholder="Leave blank to keep current password"
-          />
-        </div>
-        <div className="mb-6">
-          <label className="block mb-1 font-medium">Confirm New Password</label>
-          <input
-            type="password"
-            name="confirmPassword"
-            className="w-full border rounded px-3 py-2"
-            value={form.confirmPassword || ""}
-            onChange={handleChange}
-            disabled={!isEditing}
-            placeholder="Leave blank to keep current password"
-          />
-        </div>
-        
-        {isEditing ? (
-          <div className="flex gap-2">
-            <button
-              type="submit"
-              className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-              disabled={saving}
-            >
-              {saving ? "Saving..." : "Save Changes"}
-            </button>
-            <button
-              type="button"
-              onClick={handleCancel}
-              className="flex-1 bg-gray-500 text-white py-2 rounded hover:bg-gray-600 transition"
-              disabled={saving}
-            >
-              Cancel
+              Register New User
             </button>
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={handleEdit}
-            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
-          >
-            Edit Profile
-          </button>
         )}
-      </form>
-
-      {/* Admin-only section */}
-      {profile?.role === 'admin' && (
-        <div className="max-w-md mx-auto bg-white rounded shadow p-6 mt-6">
-          <h2 className="text-lg font-bold mb-4 text-center">Admin Actions</h2>
-          <button
-            onClick={() => router.push("/register")}
-            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
-          >
-            Register New User
-          </button>
-        </div>
-      )}
-
-      {/* Logout button */}
-      <div className="max-w-md mx-auto mt-6">
-        <button
-          onClick={handleLogout}
-          className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 transition"
-        >
-          Logout
-        </button>
       </div>
-
+      <div className="profile-header-card">
+        <h3 className="text-2xl font-bold mb-4">Profile</h3>
+      </div>
+      <div className="profile-info-card">
+        <form
+          onSubmit={handleSubmit}
+          className="max-w-md bg-white rounded shadow p-6"
+          style={{ marginLeft: 0 }}
+        >
+          {error && <div className="mb-4 text-red-500">{error}</div>}
+          {success && <div className="mb-4 text-green-600">{success}</div>}
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Username</label>
+            <input
+              type="text"
+              name="username"
+              className="w-full border rounded px-3 py-2 bg-gray-100"
+              value={form.username || ""}
+              disabled
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block mb-1 font-x medium">Full Name</label>
+            <input
+              type="text"
+              name="full_name"
+              className="w-full border rounded px-3 py-2"
+              value={form.full_name || ""}
+              onChange={handleChange}
+              disabled={!isEditing}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Email</label>
+            <input
+              type="email"
+              name="email"
+              className="w-full border rounded px-3 py-2"
+              value={form.email || ""}
+              onChange={handleChange}
+              disabled={!isEditing}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Role</label>
+            <input
+              type="text"
+              name="role"
+              className="w-full border rounded px-3 py-2 bg-gray-100"
+              value={form.role || ""}
+              disabled
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Company</label>
+            <input
+              type="text"
+              name="company_name"
+              className="w-full border rounded px-3 py-2 bg-gray-100"
+              value={form.company_name || ""}
+              disabled
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">New Password</label>
+            <input
+              type="password"
+              name="password"
+              className="w-full border rounded px-3 py-2"
+              value={form.password || ""}
+              onChange={handleChange}
+              disabled={!isEditing}
+              placeholder="Leave blank to keep current password"
+            />
+          </div>
+          <div className="mb-6">
+            <label className="block mb-1 font-medium">Confirm New Password</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              className="w-full border rounded px-3 py-2"
+              value={form.confirmPassword || ""}
+              onChange={handleChange}
+              disabled={!isEditing}
+              placeholder="Leave blank to keep current password"
+            />
+          </div>
+          {isEditing ? (
+            <div className="profile-btn-row">
+              <button
+                type="submit"
+                className="save-changes-btn"
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="cancel-btn"
+                disabled={saving}
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleEdit}
+              className="edit-btn"
+            >
+              Edit Profile
+            </button>
+          )}
+        </form>
+      </div>
       <style jsx>{`
         @media (max-width: 700px) {
           div[style] {
