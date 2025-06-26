@@ -3,7 +3,7 @@
 // For local development: 'http://localhost:5000'
 // For network access: 'http://YOUR_SERVER_IP:5000' (replace YOUR_SERVER_IP with actual IP)
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.100.188:5000';
 
 // Helper function to get full API URL
 export const getApiUrl = (endpoint: string) => {
