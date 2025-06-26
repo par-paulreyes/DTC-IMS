@@ -167,7 +167,13 @@ exports.createItem = async (req, res) => {
 
 exports.updateItem = (req, res) => {
   // Filter out computed fields that don't exist in the items table
-  const { status, system_status, ...updateData } = req.body;
+  const { 
+    status, 
+    system_status, 
+    pending_maintenance_count, 
+    maintenance_status,
+    ...updateData 
+  } = req.body;
   
   if (req.file) {
     updateData.image_url = `/uploads/${req.file.filename}`;
