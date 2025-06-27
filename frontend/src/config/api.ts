@@ -12,17 +12,16 @@ const getProtocol = () => {
 };
 
 const getBaseUrl = () => {
-  const protocol = getProtocol();
-  const serverIP = '192.168.100.188';
-  const port = '5000';
-  
-  // Always use HTTPS for backend server since it's configured for HTTPS only
-  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return `https://${serverIP}:${port}`;
+  // Use env variable if set (best for SSR)
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
   }
-  
-  // For localhost, use HTTP
-  return `http://${serverIP}:${port}`;
+  // Only use window if on client (not needed for IP, but kept for future logic)
+  if (typeof window !== 'undefined') {
+    // You could add logic here if you want to dynamically detect IP
+  }
+  // Always use your computer's own IP for SSR and client
+  return 'https://192.168.102.75:5000';
 };
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || getBaseUrl();
