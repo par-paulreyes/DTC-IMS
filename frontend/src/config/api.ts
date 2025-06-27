@@ -16,11 +16,12 @@ const getBaseUrl = () => {
   const serverIP = '192.168.100.188';
   const port = '5000';
   
-  // Use HTTPS for camera access over network, HTTP for localhost
-  if (protocol === 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  // Always use HTTPS for backend server since it's configured for HTTPS only
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
     return `https://${serverIP}:${port}`;
   }
   
+  // For localhost, use HTTP
   return `http://${serverIP}:${port}`;
 };
 
