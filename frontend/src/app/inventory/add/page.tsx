@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Webcam from "react-webcam";
 import axios from "axios";
 import { getApiUrl, getImageUrl } from "../../../config/api";
-import { Camera, Upload, X, Check, Plus, Trash2, ArrowRight, ArrowLeft, Info, Settings, CheckCircle } from "lucide-react";
+import { Camera, Upload, X, Check, Plus, Trash2, ArrowRight, ArrowLeft, Info, Settings, CheckCircle, AlertTriangle, XCircle, AlertOctagon } from "lucide-react";
 import styles from './page.module.css';
 
 interface MaintenanceTask {
@@ -53,10 +53,20 @@ export default function AddItemPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<'details' | 'maintenance' | 'diagnostics'>('details');
+  const [diagnosticsDropdownOpen, setDiagnosticsDropdownOpen] = useState(false);
   
   const router = useRouter();
   const searchParams = useSearchParams();
   const webcamRef = useRef<Webcam>(null);
+
+  const diagnosticsOptions = [
+    { value: 'Good', label: 'Good', icon: <CheckCircle color="#22c55e" size={20} /> },
+    { value: 'Fair', label: 'Fair', icon: <AlertTriangle color="#eab308" size={20} /> },
+    { value: 'Poor', label: 'Poor', icon: <XCircle color="#f97316" size={20} /> },
+    { value: 'Critical', label: 'Critical', icon: <AlertOctagon color="#dc2626" size={20} /> },
+  ];
+
+  const selectedDiagnosticsOption = diagnosticsOptions.find(opt => opt.value === diagnostic.system_status) || diagnosticsOptions[0];
 
   // Check for QR code parameter and auto-fill property_no
   useEffect(() => {
@@ -321,7 +331,7 @@ export default function AddItemPage() {
       </div>
 
       {/* Main Content Card */}
-      <div className={styles.mainCard}>
+      <form onSubmit={handleSubmit} className={styles.mainCard} encType="multipart/form-data">
         {/* Tab Navigation */}
         <div className={styles.tabNav}>
           <TabButton 
@@ -355,14 +365,6 @@ export default function AddItemPage() {
                 <X className="text-red-500 mr-3" size={20} />
                 <p className="text-red-700 font-medium">{error}</p>
               </div>
-            </div>
-          )}
-
-          {/* Camera/Capture UI Placeholder */}
-          {showCamera && (
-            <div className="mb-8 p-6 bg-gray-100 rounded-xl flex flex-col items-center justify-center">
-              <p className="mb-4 text-gray-700">[Camera capture UI goes here]</p>
-              <button type="button" onClick={() => setShowCamera(false)} className="bg-red-500 text-white px-4 py-2 rounded-lg">Close Camera</button>
             </div>
           )}
 
@@ -475,22 +477,93 @@ export default function AddItemPage() {
               <div>
                 <label className={styles.itemPictureLabel}>Item Picture</label>
                 <div className={styles.imageUpload}>
-                  <div className={styles.imageUploadIcon}>
-                    <Camera size={40} />
-                  </div>
-                  <div className={styles.imageUploadTitle}>Add Item Picture</div>
-                  <div className={styles.imageUploadDesc}>Capture or upload an image to help identify this item</div>
-                  <div className={styles.imageUploadActions}>
-                    <label className={styles.uploadLabel}>
-                      <Upload size={18} style={{marginRight: 6}} />
-                      Upload Image
-                      <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} />
-                    </label>
-                    <button type="button" className={styles.takePhotoBtn} onClick={handleCameraStart}>
-                      <Camera size={18} style={{marginRight: 6}} />
-                      Capture Photo
-                    </button>
-                  </div>
+                  {/* Show camera if active */}
+                  {showCamera ? (
+                    <div className="flex flex-col items-center w-full">
+                      <div className={styles.imagePreviewBox}>
+                        <Webcam
+                          ref={webcamRef}
+                          audio={false}
+                          screenshotFormat="image/png"
+                          videoConstraints={{
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            facingMode: "environment"
+                          }}
+                          onUserMedia={() => handleCameraReady()}
+                          onUserMediaError={(err) => handleCameraError(err instanceof Error ? err.name : 'Camera access denied')}
+                          className={styles.webcam}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#fff' }}
+                        />
+                      </div>
+                      <div className={styles.imageUploadActions}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            capturePhoto();
+                            setShowCamera(false);
+                          }}
+                          className={styles.capturePhotoBtn}
+                        >
+                          <Camera size={18} />
+                          Capture Photo
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowCamera(false)}
+                          className={styles.takePhotoBtn}
+                        >
+                          <X size={18} />
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : imagePreview || capturedImage ? (
+                    <div className="flex flex-col items-center w-full">
+                      <div className={styles.imagePreviewBox}>
+                        <img
+                          src={imagePreview || capturedImage}
+                          alt="Selected Image"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            background: '#fff'
+                          }}
+                        />
+                      </div>
+                      <div className={styles.imageUploadActions}>
+                        <label className={styles.uploadLabel}>
+                          <Upload size={18} style={{marginRight: 6}} />
+                          Upload New Image
+                          <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} />
+                        </label>
+                        <button type="button" className={styles.takePhotoBtn} onClick={() => { setShowCamera(true); setCameraError(""); setCameraLoading(true); }}>
+                          <Camera size={18} style={{marginRight: 6}} />
+                          Take New Photo
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center w-full">
+                      <div className={styles.imageUploadIcon}>
+                        <Camera size={40} />
+                      </div>
+                      <div className={styles.imageUploadTitle}>Add Item Picture</div>
+                      <div className={styles.imageUploadDesc}>Capture or upload an image to help identify this item</div>
+                      <div className={styles.imageUploadActions}>
+                        <label className={styles.uploadLabel}>
+                          <Upload size={18} style={{marginRight: 6}} />
+                          Upload Image
+                          <input type="file" accept="image/*" onChange={handleImageChange} style={{ display: "none" }} />
+                        </label>
+                        <button type="button" className={styles.takePhotoBtn} onClick={() => { setShowCamera(true); setCameraError(""); setCameraLoading(true); }}>
+                          <Camera size={18} style={{marginRight: 6}} />
+                          Capture Photo
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -500,7 +573,7 @@ export default function AddItemPage() {
           {activeTab === 'maintenance' && (
             <div className="space-y-8">
               {/* Info Card */}
-              <div style={{ background: '#e8f0fe', borderRadius: 16, padding: 24, display: 'flex', alignItems: 'center', gap: 16, border: '1.5px solid #b6d0fe', color: '#264072', fontWeight: 600, fontSize: 18, boxShadow: '0 1px 4px rgba(38,64,114,0.04)' }}>
+              <div className={styles.maintenanceInfoCard}>
                 <Info size={24} style={{ color: '#264072', flexShrink: 0 }} />
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 18 }}>Maintenance Information</div>
@@ -511,7 +584,7 @@ export default function AddItemPage() {
               </div>
 
               {/* Progress Card */}
-              <div style={{ background: '#e6fbe8', borderRadius: 16, padding: 24, border: '1.5px solid #a7f3d0', boxShadow: '0 1px 4px rgba(16,185,129,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
+              <div className={styles.maintenanceProgressCard}>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 20, color: '#166534' }}>Progress Overview</div>
                   <div style={{ fontWeight: 400, fontSize: 15, color: '#166534', marginTop: 2 }}>{completedTasks} of {maintenanceTasks.length} tasks completed</div>
@@ -525,13 +598,13 @@ export default function AddItemPage() {
               </div>
 
               {/* Checklist Title */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 22, color: '#222b3a', marginBottom: 8 }}>
+              <div className={styles.maintenanceChecklistTitle}>
                 <Settings size={22} style={{ color: '#222b3a' }} />
                 Maintenance Tasks Checklist
               </div>
 
               {/* Checklist Items */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <div className={styles.maintenanceChecklist}>
                 {maintenanceTasks.map((task, idx) => (
                   <div key={task.id} style={{ background: task.completed ? '#e6fbe8' : '#fff', border: `1.5px solid ${task.completed ? '#a7f3d0' : '#e5e7eb'}`, borderRadius: 16, boxShadow: '0 1px 4px rgba(16,185,129,0.04)', padding: 18, marginBottom: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -562,7 +635,6 @@ export default function AddItemPage() {
                       onChange={e => handleMaintenanceTaskChange(task.id, 'notes', e.target.value)}
                       className={styles.notesInput}
                       rows={2}
-                      style={{ width: '100%', minHeight: 38, borderRadius: 10, border: '1.5px solid #cbd5e1', fontSize: 15, marginTop: 0, marginBottom: 0, background: '#f8fafc', color: '#222', padding: 10, fontFamily: 'Poppins, sans-serif', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
                     />
                   </div>
                 ))}
@@ -575,12 +647,12 @@ export default function AddItemPage() {
                   placeholder="Add custom task..."
                   value={customTask}
                   onChange={e => setCustomTask(e.target.value)}
-                  style={{ flex: 1, borderRadius: 10, border: '1.5px solid #cbd5e1', fontSize: 15, padding: 12, fontFamily: 'Poppins, sans-serif', background: '#fff', color: '#222', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+                  className={styles.customTaskInput}
                 />
                 <button
                   type="button"
                   onClick={addCustomTask}
-                  style={{ background: 'linear-gradient(90deg, #d32d23 0%, #c02425 100%)', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 15, padding: '0 22px', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 2px 8px rgba(211,45,35,0.10)', cursor: 'pointer' }}
+                  className={styles.addTaskBtn}
                 >
                   <Plus size={18} /> Add Task
                 </button>
@@ -592,23 +664,39 @@ export default function AddItemPage() {
           {activeTab === 'diagnostics' && (
             <div className="space-y-8">
               <div>
-                <label className={styles.label}>System Status</label>
-                <div className="relative">
-                  <select
-                    className={styles.select}
-                    value={diagnostic.system_status}
-                    onChange={(e) => setDiagnostic(prev => ({ ...prev, system_status: e.target.value }))}
+                <label className={styles.diagnosticsLabel}>System Status</label>
+                <div className={styles.diagnosticsDropdownWrapper}>
+                  <div
+                    className={styles.customDropdown + (diagnosticsDropdownOpen ? ' open' : '')}
+                    tabIndex={0}
+                    onClick={() => setDiagnosticsDropdownOpen(open => !open)}
+                    onBlur={() => setDiagnosticsDropdownOpen(false)}
                   >
-                    <option value="Good">✅ Good</option>
-                    <option value="Fair">⚠️ Fair</option>
-                    <option value="Poor">❌ Poor</option>
-                    <option value="Critical">�� Critical</option>
-                  </select>
+                    <div className={styles.customDropdownSelected}>
+                      {selectedDiagnosticsOption.icon}
+                      <span className={styles.diagnosticsOptionLabel}>{selectedDiagnosticsOption.label}</span>
+                      <svg style={{marginLeft: 'auto'}} width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M6 8L10 12L14 8" stroke="#222b3a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                    {diagnosticsDropdownOpen && (
+                      <div className={styles.customDropdownList}>
+                        {diagnosticsOptions.map(opt => (
+                          <div
+                            key={opt.value}
+                            className={styles.customDropdownOption}
+                            onMouseDown={e => { e.preventDefault(); setDiagnostic(prev => ({ ...prev, system_status: opt.value })); setDiagnosticsDropdownOpen(false); }}
+                          >
+                            {opt.icon}
+                            <span className={styles.diagnosticsOptionLabel}>{opt.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
               <div>
-                <label className={styles.label}>Findings</label>
+                <label className={styles.diagnosticsLabel}>Findings</label>
                 <textarea
                   rows={4}
                   placeholder="Describe any issues or observations..."
@@ -619,7 +707,7 @@ export default function AddItemPage() {
               </div>
 
               <div>
-                <label className={styles.label}>Recommendations</label>
+                <label className={styles.diagnosticsLabel}>Recommendations</label>
                 <textarea
                   rows={4}
                   placeholder="Suggest actions or improvements..."
@@ -699,7 +787,7 @@ export default function AddItemPage() {
             </div>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 } 

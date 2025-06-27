@@ -161,7 +161,6 @@
   color: #222;
   margin-bottom: 6px;
   font-size: 15px;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
   font-family: 'Poppins', sans-serif;
 }
@@ -171,7 +170,7 @@
   padding: 12px;
   border: 1.5px solid #cbd5e1;
   border-radius: 12px;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 400;
   color: #222;
   background: #fff;
@@ -221,7 +220,7 @@
 .imageUploadDesc {
   color: #7b8591;
   font-size: 15px;
-  margin-bottom: 24px;
+  margin-top:24px;
   text-align: center;
 }
 
@@ -396,28 +395,57 @@
 }
 
 .notesInput {
-  width: 100%;
+  width: 80%;
+  max-width: 100%;
+  min-width: 180px;
+  margin: 0 auto 0 auto;
   padding: 12px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 14px;
   font-family: 'Poppins', sans-serif;
   resize: vertical;
-  min-height: 80px;
+  min-height: 30px;
+  background: #f8fafc;
+  color: #222;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  display: block;
+}
+
+@media (max-width: 600px) {
+  .notesInput {
+    width: 100%;
+    min-width: 0;
+    font-size: 13px;
+  }
 }
 
 .customTaskInput {
-  flex: 1;
+  width: 70%;
+  max-width: 100%;
+  min-width: 180px;
+  margin: 0 auto 0 auto;
   padding: 12px 16px;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
   font-size: 14px;
+  height: 30px;
   font-family: 'Poppins', sans-serif;
+  display: block;
+}
+
+@media (max-width: 600px) {
+  .customTaskInput {
+    width: 100%;
+    min-width: 0;
+    font-size: 13px;
+  }
 }
 
 .addTaskBtn {
-  padding: 12px 24px;
+  padding: 6px 16px;
   background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  margin-right: 20px;
   color: white;
   border: none;
   border-radius: 12px;
@@ -425,6 +453,9 @@
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .addTaskBtn:hover {
@@ -531,7 +562,7 @@
   padding: 12px;
   border: 1.5px solid #cbd5e1;
   border-radius: 12px;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 400;
   color: #222;
   background: #fff;
@@ -550,7 +581,6 @@
   color: #222;
   margin-bottom: 6px;
   font-size: 15px;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
   font-family: 'Poppins', sans-serif;
   margin-left: 50px;
@@ -564,7 +594,6 @@
   color: #222;
   margin-bottom: 6px;
   font-size: 15px;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
   font-family: 'Poppins', sans-serif;
   margin-left: 50px;
@@ -582,7 +611,7 @@
   font-weight: 600;
   font-size: 18px;
   box-shadow: 0 1px 4px rgba(38,64,114,0.04);
-  margin-bottom: 40px;
+  margin: 10px 0 10px 0;
 }
 
 .maintenanceProgressCard {
@@ -595,29 +624,140 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 40px;
+  margin: 10px 0 20px 0;
 }
 
 .maintenanceChecklistTitle {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 22px;
   color: #222b3a;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
+  justify-content: center;
+  text-align: center;
 }
 
 .maintenanceChecklist {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  margin-bottom: 40px;
+  margin-bottom: 5px;
 }
 
-.maintenanceAddTaskRow {
+.maintenanceAddTaskRow  {
   display: flex;
   gap: 10px;
-  margin-top: 18px;
-  margin-bottom: 40px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 600px) {
+  .maintenanceInfoCard, .maintenanceProgressCard {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+    font-size: 15px;
+  }
+  .maintenanceChecklistTitle {
+    font-size: 18px;
+    gap: 4px;
+    padding: 0 4px;
+  }
+}
+
+.diagnosticsDropdownWrapper {
+  position: relative;
+  margin-left: 50px;
+  width: 220px;
+}
+
+.diagnosticsSelect {
+  width: 220px;
+  display: block;
+  margin-bottom: 18px;
+}
+
+.diagnosticsStatusIcon {
+  position: absolute;
+  left: 230px;
+  top: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.diagnosticsLabel {
+  margin-left: 50px;
+  font-weight: 600;
+  margin-top: 20px;
+  display: block;
+  font-size: 18px;
+
+}
+
+.customDropdown {
+  position: relative;
+  width: 220px;
+  user-select: none;
+  margin-bottom: 18px;
+}
+
+.customDropdownSelected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 10px 16px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 15px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.customDropdownList {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  z-index: 10;
+  margin-top: 4px;
+}
+
+.customDropdownOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 15px;
+  font-family: 'Poppins', sans-serif;
+  transition: background 0.2s;
+}
+
+.customDropdownOption:hover {
+  background: #f3f4f6;
+}
+
+.diagnosticsOptionLabel {
+  margin-left: 10px;
+
+}
+
+.imagePreviewBox {
+  width: 160px;
+  height: 160px;
+  border-radius: 12px;
+  border: 3px solid #22c55e;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 18px;
 } 
