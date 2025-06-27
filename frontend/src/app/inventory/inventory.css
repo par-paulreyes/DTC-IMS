@@ -106,13 +106,15 @@
   .searchbar-pill {
     display: flex;
     align-items: center;
-    background: #e8e8e8;
+    background: #f3f3f3;
     border-radius: 999px;
     flex: 1;
-    height: 40px;
+    height: 44px;
     margin-left: 0;
     width: 100%;
     max-width: 100%;
+    box-shadow: 0 1px 4px 0 rgba(0,0,0,0.06);
+    padding: 0 8px;
   }
   
   .searchbar-icon-bg {
@@ -122,17 +124,30 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 8px;
-    color: #888;
+    margin-left: 4px;
+    color: #bdbdbd;
+    background: transparent;
   }
   
   .searchbar-input {
     border: none;
     outline: none;
-    background: transparent;
+    background: none !important;
     font-size: 1rem;
     flex: 1;
     padding: 0 16px;
+    font-family: 'Poppins', Arial, sans-serif;
+    background: transparent;
+    color: #444;
+    height: 40px;
+    border-radius: 999px;
+  }
+  
+  .searchbar-input::placeholder {
+    color: #bdbdbd;
+    font-weight: 400;
+    font-size: 1.05rem;
+    font-family: 'Poppins', Arial, sans-serif;
   }
   
   .icon-btn-square {

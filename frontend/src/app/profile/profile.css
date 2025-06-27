@@ -5,25 +5,25 @@
 }
 
 .top-card {
-    background: #b91c1c;
-    color: #fff;
-    border-radius: 15px 15px 0 0;
-    padding: 0 0 10px 15px;
-    height: 230px;
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  background: #b91c1c;
+  color: #fff;
+  border-radius: 15px 15px 0 0;
+  padding: 25px 0 10px 15px;
+  height: 230px;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-.profile-header-card, .admin-actions-header {
-    background: #182848;
-    color: #fff;
-    border-radius: 15px 15px 0 0;
-    padding: 0 0 10px 15px;
-    height: 50px;
-    box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+.profile-header-card {
+  background: #182848;
+  color: #fff;
+  border-radius: 15px 15px 0 0;
+  padding: 0 0 10px 15px;
+  height: 50px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.10);
 }
 
 .main-container {
@@ -40,14 +40,14 @@
 }
 
 .profile-info-card {
-    padding: 0 15px 10px 15px;
-    background: #fff;
-    border-radius: 0 0 15px 15px;
-    box-shadow: 0 4px 32px rgba(0,0,0,0.10);
-    padding: 32px 32px 0 32px;
-    display: flex;
-    flex-direction: column;
-    height: 630px;
+  padding: 0 15px 10px 15px;
+  background: #fff;
+  border-radius: 0 0 15px 15px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+  padding: 32px 32px 0 32px;
+  display: flex;
+  flex-direction: column;
+  height: 630px;
 }
 
 .profile-header-bar {
@@ -75,6 +75,20 @@ input:disabled {
   margin-top: 20px;
   background-color: #182848;
   color: #fff;
+  padding: 10px;
+  margin-bottom: 10px;
+  width: 615px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.edit-btn:hover, .save-changes-btn:hover, .cancel-btn:hover, .logout-btn:hover, .admin-register-btn:hover {
+  filter: brightness(0.75);
+}
+
+.save-changes-btn, .cancel-btn, .logout-btn, .admin-register-btn, .change-photo-btn, .edit-btn {
+  flex: 1;
+  color: #fff;
   border-radius: 10px;
   padding: 10px;
   margin-bottom: 10px;
@@ -82,39 +96,81 @@ input:disabled {
   width: 100%;
 }
 
-.edit-btn:hover, .save-changes-btn:hover, .cancel-btn:hover {
-  filter: brightness(0.75);
-}
-
-.save-changes-btn, .cancel-btn {
-    flex: 1;
-    color: #fff;
-    border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: none !important;
-    width: 100%;
-}
-
 .save-changes-btn {
-    background-color: #182848;
+  background-color: #182848;
 }
 
 .cancel-btn {
-    background-color: #b91c1c;
-    color: #fff;
-    border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: none !important;
-    width: 100%;
-    transition: background 0.18s;
+  background-color: #b91c1c;
+  color: #fff;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: none !important;
+  width: 100%;
+  transition: background 0.18s;
 }
 
 .profile-btn-row {
   display: flex;
   gap: 10px;
   margin-top: 24px;
+  width: 615px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
+.change-photo-btn {
+  background: #fff;
+  color: #c1121f;
+  border-radius: 14px;
+  padding: 10px 32px;
+  font-size: 10x;
+  font-weight: 500;
+  font-family: 'Poppins', Arial, sans-serif;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 230px;
+}
 
+.change-photo-btn:hover {
+  background: #c1121f;
+  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px #fff, 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.admin-register-btn, .logout-btn {
+  color: #fff;
+  padding: 10px 32px;
+  font-size: 10x;
+  font-weight: 400;
+  font-family: 'Poppins', Arial, sans-serif;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 302.5px;
+  margin-left: -20px;
+  margin-right: auto;
+}
+
+.profile-info-card form {
+  width: 615px;
+  margin: 0 auto;
+}
+
+.admin-register-btn {
+  background-color: #182848;
+}
+
+.logout-btn {
+  background-color: #b91c1c;
+}

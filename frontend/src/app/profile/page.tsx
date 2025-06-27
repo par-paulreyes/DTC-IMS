@@ -175,7 +175,7 @@ export default function ProfilePage() {
     <div className="main-container">
       {/* Profile Picture Section */}
       <div className="top-card">
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {imageUrl && (
             <img
               src={imageUrl}
@@ -196,7 +196,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition"
+                className="change-photo-btn"
                 disabled={uploading}
                 style={{ marginBottom: 4 }}
               >
@@ -205,26 +205,6 @@ export default function ProfilePage() {
             </>
           )}
         </div>
-        {/* Logout button */}
-        <div className="max-w-md mx-auto mt-6">
-          <button
-            onClick={handleLogout}
-            className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 transition"
-          >
-            Logout
-          </button>
-        </div>
-        {/* Admin-only section */}
-        {profile?.role === 'admin' && (
-          <div className="max-w-md mx-auto bg-white rounded shadow p-6 mt-6">
-            <button
-              onClick={() => router.push("/register")}
-              className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
-            >
-              Register New User
-            </button>
-          </div>
-        )}
       </div>
       <div className="profile-header-card">
         <h3 className="text-2xl font-bold mb-4">Profile</h3>
@@ -344,6 +324,28 @@ export default function ProfilePage() {
           )}
         </form>
       </div>
+      <div className="profile-btn-row">
+          {/* Admin-only section */}
+          {profile?.role === 'admin' && (
+            <div className="max-w-md mx-auto bg-white rounded shadow p-6 mt-6">
+              <button
+                onClick={() => router.push("/register")}
+                className="admin-register-btn"
+              >
+                Register New User
+              </button>
+            </div>
+          )}
+          {/* Logout button */}
+          <div className="max-w-md mx-auto mt-6">
+            <button
+              onClick={handleLogout}
+              className="logout-btn"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
       <style jsx>{`
         @media (max-width: 700px) {
           div[style] {
