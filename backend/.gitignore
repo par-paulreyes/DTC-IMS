@@ -1,0 +1,6 @@
+# Ignore certificate and key files
+*.pem
+*-key.pem
+
+# Ignore uploads directory
+uploads/ 

@@ -59,8 +59,8 @@ const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || '0.0.0.0'; // Listen on all network interfaces
 
 // HTTPS certificate and key
-const certPath = path.join(__dirname, '192.168.100.188+2.pem');
-const keyPath = path.join(__dirname, '192.168.100.188+2-key.pem');
+const certPath = process.env.CERT_PATH || path.join(__dirname, '192.168.100.188+2.pem');
+const keyPath = process.env.KEY_PATH || path.join(__dirname, '192.168.100.188+2-key.pem');
 const cert = fs.readFileSync(certPath);
 const key = fs.readFileSync(keyPath);
 
