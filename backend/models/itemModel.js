@@ -84,7 +84,7 @@ const Item = {
     });
   },
   findByQRCode: (code, callback) => {
-    db.query('SELECT * FROM items WHERE property_no = ?', [code], (err, results) => {
+    db.query('SELECT * FROM items WHERE qr_code = ?', [code], (err, results) => {
       if (err) return callback(err);
       callback(null, results[0]);
     });

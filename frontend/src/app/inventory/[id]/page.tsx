@@ -9,15 +9,29 @@ import { FaEdit, FaSave, FaTrash, FaTimes, FaClipboardList, FaStethoscope, FaInf
 
 // Helper to format date for <input type="date">
 function formatDateForInput(dateString: string) {
-  if (!dateString) return "";
-  return dateString.split("T")[0];
+  if (!dateString) return '';
+  return dateString.split('T')[0];
 }
 
 
 function formatDisplayDate(dateString: string) {
   if (!dateString) return '';
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  return date.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  });
+}
+
+
+function formatSpecifications(specs: string) {
+  if (!specs) return [];
+  // Split by common delimiters and clean up
+  return specs
+    .split(/[,;\n\r]+/)
+    .map(spec => spec.trim())
+    .filter(spec => spec.length > 0);
 }
 
 
@@ -39,6 +53,7 @@ export default function ItemDetailPage() {
   const [diagnosticsError, setDiagnosticsError] = useState("");
   const [editingDiagnostics, setEditingDiagnostics] = useState<any[]>([]);
   const [editingLogs, setEditingLogs] = useState<any[]>([]);
+  const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
@@ -48,7 +63,13 @@ export default function ItemDetailPage() {
 
 
   useEffect(() => {
-    if (!id) return;
+    setMounted(true);
+  }, []);
+
+
+  useEffect(() => {
+    if (!mounted || !id) return;
+    
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
@@ -129,7 +150,7 @@ export default function ItemDetailPage() {
     fetchItem();
     fetchLogs();
     fetchDiagnostics();
-  }, [id, router]);
+  }, [id, router, mounted]);
 
 
   const handleEdit = () => {
@@ -164,8 +185,34 @@ export default function ItemDetailPage() {
         pending_maintenance_count: pendingCount,
         maintenance_status: newStatus,
       };
-      // Sync updated fields to backend
+      
+      // Update item
       await apiClient.put(`/items/${id}`, updatedItem);
+      
+      // Update diagnostics
+      for (const diagnostic of editingDiagnostics) {
+        if (diagnostic.id) {
+          await apiClient.put(`/diagnostics/${diagnostic.id}`, {
+            system_status: diagnostic.system_status,
+            findings: diagnostic.findings,
+            recommendations: diagnostic.recommendations,
+            diagnostics_date: diagnostic.diagnostics_date
+          });
+        }
+      }
+      
+      // Update maintenance logs
+      for (const log of editingLogs) {
+        if (log.id) {
+          await apiClient.put(`/logs/${log.id}`, {
+            task_performed: log.task_performed,
+            notes: log.notes,
+            status: log.status,
+            maintenance_date: log.maintenance_date
+          });
+        }
+      }
+      
       setItem(updatedItem);
       setEditingItem(updatedItem);
       setDiagnostics(editingDiagnostics);
@@ -316,15 +363,19 @@ export default function ItemDetailPage() {
   };
 
 
-  if (loading) return (
+  if (!mounted) return (
+    <div className="min-h-screen flex items-center justify-center">Loading...</div>
+  );
+
+  if (mounted && loading) return (
     <div className="min-h-screen flex items-center justify-center">Loading...</div>
   );
  
-  if (error) return (
+  if (mounted && error) return (
     <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>
   );
  
-  if (!item) return (
+  if (mounted && !item) return (
     <div className="min-h-screen flex items-center justify-center text-gray-500">Item not found.</div>
   );
 
@@ -355,7 +406,9 @@ export default function ItemDetailPage() {
           )}
         </div>
         <div className={styles.topMain}>
-          <div className={styles.centeredTitle}>{(isEditing ? editingItem.property_no : item.property_no)?.toUpperCase()}</div>
+          <div className={styles.centeredTitle}>
+            {(isEditing ? editingItem.qr_code : item.qr_code) || (isEditing ? editingItem.property_no : item.property_no)?.toUpperCase()}
+          </div>
           <div className={styles.centeredSubtitle}>{isEditing ? editingItem.article_type : item.article_type}</div>
           <div className={styles.topButtonRow}>
             {!isEditing ? (
@@ -379,6 +432,8 @@ export default function ItemDetailPage() {
           <div className={styles.cardContent}>
             {isEditing ? (
               <>
+                <div className={styles.grayRect} style={{marginBottom:'18px'}}><span>QR Code:</span><input value={editingItem.qr_code || ''} onChange={e => handleInputChange('qr_code', e.target.value)} /></div>
+                <div className={styles.grayRect} style={{marginBottom:'18px'}}><span>Property No:</span><input value={editingItem.property_no || ''} onChange={e => handleInputChange('property_no', e.target.value)} /></div>
                 <div className={styles.grayRect} style={{marginBottom:'18px'}}><span>Location:</span><input value={editingItem.location || ''} onChange={e => handleInputChange('location', e.target.value)} /></div>
                 <div className={styles.grayRect} style={{marginBottom:'18px'}}><span>End User:</span><input value={editingItem.end_user || ''} onChange={e => handleInputChange('end_user', e.target.value)} /></div>
                 <div className={styles.grayRect} style={{marginBottom:'18px'}}><span>Date Acquired:</span><input type="date" value={formatDateForInput(editingItem.date_acquired)} onChange={e => handleInputChange('date_acquired', e.target.value)} /></div>
@@ -390,6 +445,7 @@ export default function ItemDetailPage() {
               </>
             ) : (
               <div style={{display:'flex',flexDirection:'column',gap:'20px',alignItems:'flex-start'}}>
+                <div style={{display:'flex',justifyContent:'space-between',width:'100%'}}><span>QR Code:</span> <b style={{fontWeight:700,textAlign:'right',minWidth:120,display:'inline-block'}}>{item.qr_code || 'N/A'}</b></div>
                 <div style={{display:'flex',justifyContent:'space-between',width:'100%'}}><span>Property No:</span> <b style={{fontWeight:700,textAlign:'right',minWidth:120,display:'inline-block'}}>{item.property_no}</b></div>
                 <div style={{display:'flex',justifyContent:'space-between',width:'100%'}}><span>Article Type:</span> <b style={{fontWeight:700,textAlign:'right',minWidth:120,display:'inline-block'}}>{item.article_type}</b></div>
                 <div style={{display:'flex',justifyContent:'space-between',width:'100%'}}><span>Location:</span> <b style={{fontWeight:700,textAlign:'right',minWidth:120,display:'inline-block'}}>{item.location || 'N/A'}</b></div>
@@ -410,7 +466,30 @@ export default function ItemDetailPage() {
             {isEditing ? (
               <div className={styles.grayRect}><textarea value={editingItem.specifications || ''} onChange={e => handleInputChange('specifications', e.target.value)} className={styles.specInput} /></div>
           ) : (
-              <div style={{fontWeight:700,color:'#222',whiteSpace:'pre-wrap'}}>{item.specifications || <span style={{color: '#888'}}>No specifications</span>}</div>
+              <div>
+                {item.specifications ? (
+                  <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
+                    {formatSpecifications(item.specifications).map((spec, index) => (
+                      <span 
+                        key={index} 
+                        style={{
+                          background: '#e5e7eb',
+                          color: '#374151',
+                          padding: '4px 12px',
+                          borderRadius: '16px',
+                          fontSize: '0.875rem',
+                          fontWeight: '500',
+                          border: '1px solid #d1d5db'
+                        }}
+                      >
+                        {spec}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span style={{color: '#888'}}>No specifications</span>
+                )}
+              </div>
                 )}
               </div>
                   </div>

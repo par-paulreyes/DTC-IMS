@@ -39,10 +39,23 @@ exports.createDiagnostic = (req, res) => {
 };
 
 exports.updateDiagnostic = (req, res) => {
-  const updateData = { ...req.body };
-  Diagnostic.update(req.params.id, updateData, (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error updating diagnostic', error: err });
-    res.json({ message: 'Diagnostic updated' });
+  const company_name = req.user.company_name;
+  const diagnosticId = req.params.id;
+  
+  // First check if the diagnostic belongs to the user's company
+  Diagnostic.findById(diagnosticId, (err, diagnostic) => {
+    if (err) return res.status(500).json({ message: 'Error finding diagnostic', error: err });
+    if (!diagnostic) return res.status(404).json({ message: 'Diagnostic not found' });
+    if (diagnostic.company_name !== company_name) {
+      return res.status(403).json({ message: 'Access denied: Diagnostic does not belong to your company' });
+    }
+    
+    // Proceed with update
+    const updateData = { ...req.body };
+    Diagnostic.update(diagnosticId, updateData, (updateErr, result) => {
+      if (updateErr) return res.status(500).json({ message: 'Error updating diagnostic', error: updateErr });
+      res.json({ message: 'Diagnostic updated' });
+    });
   });
 };
 

@@ -29,6 +29,19 @@ const MaintenanceLog = {
       }
     );
   },
+  findById: (id, callback) => {
+    db.query(
+      `SELECT ml.*, i.company_name
+       FROM maintenance_logs ml
+       JOIN items i ON ml.item_id = i.id
+       WHERE ml.id = ?`,
+      [id],
+      (err, results) => {
+        if (err) return callback(err);
+        callback(null, results[0]);
+      }
+    );
+  },
   create: (log, callback) => {
     db.query('INSERT INTO maintenance_logs SET ?', log, (err, results) => {
       if (err) return callback(err);

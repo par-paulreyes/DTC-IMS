@@ -19,9 +19,16 @@ export default function LogsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
@@ -33,7 +40,7 @@ export default function LogsPage() {
       .then((res) => setLogs(res.data))
       .catch((err) => setError("Error loading logs"))
       .finally(() => setLoading(false));
-  }, [router]);
+  }, [router, mounted]);
 
   const handleExport = (format: string) => {
     const token = localStorage.getItem("token");
@@ -85,10 +92,11 @@ export default function LogsPage() {
         </div>
       </div>
       
-      {loading && <div className="loading">Loading...</div>}
-      {error && <div className="error">{error}</div>}
+      {!mounted && <div className="loading">Loading...</div>}
+      {mounted && loading && <div className="loading">Loading...</div>}
+      {mounted && error && <div className="error">{error}</div>}
       
-      {!loading && !error && (
+      {mounted && !loading && !error && (
         <div className="logs-container">
           {filteredLogs.length === 0 && (
             <div className="no-logs">No logs found.</div>

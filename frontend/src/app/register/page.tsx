@@ -27,11 +27,17 @@ export default function RegisterPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [user, setUser] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    checkAuth();
+    setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    checkAuth();
+  }, [mounted]);
 
   const checkAuth = async () => {
     try {
@@ -104,7 +110,24 @@ export default function RegisterPage() {
     }
   };
 
-  if (loading) {
+  if (!mounted) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingCard}>
+          <div className={styles.loadingIcon}>
+            <svg className={styles.spinner} fill="none" viewBox="0 0 24 24">
+              <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <h2 className={styles.loadingTitle}>Loading...</h2>
+          <p className={styles.loadingText}>Please wait...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (mounted && loading) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingCard}>
@@ -122,7 +145,7 @@ export default function RegisterPage() {
   }
 
   // Show access denied message if not admin
-  if (user?.role !== 'admin') {
+  if (mounted && user?.role !== 'admin') {
     return (
       <div className={styles.accessDeniedContainer}>
         <div className={styles.accessDeniedCard}>

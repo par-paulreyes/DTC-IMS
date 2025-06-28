@@ -5,8 +5,10 @@ import { apiClient } from "../config/api";
 
 export default function TopNavbar() {
   const [user, setUser] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
     if (!token) return;
     
@@ -65,8 +67,8 @@ export default function TopNavbar() {
             minWidth: 0,
             fontFamily: 'Poppins, sans-serif'
           }}>
-            Hello{user ? `! ` : '!' }
-            {user && <span style={{ color: '#e11d48', fontWeight: 700 }}>{user.full_name || user.username}</span>}
+            Hello{!mounted || user ? `! ` : '!' }
+            {mounted && user && <span style={{ color: '#e11d48', fontWeight: 700 }}>{user.full_name || user.username}</span>}
           </div>
         </div>
         {/* Right side empty for now */}

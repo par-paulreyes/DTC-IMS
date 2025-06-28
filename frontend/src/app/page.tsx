@@ -8,6 +8,7 @@ import { apiClient, getImageUrl } from "../config/api";
 interface Item {
   id: number;
   property_no: string;
+  qr_code?: string;
   article_type: string;
   image_url?: string;
   location?: string;
@@ -27,9 +28,16 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
@@ -40,9 +48,11 @@ export default function DashboardPage() {
       .then(res => setUser(res.data))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
-  }, [router]);
+  }, [router, mounted]);
 
   useEffect(() => {
+    if (!mounted) return;
+    
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
@@ -88,7 +98,7 @@ export default function DashboardPage() {
         setError("Error loading dashboard stats");
         setLoading(false);
       });
-  }, [router]);
+  }, [router, mounted]);
 
   const handleDiagnostic = async (id: string) => {
     try {
@@ -123,7 +133,18 @@ export default function DashboardPage() {
       {/* Dashboard Title */}
       <div className={styles.dashboardTitle}>Dashboard</div>
       
-      {loading && (
+      {!mounted && (
+        <div style={{
+          textAlign: 'center',
+          padding: '2rem',
+          fontSize: '1.1rem',
+          color: '#6b7280'
+        }}>
+          Loading...
+        </div>
+      )}
+      
+      {mounted && loading && (
         <div style={{
           textAlign: 'center',
           padding: '2rem',
@@ -134,7 +155,7 @@ export default function DashboardPage() {
         </div>
       )}
       
-      {error && (
+      {mounted && error && (
         <div style={{
           backgroundColor: '#fef2f2',
           border: '1px solid #fecaca',
@@ -147,7 +168,7 @@ export default function DashboardPage() {
         </div>
       )}
       
-      {!loading && !error && (
+      {mounted && !loading && !error && (
         <>
           {/* Main Inventory Card */}
           <div className={styles.dashboardCard}>
@@ -239,12 +260,77 @@ export default function DashboardPage() {
                           justifyContent: 'center',
                           border: '1px solid #e5e7eb'
                         }}>
-                          <span style={{ fontSize: '1.2rem' }}>📷</span>
+                          {item.article_type.toLowerCase().includes('desktop') && (
+                            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                              <line x1="8" y1="21" x2="16" y2="21"/>
+                              <line x1="12" y1="17" x2="12" y2="21"/>
+                            </svg>
+                          )}
+                          {item.article_type.toLowerCase().includes('laptop') && (
+                            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                              <line x1="2" y1="10" x2="22" y2="10"/>
+                            </svg>
+                          )}
+                          {item.article_type.toLowerCase().includes('printer') && (
+                            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <polyline points="6,9 6,2 18,2 18,9"/>
+                              <path d="M6,18H4a2,2 0 0,1 -2,-2v-5a2,2 0 0,1 2,-2h16a2,2 0 0,1 2,2v5a2,2 0 0,1 -2,2h-2"/>
+                              <rect x="6" y="14" width="12" height="8"/>
+                            </svg>
+                          )}
+                          {item.article_type.toLowerCase().includes('monitor') && (
+                            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                              <line x1="8" y1="21" x2="16" y2="21"/>
+                              <line x1="12" y1="17" x2="12" y2="21"/>
+                            </svg>
+                          )}
+                          {item.article_type.toLowerCase().includes('scanner') && (
+                            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                              <line x1="8" y1="21" x2="16" y2="21"/>
+                              <line x1="12" y1="17" x2="12" y2="21"/>
+                              <line x1="6" y1="8" x2="18" y2="8"/>
+                              <line x1="6" y1="12" x2="18" y2="12"/>
+                            </svg>
+                          )}
+                          {item.article_type.toLowerCase().includes('server') && (
+                            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                              <line x1="6" y1="6" x2="6" y2="6"/>
+                              <line x1="6" y1="18" x2="6" y2="18"/>
+                            </svg>
+                          )}
+                          {item.article_type.toLowerCase().includes('network') && (
+                            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="3"/>
+                              <path d="M12 1v6m0 6v6"/>
+                              <path d="M21 12h-6m-6 0H3"/>
+                              <path d="M19.78 4.22l-4.24 4.24m-6.36 6.36l-4.24 4.24"/>
+                              <path d="M4.22 4.22l4.24 4.24m6.36 6.36l4.24 4.24"/>
+                            </svg>
+                          )}
+                          {!item.article_type.toLowerCase().includes('desktop') && 
+                           !item.article_type.toLowerCase().includes('laptop') && 
+                           !item.article_type.toLowerCase().includes('printer') && 
+                           !item.article_type.toLowerCase().includes('monitor') && 
+                           !item.article_type.toLowerCase().includes('scanner') && 
+                           !item.article_type.toLowerCase().includes('server') && 
+                           !item.article_type.toLowerCase().includes('network') && (
+                            <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                              <circle cx="8.5" cy="8.5" r="1.5"/>
+                              <polyline points="21,15 16,10 5,21"/>
+                            </svg>
+                          )}
                         </div>
                       )}
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 600, color: '#1f2937', fontSize: '0.9rem' }}>
-                          {item.property_no}
+                          {item.qr_code || item.property_no}
                         </div>
                         <div style={{ color: '#6b7280', fontSize: '0.8rem' }}>
                           {item.article_type}

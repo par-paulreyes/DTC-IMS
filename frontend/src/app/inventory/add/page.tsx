@@ -22,6 +22,7 @@ interface Diagnostic {
 export default function AddItemPage() {
   const [form, setForm] = useState({
     property_no: "",
+    qr_code: "",
     article_type: "",
     location: "",
     end_user: "",
@@ -53,6 +54,7 @@ export default function AddItemPage() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<'details' | 'maintenance' | 'diagnostics'>('details');
   const [diagnosticsDropdownOpen, setDiagnosticsDropdownOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -67,13 +69,19 @@ export default function AddItemPage() {
 
   const selectedDiagnosticsOption = diagnosticsOptions.find(opt => opt.value === diagnostic.system_status) || diagnosticsOptions[0];
 
-  // Check for QR code parameter and auto-fill property_no
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Check for QR code parameter and auto-fill qr_code field
+  useEffect(() => {
+    if (!mounted) return;
+    
     const qrCode = searchParams.get('qr');
     if (qrCode) {
-      setForm(prev => ({ ...prev, property_no: qrCode }));
+      setForm(prev => ({ ...prev, qr_code: qrCode }));
     }
-  }, [searchParams]);
+  }, [searchParams, mounted]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -310,6 +318,15 @@ export default function AddItemPage() {
 
   const previewSrc = getImageUrl(imagePreview || capturedImage);
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span className="ml-2 text-gray-600">Loading...</span>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       {/* Header Card */}
@@ -380,6 +397,18 @@ export default function AddItemPage() {
                     value={form.property_no}
                     onChange={handleChange}
                     required
+                  />
+                </div>
+                
+                <div>
+                  <label className={styles.label}>QR Code</label>
+                  <input
+                    type="text"
+                    name="qr_code"
+                    className={styles.input}
+                    value={form.qr_code}
+                    onChange={handleChange}
+                    placeholder="Enter QR code or scan to auto-fill"
                   />
                 </div>
                 
@@ -466,7 +495,7 @@ export default function AddItemPage() {
                 <textarea
                   name="specifications"
                   rows={4}
-                  placeholder="CPU, RAM, Storage, OS, etc."
+                  placeholder="Enter specifications separated by commas (e.g., Intel i7-10700K, 16GB RAM, 512GB SSD, Windows 11)"
                   className={styles.textarea}
                   value={form.specifications}
                   onChange={handleChange}
