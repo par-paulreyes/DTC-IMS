@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import axios from "axios";
-import { getApiUrl, getImageUrl } from "../../config/api";
+import Image from "next/image";
+import { apiClient, getImageUrl } from "../../config/api";
 import './inventory.css';
 
 interface Item {
@@ -42,10 +42,8 @@ export default function InventoryPage() {
       setMaintenanceFilter(maintenanceParam);
     }
 
-    axios
-      .get(getApiUrl("/items"), {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+    apiClient
+      .get("/items")
       .then((res) => {
         // Add maintenance status to items
         const itemsWithMaintenance = res.data.map((item: any) => ({

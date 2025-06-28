@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getApiUrl } from '../../config/api';
+import { apiClient } from '../../config/api';
 import Image from "next/image";
 import styles from './page.module.css';
 
@@ -18,24 +18,19 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const response = await fetch(getApiUrl('/auth/login'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
+      const response = await apiClient.post('/auth/login', {
+        username,
+        password
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
         router.push('/');
       } else {
-        setError(data.message || 'Login failed');
+        setError('Login failed - no token received');
       }
-    } catch (err) {
-      setError('Network error. Please try again.');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Network error. Please try again.');
     } finally {
       setLoading(false);
     }

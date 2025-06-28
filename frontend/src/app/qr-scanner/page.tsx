@@ -2,9 +2,8 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
 import jsQR from "jsqr";
-import axios from "axios";
 import { useRouter } from "next/navigation";
-import { getApiUrl } from "../../config/api";
+import { apiClient } from "../../config/api";
 
 export default function QRScannerPage() {
   const webcamRef = useRef<Webcam>(null);
@@ -161,10 +160,8 @@ export default function QRScannerPage() {
       return;
     }
     
-    axios
-      .get(getApiUrl(`/items/qr/${encodeURIComponent(scanned)}`), {
-        headers: { Authorization: token },
-      })
+    apiClient
+      .get(`/items/qr/${encodeURIComponent(scanned)}`)
       .then((res) => {
         // Show success message briefly before redirecting
         setLoading(false);

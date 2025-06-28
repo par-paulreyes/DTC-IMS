@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getApiUrl } from "../../config/api";
+import { apiClient } from "../../config/api";
 import styles from "./page.module.css";
 import { X } from "lucide-react";
 
@@ -41,14 +41,10 @@ export default function RegisterPage() {
       return;
     }
 
-      const response = await fetch(getApiUrl("/users/profile"), {
-        headers: {
-          "Authorization": `Bearer ${token}`
-        }
-      });
+      const response = await apiClient.get("/users/profile");
 
-      if (response.ok) {
-        const userData = await response.json();
+      if (response.data) {
+        const userData = response.data;
         setUser(userData);
         if (userData.role !== "admin") {
           setTimeout(() => router.push("/"), 2000);
@@ -80,25 +76,15 @@ export default function RegisterPage() {
     setError("");
     
     try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(getApiUrl("/auth/register"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
+      const response = await apiClient.post("/auth/register", {
         username: formData.username,
         full_name: formData.full_name,
         email: formData.email,
         company_name: formData.company_name,
-          password: formData.password
-        }),
+        password: formData.password
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.data) {
         alert("User created successfully!");
         setFormData({
           username: "",
@@ -109,10 +95,10 @@ export default function RegisterPage() {
           confirmPassword: ""
         });
       } else {
-        setError(data.message || "Failed to create user");
+        setError("Failed to create user");
       }
-    } catch (err) {
-      setError("Network error. Please try again.");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Network error. Please try again.");
     } finally {
       setSubmitting(false);
     }
