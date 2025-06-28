@@ -1,8 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import axios from "axios";
-import { getApiUrl, getImageUrl } from "../../../config/api";
+import { apiClient, getImageUrl } from "../../../config/api";
 import imageCompression from 'browser-image-compression';
 import styles from "./page.module.css";
 import { FaEdit, FaSave, FaTrash, FaTimes, FaClipboardList, FaStethoscope, FaInfoCircle, FaCog, FaCheckCircle, FaExclamationTriangle, FaTimesCircle, FaHeartbeat, FaClock, FaRegSquare, FaRegCheckSquare } from "react-icons/fa";
@@ -66,9 +65,7 @@ export default function ItemDetailPage() {
     // Fetch item details
     const fetchItem = async () => {
       try {
-        const response = await axios.get(getApiUrl(`/items/${id}`), {
-          headers: { Authorization: token }
-        });
+        const response = await apiClient.get(`/items/${id}`);
         setItem(response.data);
         setEditingItem(response.data);
         console.log('Item data loaded:', response.data);
@@ -91,9 +88,7 @@ export default function ItemDetailPage() {
     // Fetch maintenance logs
     const fetchLogs = async () => {
       try {
-        const response = await axios.get(getApiUrl(`/logs/item/${id}`), {
-          headers: { Authorization: token }
-        });
+        const response = await apiClient.get(`/logs/item/${id}`);
         setLogs(response.data);
         console.log('Maintenance logs loaded:', response.data);
       } catch (err: any) {
@@ -113,9 +108,7 @@ export default function ItemDetailPage() {
     // Fetch diagnostics
     const fetchDiagnostics = async () => {
       try {
-        const response = await axios.get(getApiUrl(`/diagnostics/item/${id}`), {
-          headers: { Authorization: token }
-        });
+        const response = await apiClient.get(`/diagnostics/item/${id}`);
         setDiagnostics(response.data);
         console.log('Diagnostics loaded:', response.data);
       } catch (err: any) {
@@ -158,7 +151,6 @@ export default function ItemDetailPage() {
     if (!editingItem) return;
     setSaving(true);
     setError("");
-    const token = localStorage.getItem("token");
    
     // Debug: Log what we're about to send
     console.log('Sending item update with data:', editingItem);
@@ -173,9 +165,7 @@ export default function ItemDetailPage() {
         maintenance_status: newStatus,
       };
       // Sync updated fields to backend
-      await axios.put(getApiUrl(`/items/${id}`), updatedItem, {
-        headers: { Authorization: token },
-      });
+      await apiClient.put(`/items/${id}`, updatedItem);
       setItem(updatedItem);
       setEditingItem(updatedItem);
       setDiagnostics(editingDiagnostics);
@@ -198,15 +188,11 @@ export default function ItemDetailPage() {
     if (!confirm("Are you sure you want to delete this item? This action cannot be undone.")) {
       return;
     }
-   
     setDeleting(true);
-    setError("");
     const token = localStorage.getItem("token");
    
     try {
-      await axios.delete(getApiUrl(`/items/${id}`), {
-        headers: { Authorization: token },
-      });
+      await apiClient.delete(`/items/${id}`);
       router.push("/inventory");
     } catch (err: any) {
       if (err.response?.status === 401) {
@@ -279,10 +265,8 @@ export default function ItemDetailPage() {
       const compressedFile = await imageCompression(file, options);
       const formData = new FormData();
       formData.append('image', compressedFile, file.name || 'item.png');
-      const token = localStorage.getItem('token');
-      const response = await axios.post(getApiUrl(`/items/${id}/image`), formData, {
+      const response = await apiClient.post(`/items/${id}/image`, formData, {
         headers: {
-          Authorization: token,
           'Content-Type': 'multipart/form-data',
         },
       });

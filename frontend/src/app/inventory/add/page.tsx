@@ -2,8 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Webcam from "react-webcam";
-import axios from "axios";
-import { getApiUrl, getImageUrl } from "../../../config/api";
+import { apiClient, getImageUrl } from "../../../config/api";
 import { Camera, Upload, X, Check, Plus, Trash2, ArrowRight, ArrowLeft, Info, Settings, CheckCircle, AlertTriangle, XCircle, AlertOctagon } from "lucide-react";
 import styles from './page.module.css';
 
@@ -263,7 +262,7 @@ export default function AddItemPage() {
         console.log(`${key}:`, value);
       }
 
-      const response = await axios.post(getApiUrl("/items"), formData, {
+      const response = await apiClient.post("/items", formData, {
         headers: { 
           Authorization: token,
           'Content-Type': 'multipart/form-data'

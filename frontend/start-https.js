@@ -16,7 +16,7 @@ const args = [
 
 console.log('Starting Next.js development server with HTTPS support...');
 console.log('This will enable camera access over the network.');
-console.log('Access your app at: https://192.168.100.188:3000');
+console.log('Access your app at: https://192.168.68.150:3000');
 
 const child = spawn('npx', ['next', ...args], {
   stdio: 'inherit',

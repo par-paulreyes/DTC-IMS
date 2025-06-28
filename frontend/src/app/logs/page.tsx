@@ -1,8 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
-import { getApiUrl } from "../../config/api";
+import { apiClient, getApiUrl } from "../../config/api";
 import "./logs.css";
 import "../inventory/inventory.css";
 
@@ -29,8 +28,8 @@ export default function LogsPage() {
       return;
     }
 
-    axios
-      .get(getApiUrl("/logs"), { headers: { Authorization: token } })
+    apiClient
+      .get("/logs")
       .then((res) => setLogs(res.data))
       .catch((err) => setError("Error loading logs"))
       .finally(() => setLoading(false));

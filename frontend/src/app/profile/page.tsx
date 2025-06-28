@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { getApiUrl, getImageUrl } from "../../config/api";
+import { apiClient, getImageUrl } from "../../config/api";
 import imageCompression from 'browser-image-compression';
 import './profile.css';
 
@@ -24,21 +24,10 @@ export default function ProfilePage() {
       return;
     }
 
-    fetch(getApiUrl("/users/profile"), { 
-      headers: { 
-        Authorization: `Bearer ${token}` 
-      } 
-    })
-      .then((res) => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw new Error('Failed to load profile');
-        }
-      })
-      .then((data) => {
-        setProfile(data);
-        setForm({ ...data, password: "", confirmPassword: "" });
+    apiClient.get("/users/profile")
+      .then((response) => {
+        setProfile(response.data);
+        setForm({ ...response.data, password: "", confirmPassword: "" });
       })
       .catch((err) => setError("Error loading profile"))
       .finally(() => setLoading(false));
@@ -70,7 +59,6 @@ export default function ProfilePage() {
       return;
     }
     setSaving(true);
-    const token = localStorage.getItem("token");
     
     // Prepare the data to send
     const dataToSend = form.password ? { ...form, password: form.password } : form;
@@ -79,42 +67,19 @@ export default function ProfilePage() {
     console.log('📤 Sending profile update data:', dataToSend);
     
     try {
-      const response = await fetch(
-        getApiUrl("/users/profile"),
-        {
-          method: 'PUT',
-          headers: { 
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}` 
-          },
-          body: JSON.stringify(dataToSend)
-        }
-      );
+      const response = await apiClient.put("/users/profile", dataToSend);
       
-      console.log('📥 Response status:', response.status);
+      console.log('✅ Profile update successful:', response.data);
+      setSuccess("Profile updated successfully!");
+      setForm({ ...form, password: "", confirmPassword: "" });
+      setIsEditing(false);
       
-      if (response.ok) {
-        const result = await response.json();
-        console.log('✅ Profile update successful:', result);
-        setSuccess("Profile updated successfully!");
-        setForm({ ...form, password: "", confirmPassword: "" });
-        setIsEditing(false);
-        // Refresh profile data
-        const updatedResponse = await fetch(getApiUrl("/users/profile"), { 
-          headers: { Authorization: `Bearer ${token}` } 
-        });
-        if (updatedResponse.ok) {
-          const updatedData = await updatedResponse.json();
-          setProfile(updatedData);
-        }
-      } else {
-        const errorData = await response.json();
-        console.error('❌ Profile update failed:', errorData);
-        setError(errorData.message || "Error updating profile");
-      }
+      // Refresh profile data
+      const updatedResponse = await apiClient.get("/users/profile");
+      setProfile(updatedResponse.data);
     } catch (err: any) {
-      console.error('❌ Network error:', err);
-      setError("Network error. Please try again.");
+      console.error('❌ Profile update failed:', err);
+      setError(err.response?.data?.message || "Error updating profile");
     } finally {
       setSaving(false);
     }
@@ -143,22 +108,20 @@ export default function ProfilePage() {
       const compressedFile = await imageCompression(file, options);
       const formData = new FormData();
       formData.append('profile_picture', compressedFile, file.name || 'profile.png');
-      const token = localStorage.getItem("token");
-      const response = await fetch(getApiUrl("/users/profile-picture"), {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      } as any); // as any to allow FormData
-      if (response.ok) {
-        const data = await response.json();
-        setProfile((prev: any) => ({ ...prev, profile_picture: data.url }));
-        setForm((prev: any) => ({ ...prev, profile_picture: data.url }));
+      const response = await apiClient.post("/users/profile-picture", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      if (response.data.url) {
+        setProfile((prev: any) => ({ ...prev, profile_picture: response.data.url }));
+        setForm((prev: any) => ({ ...prev, profile_picture: response.data.url }));
         setSuccess("Profile picture updated!");
       } else {
         setError("Failed to upload profile picture");
       }
-    } catch (err) {
-      setError("Network error. Please try again.");
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Network error. Please try again.");
     } finally {
       setUploading(false);
     }

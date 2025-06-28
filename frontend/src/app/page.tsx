@@ -1,10 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import Image from "next/image";
 import styles from "./dashboard.module.css";
-import { getApiUrl, getImageUrl } from "../config/api";
+import { apiClient, getImageUrl } from "../config/api";
 
 interface Item {
   id: number;
@@ -37,7 +36,7 @@ export default function DashboardPage() {
       return;
     }
     setLoading(true);
-    axios.get(getApiUrl("/users/profile"), { headers: { Authorization: `Bearer ${token}` } })
+    apiClient.get("/users/profile")
       .then(res => setUser(res.data))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
@@ -54,9 +53,9 @@ export default function DashboardPage() {
     setError("");
     
     Promise.all([
-      axios.get(getApiUrl("/items"), { headers: { Authorization: `Bearer ${token}` } }),
-      axios.get(getApiUrl("/items/maintenance/needed"), { headers: { Authorization: `Bearer ${token}` } }),
-      axios.get(getApiUrl("/logs"), { headers: { Authorization: `Bearer ${token}` } }),
+      apiClient.get("/items"),
+      apiClient.get("/items/maintenance/needed"),
+      apiClient.get("/logs"),
     ])
       .then(([itemsRes, neededMaintenanceRes, maintenanceLogsRes]) => {
         const items = itemsRes.data;
@@ -92,9 +91,8 @@ export default function DashboardPage() {
   }, [router]);
 
   const handleDiagnostic = async (id: string) => {
-    const token = localStorage.getItem("token");
     try {
-      await axios.get(getApiUrl(`/diagnostics/item/${id}`), { headers: { Authorization: `Bearer ${token}` } });
+      await apiClient.get(`/diagnostics/item/${id}`);
       // Handle diagnostic response
     } catch (err) {
       console.error("Error running diagnostic:", err);

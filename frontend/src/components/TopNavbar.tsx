@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { getApiUrl } from "../config/api";
+import { apiClient } from "../config/api";
 
 export default function TopNavbar() {
   const [user, setUser] = useState<any>(null);
@@ -9,11 +9,9 @@ export default function TopNavbar() {
   useEffect(() => {
     const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
     if (!token) return;
-    fetch(getApiUrl("/users/profile"), {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => setUser(data))
+    
+    apiClient.get("/users/profile")
+      .then((response) => setUser(response.data))
       .catch(() => setUser(null));
   }, []);
 

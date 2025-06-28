@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 // API Configuration
 // Change this to your server's IP address when accessing over network
 // For local development: 'http://localhost:5000'
@@ -21,10 +23,57 @@ const getBaseUrl = () => {
     // You could add logic here if you want to dynamically detect IP
   }
   // Always use your computer's own IP for SSR and client
-  return 'https://192.168.102.75:5000';
+  return 'https://192.168.68.150:5000';
 };
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || getBaseUrl();
+
+// Create Axios instance with configuration for self-signed certificates
+export const apiClient = axios.create({
+  baseURL: `${API_BASE_URL}/api`,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  // For development with self-signed certificates
+  ...(typeof window !== 'undefined' && {
+    // This will be handled by the browser's security settings
+    // We'll need to accept the certificate manually in the browser
+  })
+});
+
+// Add request interceptor to handle authentication
+apiClient.interceptors.request.use(
+  (config) => {
+    // Add auth token if available
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle errors
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    // Handle specific error cases
+    if (error.response?.status === 401) {
+      // Unauthorized - redirect to login
+      localStorage.removeItem('token');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Helper function to get full API URL
 export const getApiUrl = (endpoint: string) => {
