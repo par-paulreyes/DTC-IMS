@@ -16,14 +16,9 @@ dotenv.config();
 
 const app = express();
 
-// Configure CORS for local development - allow localhost and network IP
+// Configure CORS to allow all origins
 app.use(cors({
-  origin: [
-    'http://localhost:3000', 
-    'https://localhost:3000',
-    'http://192.168.137.17:3000',
-    'https://192.168.137.17:3000'
-  ],
+  origin: '*', // Allow all origins
   credentials: true
 }));
 
