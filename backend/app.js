@@ -3,7 +3,6 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
-const https = require('https');
 const db = require('./db');
 const authRoutes = require('./routes/authRoutes');
 const companyRoutes = require('./routes/companyRoutes');
@@ -17,9 +16,9 @@ dotenv.config();
 
 const app = express();
 
-// Configure CORS to allow requests from any origin
+// Configure CORS for local development - allow both HTTP and HTTPS
 app.use(cors({
-  origin: '*', // Allow all origins for network access
+  origin: ['http://localhost:3000', 'https://localhost:3000'], // Allow both HTTP and HTTPS
   credentials: true
 }));
 
@@ -56,14 +55,8 @@ app.use('/api/diagnostics', diagnosticRoutes);
 app.use('/api/users', userRoutes);
 
 const PORT = process.env.PORT || 5000;
-const HOST = process.env.HOST || '0.0.0.0'; // Listen on all network interfaces
 
-// HTTPS certificate and key
-const certPath = process.env.CERT_PATH || path.join(__dirname, '192.168.100.188+2.pem');
-const keyPath = process.env.KEY_PATH || path.join(__dirname, '192.168.100.188+2-key.pem');
-const cert = fs.readFileSync(certPath);
-const key = fs.readFileSync(keyPath);
-
-https.createServer({ key, cert }, app).listen(PORT, HOST, () => {
-  console.log(`HTTPS Server running on https://${HOST}:${PORT}`);
+// Local development server - only listen on localhost
+app.listen(PORT, 'localhost', () => {
+  console.log(`Local development server running on http://localhost:${PORT}`);
 }); 
