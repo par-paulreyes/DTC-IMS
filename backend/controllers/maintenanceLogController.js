@@ -34,10 +34,23 @@ exports.createLog = (req, res) => {
 
 exports.updateLog = (req, res) => {
   const username = req.user.username;
-  const logData = { ...req.body, maintained_by: username };
-  MaintenanceLog.update(req.params.id, logData, (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error updating log', error: err });
-    res.json({ message: 'Log updated' });
+  const company_name = req.user.company_name;
+  const logId = req.params.id;
+  
+  // First check if the log belongs to the user's company
+  MaintenanceLog.findById(logId, (err, log) => {
+    if (err) return res.status(500).json({ message: 'Error finding log', error: err });
+    if (!log) return res.status(404).json({ message: 'Log not found' });
+    if (log.company_name !== company_name) {
+      return res.status(403).json({ message: 'Access denied: Log does not belong to your company' });
+    }
+    
+    // Proceed with update
+    const logData = { ...req.body, maintained_by: username };
+    MaintenanceLog.update(logId, logData, (updateErr, result) => {
+      if (updateErr) return res.status(500).json({ message: 'Error updating log', error: updateErr });
+      res.json({ message: 'Log updated' });
+    });
   });
 };
 

@@ -14,15 +14,22 @@ export default function QRScannerPage() {
   const [success, setSuccess] = useState(false);
   const [cameraAvailable, setCameraAvailable] = useState<boolean | null>(null);
   const [showFileUpload, setShowFileUpload] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Check authentication on page load
   useEffect(() => {
+    if (!mounted) return;
+    
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
     }
-  }, [router]);
+  }, [router, mounted]);
 
   // Check camera availability
   useEffect(() => {
@@ -189,34 +196,77 @@ export default function QRScannerPage() {
   const renderScannerContent = () => {
     if (cameraAvailable === null) {
       return (
-        <div className="flex items-center justify-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-gray-600">Checking camera availability...</span>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '2rem',
+          color: '#666'
+        }}>
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            border: '2px solid #b91c1c',
+            borderTop: '2px solid transparent',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }}></div>
+          <span style={{ marginLeft: '0.5rem' }}>Checking camera availability...</span>
         </div>
       );
     }
 
     if (cameraAvailable && !showFileUpload) {
       return (
-        <div className="flex flex-col items-center">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <Webcam
             audio={false}
             ref={webcamRef}
             screenshotFormat="image/png"
             videoConstraints={{ facingMode: "environment" }}
-            className="w-80 h-80 rounded-lg border-4 border-blue-500 shadow-lg"
+            style={{
+              width: '320px',
+              height: '320px',
+              borderRadius: '15px',
+              border: '4px solid #182848',
+              boxShadow: '0 4px 32px rgba(0,0,0,0.10)'
+            }}
           />
           
-          <div className="mt-4 flex gap-2">
+          <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
             <button
               onClick={() => setShowFileUpload(true)}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              style={{
+                padding: '0.75rem 1.5rem',
+                backgroundColor: '#182848',
+                color: '#fff',
+                borderRadius: '10px',
+                border: 'none',
+                cursor: 'pointer',
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: '500',
+                transition: 'filter 0.2s'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.filter = 'brightness(0.75)'}
+              onMouseOut={(e) => e.currentTarget.style.filter = 'brightness(1)'}
             >
               Upload Image Instead
             </button>
             <button
               onClick={handleManualInput}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              style={{
+                padding: '0.75rem 1.5rem',
+                backgroundColor: '#b91c1c',
+                color: '#fff',
+                borderRadius: '10px',
+                border: 'none',
+                cursor: 'pointer',
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: '500',
+                transition: 'filter 0.2s'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.filter = 'brightness(0.75)'}
+              onMouseOut={(e) => e.currentTarget.style.filter = 'brightness(1)'}
             >
               Enter Manually
             </button>
@@ -226,13 +276,22 @@ export default function QRScannerPage() {
     }
 
     return (
-      <div className="flex flex-col items-center">
-        <div className="w-80 h-80 rounded-lg border-4 border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
-          <div className="text-center">
-            <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{
+          width: '320px',
+          height: '320px',
+          borderRadius: '15px',
+          border: '4px dashed #e8e8e8',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#f3f4f6'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <svg style={{ margin: '0 auto', width: '3rem', height: '3rem', color: '#666' }} stroke="currentColor" fill="none" viewBox="0 0 48 48">
               <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <p className="mt-2 text-sm text-gray-600">Upload QR Code Image</p>
+            <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#666' }}>Upload QR Code Image</p>
           </div>
         </div>
         
@@ -241,27 +300,63 @@ export default function QRScannerPage() {
           type="file"
           accept="image/*"
           onChange={handleFileUpload}
-          className="hidden"
+          style={{ display: 'none' }}
         />
         
-        <div className="mt-4 flex gap-2">
+        <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#182848',
+              color: '#fff',
+              borderRadius: '10px',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: '500',
+              transition: 'filter 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.filter = 'brightness(0.75)'}
+            onMouseOut={(e) => e.currentTarget.style.filter = 'brightness(1)'}
           >
             Choose File
           </button>
           {cameraAvailable && (
             <button
               onClick={() => setShowFileUpload(false)}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              style={{
+                padding: '0.75rem 1.5rem',
+                backgroundColor: '#182848',
+                color: '#fff',
+                borderRadius: '10px',
+                border: 'none',
+                cursor: 'pointer',
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: '500',
+                transition: 'filter 0.2s'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.filter = 'brightness(0.75)'}
+              onMouseOut={(e) => e.currentTarget.style.filter = 'brightness(1)'}
             >
               Use Camera
             </button>
           )}
           <button
             onClick={handleManualInput}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: '#b91c1c',
+              color: '#fff',
+              borderRadius: '10px',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: '500',
+              transition: 'filter 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.filter = 'brightness(0.75)'}
+            onMouseOut={(e) => e.currentTarget.style.filter = 'brightness(1)'}
           >
             Enter Manually
           </button>
@@ -269,6 +364,36 @@ export default function QRScannerPage() {
       </div>
     );
   };
+
+  if (!mounted) {
+    return (
+      <div style={{
+        maxWidth: 700,
+        margin: '40px auto 0 auto',
+        background: '#fff',
+        borderRadius: 24,
+        boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
+        padding: '32px 32px 40px 32px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 32,
+        minHeight: 'calc(100vh - 120px)',
+        fontFamily: 'Poppins, sans-serif'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+          <div style={{
+            width: '2rem',
+            height: '2rem',
+            border: '2px solid #b91c1c',
+            borderTop: '2px solid transparent',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite'
+          }}></div>
+          <span style={{ marginLeft: '0.5rem', color: '#666' }}>Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{
@@ -281,65 +406,146 @@ export default function QRScannerPage() {
       display: 'flex',
       flexDirection: 'column',
       gap: 32,
-      minHeight: 'calc(100vh - 120px)'
+      minHeight: 'calc(100vh - 120px)',
+      fontFamily: 'Poppins, sans-serif'
     }}>
-      <div className="bg-white rounded-xl shadow-xl overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">QR Scanner</h1>
-              <p className="text-blue-100 mt-2 text-lg">
-                {cameraAvailable === false 
-                  ? "Camera not available - Upload QR code image" 
-                  : "Scan QR codes to view or add items"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Scanner Content */}
-        <div className="p-8">
-          {renderScannerContent()}
-          
-          {error && (
-            <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 flex items-center gap-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-              {error}
-            </div>
-          )}
-          
-          {scanned && (
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 flex items-center gap-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="font-semibold">Scanned QR:</span> {scanned}
-            </div>
-          )}
-          
-          {loading && (
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 flex items-center gap-2">
-              <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Loading...
-            </div>
-          )}
-          
-          {success && (
-            <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 flex items-center gap-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span className="font-semibold">Item found! Redirecting to details...</span>
-            </div>
-          )}
-        </div>
+      {/* Header Card */}
+      <div style={{
+        background: 'linear-gradient(90deg, #b91c1c 60%, #ef4444 100%)',
+        borderRadius: '15px 15px 0 0',
+        padding: '25px 0 10px 15px',
+        height: '120px',
+        marginBottom: '15px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#fff'
+      }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>QR Scanner</h1>
+        <p style={{ margin: '8px 0 0 0', opacity: 0.9, textAlign: 'center' }}>
+          {cameraAvailable === false 
+            ? "Camera not available - Upload QR code image" 
+            : "Scan QR codes to view or add items"}
+        </p>
       </div>
+
+      {/* Scanner Content Card */}
+      <div style={{
+        padding: '32px',
+        background: '#fff',
+        borderRadius: '0 0 15px 15px',
+        boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      }}>
+        {renderScannerContent()}
+        
+        {error && (
+          <div style={{
+            marginTop: '1.5rem',
+            padding: '1rem',
+            backgroundColor: '#fef2f2',
+            border: '1px solid #fecaca',
+            borderRadius: '10px',
+            color: '#b91c1c',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            width: '100%',
+            maxWidth: '500px'
+          }}>
+            <svg style={{ width: '1rem', height: '1rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            {error}
+          </div>
+        )}
+        
+        {scanned && (
+          <div style={{
+            marginTop: '1.5rem',
+            padding: '1rem',
+            backgroundColor: '#f0f9ff',
+            border: '1px solid #bae6fd',
+            borderRadius: '10px',
+            color: '#0369a1',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            width: '100%',
+            maxWidth: '500px'
+          }}>
+            <svg style={{ width: '1rem', height: '1rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span style={{ fontWeight: '600' }}>Scanned QR:</span> {scanned}
+          </div>
+        )}
+        
+        {loading && (
+          <div style={{
+            marginTop: '1.5rem',
+            padding: '1rem',
+            backgroundColor: '#f0f9ff',
+            border: '1px solid #bae6fd',
+            borderRadius: '10px',
+            color: '#0369a1',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            width: '100%',
+            maxWidth: '500px'
+          }}>
+            <div style={{
+              width: '1rem',
+              height: '1rem',
+              border: '2px solid #0369a1',
+              borderTop: '2px solid transparent',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }}></div>
+            Loading...
+          </div>
+        )}
+        
+        {success && (
+          <div style={{
+            marginTop: '1.5rem',
+            padding: '1rem',
+            backgroundColor: '#f0fdf4',
+            border: '1px solid #bbf7d0',
+            borderRadius: '10px',
+            color: '#166534',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            width: '100%',
+            maxWidth: '500px'
+          }}>
+            <svg style={{ width: '1rem', height: '1rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span style={{ fontWeight: '600' }}>Item found! Redirecting to details...</span>
+          </div>
+        )}
+      </div>
+
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 700px) {
+          div[style] {
+            max-width: 98vw !important;
+            padding-left: 4vw !important;
+            padding-right: 4vw !important;
+          }
+        }
+      `}</style>
     </div>
   );
 } 

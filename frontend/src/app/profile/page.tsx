@@ -14,10 +14,17 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
@@ -31,7 +38,7 @@ export default function ProfilePage() {
       })
       .catch((err) => setError("Error loading profile"))
       .finally(() => setLoading(false));
-  }, [router]);
+  }, [router, mounted]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -130,22 +137,39 @@ export default function ProfilePage() {
   // Helper to get the correct image URL
   const imageUrl = getImageUrl(form.profile_picture);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  if (error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
-  if (!profile) return <div className="min-h-screen flex items-center justify-center text-gray-500">Profile not found.</div>;
+  if (!mounted) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (mounted && loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (mounted && error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
+  if (mounted && !profile) return <div className="min-h-screen flex items-center justify-center text-gray-500">Profile not found.</div>;
 
   return (
     <div className="main-container">
       {/* Profile Picture Section */}
       <div className="top-card">
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {imageUrl && (
+          {imageUrl ? (
             <img
               src={imageUrl}
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
               style={{ marginBottom: 12, width: 96, height: 96 }}
             />
+          ) : (
+            <div 
+              className="w-24 h-24 rounded-full border-4 border-white shadow-lg flex items-center justify-center"
+              style={{ 
+                marginBottom: 12, 
+                width: 96, 
+                height: 96, 
+                backgroundColor: '#b91c1c',
+                border: '4px solid white'
+              }}
+            >
+              <svg width="48" height="48" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </div>
           )}
           {isEditing && !success && (
             <>

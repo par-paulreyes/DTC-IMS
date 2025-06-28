@@ -29,6 +29,19 @@ const Diagnostic = {
       }
     );
   },
+  findById: (id, callback) => {
+    db.query(
+      `SELECT d.*, i.company_name
+       FROM diagnostics d
+       JOIN items i ON d.item_id = i.id
+       WHERE d.id = ?`,
+      [id],
+      (err, results) => {
+        if (err) return callback(err);
+        callback(null, results[0]);
+      }
+    );
+  },
   create: (diagnostic, callback) => {
     db.query('INSERT INTO diagnostics SET ?', diagnostic, (err, results) => {
       if (err) return callback(err);
