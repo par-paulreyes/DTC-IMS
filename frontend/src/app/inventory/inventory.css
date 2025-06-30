@@ -7,7 +7,6 @@
     padding: 32px 16px 40px 16px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
     min-height: calc(100vh - 120px);
     font-family: 'Poppins', sans-serif;
   }
@@ -21,10 +20,6 @@
     .searchbar-row {
       flex-direction: column;
       gap: 8px;
-    }
-    .searchbar-pill {
-      min-width: 0;
-      width: 100%;
     }
   }
   
@@ -98,35 +93,8 @@
   .searchbar-row {
     display: flex;
     align-items: center;
-    margin-bottom: 5px;
-    gap: 15px;
     width: 100%;
-  }
-  
-  .searchbar-pill {
-    display: flex;
-    align-items: center;
-    background: #f3f3f3;
-    border-radius: 999px;
-    flex: 1;
-    height: 44px;
-    margin-left: 0;
-    width: 100%;
-    max-width: 100%;
-    box-shadow: 0 1px 4px 0 rgba(0,0,0,0.06);
-    padding: 0 8px;
-  }
-  
-  .searchbar-icon-bg {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 4px;
-    color: #bdbdbd;
-    background: transparent;
+    padding: 15px;
   }
   
   .searchbar-input {
@@ -150,24 +118,11 @@
     font-family: 'Poppins', Arial, sans-serif;
   }
   
-  .icon-btn-square {
-    width: 40px;
-    height: 40px;
-    background: #e8e8e8;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    cursor: pointer;
-  }
-  
   /* Previous filter bar styles */
   .filterbar-row {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 5px;
+    margin: 15px 0 5px 0;
     width: 100%;
   }
   
@@ -175,10 +130,11 @@
     border: none;
     outline: none;
     background: transparent;
-    font-size: 1rem;
+    font-size: 10px;
     padding: 0 16px;
     border-radius: 999px;
     height: 40px;
+    font-family: 'Poppins', Arial, sans-serif;
   }
   
   .filterbar-input {
@@ -188,19 +144,38 @@
   .filterbar-select {
     flex: 1;
     min-width: 0;
-    background: #e8e8e8;
-    border-radius: 12px;
+    background: linear-gradient(90deg, #182848 0%, #2d4a6b 100%);
+    border-radius: 8px;
     padding: 10px 16px;
     border: none;
     font-size: 1rem;
+    color: #fff;
+    font-weight: 500;
+    margin-right: 8px;
+    transition: box-shadow 0.2s;
+    height: 40px;
+    line-height: 40px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  
+  .filterbar-select:focus {
+    box-shadow: 0 0 0 2px #3b82f6;
   }
   
   .inventory-header-row {
+    background: linear-gradient(90deg, #b91c1c 60%, #ef4444 100%);
+    border-radius: 15px 15px 0 0; 
+    padding: 25px 0 10px 15px;
+    height: 120px;
+    marginBottom: 15px;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 5px;
+    justify-content: center;
+    color: #fff;
+    margin-bottom: 0;
+    padding-bottom: 0;
   }
   
   .filters-row {
@@ -225,3 +200,107 @@
 .inventory-card a, .inventory-card .inventory-type, .inventory-card .inventory-status {
   text-decoration: none !important;
 }
+
+.search-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 15px;
+  font-size: 16px;
+  font-family: 'Poppins', Arial, sans-serif;
+  outline: none;
+  background: #fafafa;
+  color: #374151;
+  height: 48px;
+  box-sizing: border-box;
+  margin-bottom: 0;
+}
+
+.search-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+
+.status-poor {
+  color: #dc2626; /* red-600 */
+  font-weight: 600;
+}
+.status-fair {
+  color: #eab308; /* yellow-500 */
+  font-weight: 600;
+}
+.status-good {
+  color: #16a34a; /* green-600 */
+  font-weight: 600;
+}
+
+.inputContainer {
+  position: relative;
+  width: 650px;
+  margin: 0 auto;
+  left: -25px;
+}
+
+.inputIcon {
+  position: absolute;
+  top: 50%;
+  left: 1.2rem;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.inputIconSvg {
+  height: 0.75rem;
+  width: 0.75rem;
+  color: #9ca3af;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  max-width: 615px;
+  padding-left: 2.5rem;
+  padding-right: 0.75rem;
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+}
+
+.input:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+}
+
+.body-container {
+  padding: 0 16px 0 16px;
+  background: #fff;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+  border-radius: 0 0 15px 15px;
+  margin-top: 0; /* or a smaller value if you want a tiny gap */
+  padding-top: 0;
+}
+
+option {
+  background: #fff;
+  color: #000;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+

@@ -210,16 +210,16 @@ export default function RegisterPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
-          <input
-            type="text"
-            name="username"
-            className={styles.input}
-            placeholder="Enter username"
-            value={formData.username}
-            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-            required
-          />
-        </div>
+                <input
+                  type="text"
+                  name="username"
+                  className={styles.input}
+                  placeholder="Enter username"
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  required
+                />
+              </div>
             </div>
 
             <div className={styles.formField}>
@@ -232,16 +232,16 @@ export default function RegisterPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
-          <input
-            type="text"
-            name="full_name"
-            className={styles.input}
-            placeholder="Enter full name"
-            value={formData.full_name}
-            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-            required
-          />
-        </div>
+                <input
+                  type="text"
+                  name="full_name"
+                  className={styles.input}
+                  placeholder="Enter full name"
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  required
+                />
+              </div>
             </div>
           </div>
 
@@ -256,16 +256,16 @@ export default function RegisterPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
-          <input
-            type="email"
-            name="email"
-            className={styles.input}
-            placeholder="Enter email address"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            required
-          />
-        </div>
+                <input
+                  type="email"
+                  name="email"
+                  className={styles.input}
+                  placeholder="Enter email address"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                />
+              </div>
             </div>
 
             <div className={styles.formField}>
@@ -278,16 +278,16 @@ export default function RegisterPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
                 </div>
-          <input
-            type="text"
-            name="company_name"
-            className={styles.input}
-            placeholder="e.g., DTC"
-            value={formData.company_name}
-            onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-            required
-          />
-        </div>
+                <input
+                  type="text"
+                  name="company_name"
+                  className={styles.input}
+                  placeholder="e.g., DTC"
+                  value={formData.company_name}
+                  onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                  required
+                />
+              </div>
             </div>
           </div>
 
@@ -302,16 +302,16 @@ export default function RegisterPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
-          <input
-            type="password"
-            name="password"
-            className={styles.input}
-            placeholder="Enter password"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            required
-          />
-        </div>
+                <input
+                  type="password"
+                  name="password"
+                  className={styles.input}
+                  placeholder="Enter password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  required
+                />
+              </div>
             </div>
 
             <div className={styles.formField}>
@@ -324,16 +324,16 @@ export default function RegisterPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
-          <input
-            type="password"
-            name="confirmPassword"
-            className={styles.input}
-            placeholder="Confirm password"
-            value={formData.confirmPassword}
-            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-            required
-          />
-        </div>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  className={styles.input}
+                  placeholder="Confirm password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  required
+                />
+              </div>
             </div>
           </div>
 

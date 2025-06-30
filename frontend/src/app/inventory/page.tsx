@@ -97,201 +97,214 @@ export default function InventoryPage() {
   return (
     <div className="main-container">
       <div className="inventory-header-row">
-        <h1 className="inventory-title">Inventory</h1>
+        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>Inventory</h1>
+        <p style={{ margin: '8px 0 0 0', opacity: 0.9, textAlign: 'center' }}>
+          View and manage inventory items here
+        </p>
       </div>
-      {/* Search Bar */}
-      <div className="searchbar-row">
-        <div className="searchbar-pill">
-          <div className="searchbar-icon-bg">
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-          </div>
-          <input
-            type="text"
-            placeholder="Search by QR code, property no, or article type..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="searchbar-input"
-          />
-        </div>
-      </div>
-      {/* Filter Bar */}
-      <div className="filterbar-row">
-        <select
-          value={articleType}
-          onChange={(e) => setArticleType(e.target.value)}
-          className="filterbar-select"
-        >
-          <option value="">All Types</option>
-          {articleTypes.map((type) => (
-            <option key={type} value={type}>{type}</option>
-          ))}
-        </select>
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="filterbar-select"
-        >
-          <option value="">All System Statuses</option>
-          {statuses.map((s) => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
-        <select
-          value={maintenanceFilter}
-          onChange={(e) => setMaintenanceFilter(e.target.value)}
-          className="filterbar-select"
-        >
-          <option value="">All Maintenance Status</option>
-          <option value="pending">Pending Maintenance</option>
-          <option value="completed">Completed Maintenance</option>
-        </select>
-      </div>
-      {/* Filter Status Display */}
-      {maintenanceFilter === "pending" && (
-        <div style={{
-          backgroundColor: '#fef3c7',
-          border: '1px solid #f59e0b',
-          borderRadius: '0.5rem',
-          padding: '0.75rem',
-          marginBottom: '1rem',
-          color: '#92400e'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span>⚠️</span>
-            <span style={{ fontWeight: '600' }}>Showing items with pending maintenance</span>
-          </div>
-          <button 
-            onClick={() => setMaintenanceFilter("")}
-            style={{
-              marginTop: '0.5rem',
-              color: '#92400e',
-              textDecoration: 'underline',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '0.875rem'
-            }}
+      <div className="body-container">
+        {/* Filter Bar */}
+        <div className="filterbar-row">
+          <select
+            value={articleType}
+            onChange={(e) => setArticleType(e.target.value)}
+            className="filterbar-select"
           >
-            Clear filter
-          </button>
+            <option value="">All Types</option>
+            {articleTypes.map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="filterbar-select"
+          >
+            <option value="">All System Statuses</option>
+            {statuses.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <select
+            value={maintenanceFilter}
+            onChange={(e) => setMaintenanceFilter(e.target.value)}
+            className="filterbar-select"
+          >
+            <option value="">All Maintenance Status</option>
+            <option value="pending">Pending Maintenance</option>
+            <option value="completed">Completed Maintenance</option>
+          </select>
         </div>
-      )}
-      {!mounted && <div className="text-center text-blue-600">Loading...</div>}
-      {mounted && loading && <div className="text-center text-blue-600">Loading...</div>}
-      {mounted && error && <div className="text-center text-red-500">{error}</div>}
-      {mounted && !loading && !error && (
-        <div>
-          {filteredItems.length === 0 && (
-            <div className="text-center text-gray-500 p-6">No items found.</div>
-          )}
-          {filteredItems.map((item) => (
-            <div key={item.id} className="inventory-card">
-              <Link href={`/inventory/${item.id}`} className="flex items-center w-full">
-                {item.image_url ? (
-                  <img
-                    src={getImageUrl(item.image_url)}
-                    alt={item.qr_code || item.property_no}
-                    className="inventory-icon"
-                    style={{ objectFit: 'cover' }}
-                  />
-                ) : (
-                  <div className="inventory-icon">
-                    {item.article_type.toLowerCase().includes('desktop') && (
-                      <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                        <line x1="8" y1="21" x2="16" y2="21"/>
-                        <line x1="12" y1="17" x2="12" y2="21"/>
-                      </svg>
-                    )}
-                    {item.article_type.toLowerCase().includes('laptop') && (
-                      <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                        <line x1="2" y1="10" x2="22" y2="10"/>
-                      </svg>
-                    )}
-                    {item.article_type.toLowerCase().includes('printer') && (
-                      <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <polyline points="6,9 6,2 18,2 18,9"/>
-                        <path d="M6,18H4a2,2 0 0,1 -2,-2v-5a2,2 0 0,1 2,-2h16a2,2 0 0,1 2,2v5a2,2 0 0,1 -2,2h-2"/>
-                        <rect x="6" y="14" width="12" height="8"/>
-                      </svg>
-                    )}
-                    {item.article_type.toLowerCase().includes('monitor') && (
-                      <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                        <line x1="8" y1="21" x2="16" y2="21"/>
-                        <line x1="12" y1="17" x2="12" y2="21"/>
-                      </svg>
-                    )}
-                    {item.article_type.toLowerCase().includes('scanner') && (
-                      <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                        <line x1="8" y1="21" x2="16" y2="21"/>
-                        <line x1="12" y1="17" x2="12" y2="21"/>
-                        <line x1="6" y1="8" x2="18" y2="8"/>
-                        <line x1="6" y1="12" x2="18" y2="12"/>
-                      </svg>
-                    )}
-                    {item.article_type.toLowerCase().includes('server') && (
-                      <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
-                        <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
-                        <line x1="6" y1="6" x2="6" y2="6"/>
-                        <line x1="6" y1="18" x2="6" y2="18"/>
-                      </svg>
-                    )}
-                    {item.article_type.toLowerCase().includes('network') && (
-                      <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="3"/>
-                        <path d="M12 1v6m0 6v6"/>
-                        <path d="M21 12h-6m-6 0H3"/>
-                        <path d="M19.78 4.22l-4.24 4.24m-6.36 6.36l-4.24 4.24"/>
-                        <path d="M4.22 4.22l4.24 4.24m6.36 6.36l4.24 4.24"/>
-                      </svg>
-                    )}
-                    {!item.article_type.toLowerCase().includes('desktop') && 
-                     !item.article_type.toLowerCase().includes('laptop') && 
-                     !item.article_type.toLowerCase().includes('printer') && 
-                     !item.article_type.toLowerCase().includes('monitor') && 
-                     !item.article_type.toLowerCase().includes('scanner') && 
-                     !item.article_type.toLowerCase().includes('server') && 
-                     !item.article_type.toLowerCase().includes('network') && (
-                      <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <polyline points="21,15 16,10 5,21"/>
-                      </svg>
-                    )}
-                  </div>
-                )}
-                <div className="inventory-info">
-                  <div className="inventory-propno">
-                    {item.qr_code ? (
-                      <span style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1f2937' }}>
-                        {item.qr_code}
-                      </span>
-                    ) : (
-                      <span style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1f2937' }}>
-                        {item.property_no}
-                      </span>
-                    )}
-                  </div>
-                  <div className="inventory-type">{item.article_type}</div>
-                  <div className="inventory-status">System Status: {item.system_status ? item.system_status : "Unknown"}</div>
-                  {item.has_pending_maintenance && (
-                    <div className="text-red-500 text-xs font-medium mt-1">
-                      ⚠️ Pending Maintenance ({item.pending_maintenance_count || 1} task{item.pending_maintenance_count > 1 ? 's' : ''})
+        {/* Search Bar */}
+        <div className="searchbar-row">
+          <div className="inputContainer">
+            <div className="inputIcon">
+              <svg className="inputIconSvg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              name="full_name"
+              className="input"
+              placeholder="Search with article id"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              required
+            />
+          </div>
+        </div>
+        {/* Filter Status Display */}
+        {maintenanceFilter === "pending" && (
+          <div style={{
+            backgroundColor: '#fef3c7',
+            border: '1px solid #f59e0b',
+            borderRadius: '0.5rem',
+            padding: '0.75rem',
+            marginBottom: '1rem',
+            color: '#92400e'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span>⚠️</span>
+              <span style={{ fontWeight: '600' }}>Showing items with pending maintenance</span>
+            </div>
+            <button 
+              onClick={() => setMaintenanceFilter("")}
+              style={{
+                marginTop: '0.5rem',
+                color: '#92400e',
+                textDecoration: 'underline',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '0.875rem'
+              }}
+            >
+              Clear filter
+            </button>
+          </div>
+        )}
+        {!mounted && <div className="text-center text-blue-600">Loading...</div>}
+        {mounted && loading && <div className="text-center text-blue-600">Loading...</div>}
+        {mounted && error && <div className="text-center text-red-500">{error}</div>}
+        {mounted && !loading && !error && (
+          <div>
+            {filteredItems.length === 0 && (
+              <div className="text-center text-gray-500 p-6">No items found.</div>
+            )}
+            {filteredItems.map((item) => (
+              <div key={item.id} className="inventory-card">
+                <Link href={`/inventory/${item.id}`} className="flex items-center w-full">
+                  {item.image_url ? (
+                    <img
+                      src={getImageUrl(item.image_url)}
+                      alt={item.qr_code || item.property_no}
+                      className="inventory-icon"
+                      style={{ objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <div className="inventory-icon">
+                      {item.article_type.toLowerCase().includes('desktop') && (
+                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                          <line x1="8" y1="21" x2="16" y2="21"/>
+                          <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                      )}
+                      {item.article_type.toLowerCase().includes('laptop') && (
+                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                          <line x1="2" y1="10" x2="22" y2="10"/>
+                        </svg>
+                      )}
+                      {item.article_type.toLowerCase().includes('printer') && (
+                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <polyline points="6,9 6,2 18,2 18,9"/>
+                          <path d="M6,18H4a2,2 0 0,1 -2,-2v-5a2,2 0 0,1 2,-2h16a2,2 0 0,1 2,2v5a2,2 0 0,1 -2,2h-2"/>
+                          <rect x="6" y="14" width="12" height="8"/>
+                        </svg>
+                      )}
+                      {item.article_type.toLowerCase().includes('monitor') && (
+                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                          <line x1="8" y1="21" x2="16" y2="21"/>
+                          <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                      )}
+                      {item.article_type.toLowerCase().includes('scanner') && (
+                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                          <line x1="8" y1="21" x2="16" y2="21"/>
+                          <line x1="12" y1="17" x2="12" y2="21"/>
+                          <line x1="6" y1="8" x2="18" y2="8"/>
+                          <line x1="6" y1="12" x2="18" y2="12"/>
+                        </svg>
+                      )}
+                      {item.article_type.toLowerCase().includes('server') && (
+                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                          <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                          <line x1="6" y1="6" x2="6" y2="6"/>
+                          <line x1="6" y1="18" x2="6" y2="18"/>
+                        </svg>
+                      )}
+                      {item.article_type.toLowerCase().includes('network') && (
+                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <circle cx="12" cy="12" r="3"/>
+                          <path d="M12 1v6m0 6v6"/>
+                          <path d="M21 12h-6m-6 0H3"/>
+                          <path d="M19.78 4.22l-4.24 4.24m-6.36 6.36l-4.24 4.24"/>
+                          <path d="M4.22 4.22l4.24 4.24m6.36 6.36l4.24 4.24"/>
+                        </svg>
+                      )}
+                      {!item.article_type.toLowerCase().includes('desktop') && 
+                      !item.article_type.toLowerCase().includes('laptop') && 
+                      !item.article_type.toLowerCase().includes('printer') && 
+                      !item.article_type.toLowerCase().includes('monitor') && 
+                      !item.article_type.toLowerCase().includes('scanner') && 
+                      !item.article_type.toLowerCase().includes('server') && 
+                      !item.article_type.toLowerCase().includes('network') && (
+                        <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                          <circle cx="8.5" cy="8.5" r="1.5"/>
+                          <polyline points="21,15 16,10 5,21"/>
+                        </svg>
+                      )}
                     </div>
                   )}
-                </div>
-              </Link>
-            </div>
-          ))}
-        </div>
-      )}
+                  <div className="inventory-info">
+                    <div className="inventory-propno">
+                      {item.qr_code ? (
+                        <span style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1f2937' }}>
+                          {item.qr_code}
+                        </span>
+                      ) : (
+                        <span style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1f2937' }}>
+                          {item.property_no}
+                        </span>
+                      )}
+                    </div>
+                    <div className="inventory-type">{item.article_type}</div>
+                    <div className={`inventory-status ${
+                      item.system_status?.toLowerCase() === 'poor' ? 'status-poor' :
+                      item.system_status?.toLowerCase() === 'fair' ? 'status-fair' :
+                      item.system_status?.toLowerCase() === 'good' ? 'status-good' : ''
+                    }`}>
+                      System Status: {item.system_status ? item.system_status : "Unknown"}
+                    </div>
+                    {item.has_pending_maintenance && (
+                      <div className="text-red-500 text-xs font-medium mt-1">
+                        ⚠️ Pending Maintenance ({item.pending_maintenance_count || 1} task{item.pending_maintenance_count > 1 ? 's' : ''})
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 } 
