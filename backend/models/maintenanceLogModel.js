@@ -3,7 +3,7 @@ const db = require('../db');
 const MaintenanceLog = {
   findAllByCompany: (company_name, callback) => {
     db.query(
-      `SELECT ml.*, i.property_no, i.article_type
+      `SELECT ml.*, i.property_no, i.article_type, i.qr_code
        FROM maintenance_logs ml
        JOIN items i ON ml.item_id = i.id
        WHERE i.company_name = ?
@@ -17,7 +17,7 @@ const MaintenanceLog = {
   },
   findAllByItem: (item_id, callback) => {
     db.query(
-      `SELECT ml.*, i.property_no, i.article_type, i.company_name
+      `SELECT ml.*, i.property_no, i.article_type, i.qr_code, i.company_name
        FROM maintenance_logs ml
        JOIN items i ON ml.item_id = i.id
        WHERE ml.item_id = ?
@@ -31,7 +31,7 @@ const MaintenanceLog = {
   },
   findById: (id, callback) => {
     db.query(
-      `SELECT ml.*, i.company_name
+      `SELECT ml.*, i.company_name, i.qr_code
        FROM maintenance_logs ml
        JOIN items i ON ml.item_id = i.id
        WHERE ml.id = ?`,
