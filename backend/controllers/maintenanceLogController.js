@@ -76,7 +76,7 @@ exports.exportLogs = (req, res) => {
         doc.moveDown();
         logs.forEach((log, idx) => {
           doc.fontSize(12).text(`Log #${idx + 1}`);
-          doc.text(`Item: ${log.property_no || 'N/A'} (${log.article_type || 'N/A'})`);
+          doc.text(`Item: ${log.qr_code || 'N/A'} (${log.article_type || 'N/A'})`);
           doc.text(`Task: ${log.task_performed}`);
           doc.text(`Date: ${log.maintenance_date}`);
           doc.text(`Maintained By: ${log.maintained_by}`);
@@ -90,7 +90,7 @@ exports.exportLogs = (req, res) => {
     } else {
       try {
         const fields = [
-          'id', 'item_id', 'property_no', 'article_type',
+          'id', 'item_id', 'qr_code', 'article_type',
           'task_performed', 'maintenance_date', 'maintained_by', 'created_at'
         ];
         const parser = new Parser({ fields });

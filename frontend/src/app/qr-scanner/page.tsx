@@ -14,6 +14,8 @@ export default function QRScannerPage() {
   const [success, setSuccess] = useState(false);
   const [cameraAvailable, setCameraAvailable] = useState<boolean | null>(null);
   const [showFileUpload, setShowFileUpload] = useState(false);
+  const [showManualInput, setShowManualInput] = useState(false);
+  const [manualQrCode, setManualQrCode] = useState("");
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
@@ -139,10 +141,21 @@ export default function QRScannerPage() {
   };
 
   const handleManualInput = () => {
-    const qrCode = prompt("Enter QR code manually:");
-    if (qrCode && qrCode.trim()) {
-      setScanned(qrCode.trim());
+    setShowManualInput(true);
+    setShowFileUpload(false);
+  };
+
+  const handleManualSubmit = () => {
+    if (manualQrCode && manualQrCode.trim()) {
+      setScanned(manualQrCode.trim());
+      setShowManualInput(false);
+      setManualQrCode("");
     }
+  };
+
+  const handleManualCancel = () => {
+    setShowManualInput(false);
+    setManualQrCode("");
   };
 
   useEffect(() => {
@@ -212,6 +225,129 @@ export default function QRScannerPage() {
             animation: 'spin 1s linear infinite'
           }}></div>
           <span style={{ marginLeft: '0.5rem' }}>Checking camera availability...</span>
+        </div>
+      );
+    }
+
+    if (showManualInput) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '500px' }}>
+          <div style={{
+            width: '100%',
+            padding: '2rem',
+            borderRadius: '16px',
+            border: '2px dashed #d1d5db',
+            backgroundColor: '#f8f9fb',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '1.5rem'
+          }}>
+            <div style={{ 
+              textAlign: 'center', 
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '1rem'
+            }}>
+              <svg style={{ width: '3rem', height: '3rem', color: '#6b7280' }} stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <div style={{ width: '100%', maxWidth: '400px' }}>
+                <input
+                  type="text"
+                  value={manualQrCode}
+                  onChange={(e) => setManualQrCode(e.target.value)}
+                  placeholder="Enter QR code manually..."
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '1.5px solid #cbd5e1',
+                    borderRadius: '12px',
+                    fontSize: '15px',
+                    fontFamily: 'Poppins, sans-serif',
+                    fontWeight: '400',
+                    color: '#222',
+                    backgroundColor: '#fff',
+                    outline: 'none',
+                    transition: 'border-color 0.2s, box-shadow 0.2s',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.03)'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#182848';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(24, 40, 72, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#cbd5e1';
+                    e.target.style.boxShadow = '0 1px 2px rgba(0,0,0,0.03)';
+                  }}
+                  onKeyPress={(e) => e.key === 'Enter' && handleManualSubmit()}
+                />
+              </div>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '12px', width: '100%', maxWidth: '400px' }}>
+            <button
+              onClick={handleManualSubmit}
+              disabled={!manualQrCode.trim()}
+              style={{
+                flex: 1,
+                padding: '12px 24px',
+                backgroundColor: manualQrCode.trim() ? '#182848' : '#9ca3af',
+                color: '#fff',
+                borderRadius: '12px',
+                border: 'none',
+                cursor: manualQrCode.trim() ? 'pointer' : 'not-allowed',
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: '600',
+                fontSize: '15px',
+                transition: 'all 0.2s',
+                boxShadow: manualQrCode.trim() ? '0 2px 8px rgba(24, 40, 72, 0.2)' : 'none'
+              }}
+              onMouseOver={(e) => {
+                if (manualQrCode.trim()) {
+                  e.currentTarget.style.filter = 'brightness(0.9)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.filter = 'brightness(1)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              Submit
+            </button>
+            <button
+              onClick={handleManualCancel}
+              style={{
+                flex: 1,
+                padding: '12px 24px',
+                backgroundColor: '#b91c1c',
+                color: '#fff',
+                borderRadius: '12px',
+                border: 'none',
+                cursor: 'pointer',
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: '600',
+                fontSize: '15px',
+                transition: 'all 0.2s',
+                boxShadow: '0 2px 8px rgba(185, 28, 28, 0.2)'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.filter = 'brightness(0.9)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.filter = 'brightness(1)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       );
     }
@@ -430,12 +566,8 @@ export default function QRScannerPage() {
         </p>
       </div>
 
-      {/* Scanner Content Card */}
+      {/* Scanner Content */}
       <div style={{
-        padding: '32px',
-        background: '#fff',
-        borderRadius: '0 0 15px 15px',
-        boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center'
