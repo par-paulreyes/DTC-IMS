@@ -7,6 +7,8 @@ import styles from "./page.module.css";
 import { FaEdit, FaSave, FaTrash, FaTimes, FaClipboardList, FaStethoscope, FaInfoCircle, FaCog, FaCheckCircle, FaExclamationTriangle, FaTimesCircle, FaHeartbeat, FaClock, FaRegSquare, FaRegCheckSquare } from "react-icons/fa";
 
 
+
+
 // Helper to format date for <input type="date">
 function formatDateForInput(dateString: string) {
   if (!dateString) return '';
@@ -14,15 +16,19 @@ function formatDateForInput(dateString: string) {
 }
 
 
+
+
 function formatDisplayDate(dateString: string) {
   if (!dateString) return '';
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric' 
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
   });
 }
+
+
 
 
 function formatSpecifications(specs: string) {
@@ -33,6 +39,8 @@ function formatSpecifications(specs: string) {
     .map(spec => spec.trim())
     .filter(spec => spec.length > 0);
 }
+
+
 
 
 export default function ItemDetailPage() {
@@ -62,14 +70,18 @@ export default function ItemDetailPage() {
   const [diagnosticsFilter, setDiagnosticsFilter] = useState('all');
 
 
+
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
 
+
+
   useEffect(() => {
     if (!mounted || !id) return;
-    
+   
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
@@ -106,6 +118,8 @@ export default function ItemDetailPage() {
     };
 
 
+
+
     // Fetch maintenance logs
     const fetchLogs = async () => {
       try {
@@ -124,6 +138,8 @@ export default function ItemDetailPage() {
         setLoadingLogs(false);
       }
     };
+
+
 
 
     // Fetch diagnostics
@@ -146,11 +162,15 @@ export default function ItemDetailPage() {
     };
 
 
+
+
     // Fetch all data
     fetchItem();
     fetchLogs();
     fetchDiagnostics();
   }, [id, router, mounted]);
+
+
 
 
   const handleEdit = () => {
@@ -161,11 +181,15 @@ export default function ItemDetailPage() {
   };
 
 
+
+
   const handleCancel = () => {
     setIsEditing(false);
     setEditingItem(item);
     setError("");
   };
+
+
 
 
   const handleSave = async () => {
@@ -185,10 +209,10 @@ export default function ItemDetailPage() {
         pending_maintenance_count: pendingCount,
         maintenance_status: newStatus,
       };
-      
+     
       // Update item
       await apiClient.put(`/items/${id}`, updatedItem);
-      
+     
       // Update diagnostics
       for (const diagnostic of editingDiagnostics) {
         if (diagnostic.id) {
@@ -200,7 +224,7 @@ export default function ItemDetailPage() {
           });
         }
       }
-      
+     
       // Update maintenance logs
       for (const log of editingLogs) {
         if (log.id) {
@@ -212,12 +236,15 @@ export default function ItemDetailPage() {
           });
         }
       }
-      
+     
       setItem(updatedItem);
       setEditingItem(updatedItem);
       setDiagnostics(editingDiagnostics);
       setLogs(editingLogs);
       setIsEditing(false);
+     
+      // Trigger dashboard refresh by setting a timestamp
+      localStorage.setItem('dashboard_refresh_trigger', Date.now().toString());
     } catch (err: any) {
       if (err.response?.status === 401) {
         localStorage.removeItem("token");
@@ -231,6 +258,8 @@ export default function ItemDetailPage() {
   };
 
 
+
+
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this item? This action cannot be undone.")) {
       return;
@@ -240,6 +269,10 @@ export default function ItemDetailPage() {
    
     try {
       await apiClient.delete(`/items/${id}`);
+     
+      // Trigger dashboard refresh by setting a timestamp
+      localStorage.setItem('dashboard_refresh_trigger', Date.now().toString());
+     
       router.push("/inventory");
     } catch (err: any) {
       if (err.response?.status === 401) {
@@ -254,9 +287,13 @@ export default function ItemDetailPage() {
   };
 
 
+
+
   const handleInputChange = (field: string, value: string) => {
     setEditingItem({ ...editingItem, [field]: value });
   };
+
+
 
 
   const getStatusIcon = (status: string) => {
@@ -270,6 +307,8 @@ export default function ItemDetailPage() {
   };
 
 
+
+
   const getTaskStatusIcon = (status: string) => {
     switch (status) {
       case 'completed': return <FaCheckCircle className={styles.taskIcon} style={{color:'#22c55e'}} title="Completed"/>;
@@ -277,6 +316,8 @@ export default function ItemDetailPage() {
       default: return <FaClock className={styles.taskIcon} style={{color:'#888'}} title="Unknown"/>;
     }
   };
+
+
 
 
   const getTaskStatusClass = (status: string) => {
@@ -288,14 +329,20 @@ export default function ItemDetailPage() {
   };
 
 
+
+
   const handleDiagnosticChange = (index: number, field: string, value: any) => {
     setEditingDiagnostics(prev => prev.map((d, i) => i === index ? { ...d, [field]: value, diagnostics_date: new Date().toISOString().split('T')[0] } : d));
   };
 
 
+
+
   const handleLogChange = (index: number, field: string, value: any) => {
     setEditingLogs(prev => prev.map((l, i) => i === index ? { ...l, [field]: value, maintenance_date: new Date().toISOString().split('T')[0] } : l));
   };
+
+
 
 
   // Handle image upload for inventory item
@@ -328,9 +375,13 @@ export default function ItemDetailPage() {
   };
 
 
+
+
   const imgSrc = isEditing
     ? (editingItem && getImageUrl(editingItem.image_url))
     : (item && getImageUrl(item.image_url));
+
+
 
 
   // Use editingDiagnostics/logs in edit mode, diagnostics/logs in view mode
@@ -338,10 +389,14 @@ export default function ItemDetailPage() {
   const logsToShow = isEditing ? editingLogs : logs;
 
 
+
+
   // Diagnostics filter logic
   const filteredDiagnostics = diagnosticsToShow.filter(d =>
     diagnosticsFilter === 'all' ? true : d.system_status === diagnosticsFilter
   );
+
+
 
 
   // Checklist for logs
@@ -351,9 +406,13 @@ export default function ItemDetailPage() {
   }));
 
 
+
+
   const handleImageButtonClick = () => {
     if (fileInputRef.current) fileInputRef.current.click();
   };
+
+
 
 
   // Checklist toggle logic (checkbox only)
@@ -363,9 +422,12 @@ export default function ItemDetailPage() {
   };
 
 
+
+
   if (!mounted) return (
     <div className="min-h-screen flex items-center justify-center">Loading...</div>
   );
+
 
   if (mounted && loading) return (
     <div className="min-h-screen flex items-center justify-center">Loading...</div>
@@ -378,6 +440,8 @@ export default function ItemDetailPage() {
   if (mounted && !item) return (
     <div className="min-h-screen flex items-center justify-center text-gray-500">Item not found.</div>
   );
+
+
 
 
   return (
@@ -470,8 +534,8 @@ export default function ItemDetailPage() {
                 {item.specifications ? (
                   <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
                     {formatSpecifications(item.specifications).map((spec, index) => (
-                      <span 
-                        key={index} 
+                      <span
+                        key={index}
                         style={{
                           background: '#e5e7eb',
                           color: '#374151',
@@ -613,4 +677,8 @@ export default function ItemDetailPage() {
     </div>
   );
 }
+
+
+
+
 

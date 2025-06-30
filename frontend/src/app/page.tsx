@@ -1,22 +1,34 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import styles from "./dashboard.module.css";
 import { apiClient, getImageUrl } from "../config/api";
+import { FaHome, FaClipboardList, FaHistory, FaUser, FaSync, FaSyncAlt, FaTools, FaChartBar, FaBoxes, FaPlus } from "react-icons/fa";
+
 
 interface Item {
   id: number;
   property_no: string;
-  qr_code?: string;
-  article_type: string;
-  image_url?: string;
+  qr_code: string;
+  article_type: string; // This is the actual name field in the database
+  specifications?: string;
+  date_acquired?: string;
+  end_user?: string;
+  price?: number;
   location?: string;
+  supply_officer?: string;
+  company_name: string;
+  image_url?: string;
+  next_maintenance_date?: string;
+  pending_maintenance_count?: number;
+  maintenance_status?: string;
   status?: string;
   system_status?: string;
-  has_pending_maintenance?: boolean;
-  pending_maintenance_count?: number;
+  created_at: string;
+  updated_at?: string;
 }
+
 
 export default function DashboardPage() {
   const [totalItems, setTotalItems] = useState(0);
@@ -27,17 +39,175 @@ export default function DashboardPage() {
   const [recentItems, setRecentItems] = useState<Item[]>([]);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [criticalItems, setCriticalItems] = useState(0);
+  const [completedMaintenance, setCompletedMaintenance] = useState(0);
+  const [pendingMaintenance, setPendingMaintenance] = useState(0);
+  const [topCategory, setTopCategory] = useState('');
+  const [topCategoryCount, setTopCategoryCount] = useState(0);
+  const [secondCategory, setSecondCategory] = useState('');
+  const [secondCategoryCount, setSecondCategoryCount] = useState(0);
+  const [todayAdded, setTodayAdded] = useState(0);
+  const [yesterdayAdded, setYesterdayAdded] = useState(0);
+  const [goodStatusCount, setGoodStatusCount] = useState(0);
+  const [belowGoodCount, setBelowGoodCount] = useState(0);
   const router = useRouter();
+
+
+  // Function to fetch dashboard data
+  const fetchDashboardData = useCallback(async (showLoading = true) => {
+    if (showLoading) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
+    setError("");
+   
+    try {
+      const [itemsRes, neededMaintenanceRes, maintenanceLogsRes] = await Promise.all([
+        apiClient.get("/items"),
+        apiClient.get("/items/maintenance/needed"),
+        apiClient.get("/logs"),
+      ]);
+
+
+      const items = itemsRes.data;
+      const neededMaintenance = neededMaintenanceRes.data;
+      const maintenanceLogs = maintenanceLogsRes.data;
+     
+      // Calculate statistics
+      const totalItems = items.length;
+      const criticalItemsCount = items.filter(item => item.system_status === 'Poor' || item.system_status === 'Critical' || item.system_status === 'Fair' || item.system_status === 'Needs Repair' || item.system_status === 'Out of Order').length;
+      const completedMaintenanceCount = maintenanceLogs.filter(log => log.status === 'completed').length;
+      const pendingMaintenanceCount = maintenanceLogs.filter(log => log.status === 'pending').length;
+      const totalMaintenanceCount = maintenanceLogs.length;
+     
+      // Calculate items needing maintenance (system_status below 'Good')
+      const itemsNeedingMaintenance = items.filter(item =>
+        item.system_status &&
+        ['Poor', 'Critical', 'Fair', 'Needs Repair', 'Out of Order'].includes(item.system_status)
+      ).length;
+     
+      // Calculate items with Good status
+      const itemsWithGoodStatus = items.filter(item =>
+        item.system_status &&
+        item.system_status === 'Good'
+      ).length;
+     
+      // Calculate category statistics (using article_type instead of category)
+      const categoryCounts: { [key: string]: number } = {};
+      items.forEach(item => {
+        const category = item.article_type || 'Uncategorized';
+        categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+      });
+     
+      const sortedCategories = Object.entries(categoryCounts)
+        .sort(([,a], [,b]) => (b as number) - (a as number))
+        .slice(0, 2);
+     
+      const topCategoryName = sortedCategories[0]?.[0] || 'None';
+      const topCategoryCount = sortedCategories[0]?.[1] as number || 0;
+      const secondCategoryName = sortedCategories[1]?.[0] || 'None';
+      const secondCategoryCount = sortedCategories[1]?.[1] as number || 0;
+     
+      // Calculate today and yesterday added items
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+     
+      const todayAddedCount = items.filter(item => {
+        if (!item || !item.created_at) return false;
+        const itemDate = new Date(item.created_at);
+        return itemDate.toDateString() === today.toDateString();
+      }).length;
+     
+      const yesterdayAddedCount = items.filter(item => {
+        if (!item || !item.created_at) return false;
+        const itemDate = new Date(item.created_at);
+        return itemDate.toDateString() === yesterday.toDateString();
+      }).length;
+
+
+      // Get recently added items (last 5 items)
+      const recentItemsList = items
+        .filter(item => item && item.created_at) // Filter out items without creation date
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 5);
+
+
+      // Calculate recently added count (items added in last 7 days)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const recentlyAddedCount = items.filter(item => {
+        if (!item || !item.created_at) return false;
+        const itemDate = new Date(item.created_at);
+        return itemDate >= sevenDaysAgo;
+      }).length;
+
+
+      // Set all state variables
+      setTotalItems(totalItems);
+      setNeededMaintenance(itemsNeedingMaintenance);
+      setTotalMaintenance(totalMaintenanceCount);
+      setTotalArticles(totalItems); // Total articles is the same as total items
+      setRecentlyAdded(recentlyAddedCount);
+      setRecentItems(recentItemsList);
+      setCriticalItems(criticalItemsCount);
+      setCompletedMaintenance(completedMaintenanceCount);
+      setPendingMaintenance(pendingMaintenanceCount);
+      setTopCategory(topCategoryName);
+      setTopCategoryCount(topCategoryCount);
+      setSecondCategory(secondCategoryName);
+      setSecondCategoryCount(secondCategoryCount);
+      setTodayAdded(todayAddedCount);
+      setYesterdayAdded(yesterdayAddedCount);
+      setGoodStatusCount(itemsWithGoodStatus);
+      setBelowGoodCount(itemsNeedingMaintenance);
+     
+      setLastUpdated(new Date());
+     
+      // Log the fetched data for debugging
+      console.log('Dashboard data updated:', {
+        totalItems: totalItems,
+        neededMaintenance: itemsNeedingMaintenance,
+        goodStatusCount: itemsWithGoodStatus,
+        belowGoodCount: itemsNeedingMaintenance,
+        totalMaintenance: totalMaintenanceCount,
+        recentlyAdded: recentlyAddedCount,
+        totalArticles: totalItems,
+        criticalItems: criticalItemsCount,
+        completedMaintenance: completedMaintenanceCount,
+        pendingMaintenance: pendingMaintenanceCount,
+        recentItems: recentItemsList.length
+      });
+     
+    } catch (err: any) {
+      console.error("Error loading dashboard stats:", err);
+      setError("Error loading dashboard stats");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+
+  // Manual refresh function
+  const handleManualRefresh = () => {
+    fetchDashboardData(false);
+  };
+
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+
   useEffect(() => {
     if (!mounted) return;
-    
+   
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
@@ -50,55 +220,84 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, [router, mounted]);
 
+
   useEffect(() => {
     if (!mounted) return;
-    
+   
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
       return;
     }
 
-    setLoading(true);
-    setError("");
-    
-    Promise.all([
-      apiClient.get("/items"),
-      apiClient.get("/items/maintenance/needed"),
-      apiClient.get("/logs"),
-    ])
-      .then(([itemsRes, neededMaintenanceRes, maintenanceLogsRes]) => {
-        const items = itemsRes.data;
-        const neededMaintenance = neededMaintenanceRes.data;
-        const maintenanceLogs = maintenanceLogsRes.data;
-        
-        setTotalItems(items.length);
-        setNeededMaintenance(neededMaintenance.length);
-        setTotalMaintenance(maintenanceLogs.length);
-        
-        // Calculate recently added items (items created today)
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Start of today
-        const recentItems = items.filter((item: any) => {
-          const createdAt = new Date(item.created_at);
-          createdAt.setHours(0, 0, 0, 0); // Normalize to start of day
-          return createdAt.getTime() === today.getTime();
-        });
-        setRecentlyAdded(recentItems.length);
-        setRecentItems(recentItems);
-        
-        // Calculate total unique article types
-        const uniqueArticleTypes = new Set(items.map((item: any) => item.article_type));
-        setTotalArticles(uniqueArticleTypes.size);
-        
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error loading dashboard stats:", err);
-        setError("Error loading dashboard stats");
-        setLoading(false);
-      });
-  }, [router, mounted]);
+
+    // Initial data fetch
+    fetchDashboardData();
+
+
+    // Set up automatic refresh every 30 seconds
+    const refreshInterval = setInterval(() => {
+      fetchDashboardData(false);
+    }, 30000); // 30 seconds
+
+
+    // Set up focus refresh (refresh when user returns to tab)
+    const handleFocus = () => {
+      fetchDashboardData(false);
+    };
+
+
+    // Set up visibility change refresh (refresh when user returns to tab)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchDashboardData(false);
+      }
+    };
+
+
+    // Set up route change refresh (refresh when user navigates back to dashboard)
+    const handleRouteChange = () => {
+      // Check if we're on the dashboard page
+      if (window.location.pathname === '/') {
+        fetchDashboardData(false);
+      }
+    };
+
+
+    // Check for maintenance update triggers
+    const checkMaintenanceUpdates = () => {
+      const refreshTrigger = localStorage.getItem('dashboard_refresh_trigger');
+      if (refreshTrigger) {
+        const triggerTime = parseInt(refreshTrigger);
+        const currentTime = Date.now();
+        // If trigger is less than 5 seconds old, refresh dashboard
+        if (currentTime - triggerTime < 5000) {
+          fetchDashboardData(false);
+          localStorage.removeItem('dashboard_refresh_trigger');
+        }
+      }
+    };
+
+
+    // Check for maintenance updates every 2 seconds
+    const maintenanceCheckInterval = setInterval(checkMaintenanceUpdates, 2000);
+
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('popstate', handleRouteChange);
+
+
+    // Cleanup
+    return () => {
+      clearInterval(refreshInterval);
+      clearInterval(maintenanceCheckInterval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('popstate', handleRouteChange);
+    };
+  }, [router, mounted, fetchDashboardData]);
+
 
   const handleDiagnostic = async (id: string) => {
     try {
@@ -109,13 +308,14 @@ export default function DashboardPage() {
     }
   };
 
+
   const handleCardClick = (cardType: string) => {
     switch (cardType) {
       case 'needed-maintenance':
-        router.push('/inventory?maintenance=pending');
+        router.push('/inventory?needs_maintenance=true');
         break;
       case 'total-maintenance':
-        router.push('/logs');
+        router.push('/inventory?maintenance=pending');
         break;
       case 'total-articles':
         router.push('/inventory');
@@ -128,11 +328,9 @@ export default function DashboardPage() {
     }
   };
 
+
   return (
     <div className={styles.dashboardContainer}>
-      {/* Dashboard Title */}
-      <div className={styles.dashboardTitle}>Dashboard</div>
-      
       {!mounted && (
         <div style={{
           textAlign: 'center',
@@ -143,7 +341,7 @@ export default function DashboardPage() {
           Loading...
         </div>
       )}
-      
+     
       {mounted && loading && (
         <div style={{
           textAlign: 'center',
@@ -154,7 +352,7 @@ export default function DashboardPage() {
           Loading dashboard data...
         </div>
       )}
-      
+     
       {mounted && error && (
         <div style={{
           backgroundColor: '#fef2f2',
@@ -167,59 +365,164 @@ export default function DashboardPage() {
           {error}
         </div>
       )}
-      
+     
       {mounted && !loading && !error && (
         <>
-          {/* Main Inventory Card */}
+          {/* Header Card - matching QR scanner style */}
           <div className={styles.dashboardCard}>
             <Image
-              src="/dtc-bg.png"
+              src="/dtc.svg"
               alt="Inventory Background"
               className={styles.dashboardCardBg}
               fill
               priority
             />
             <div className={styles.dashboardCardContent}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <div style={{ fontSize: '2.5rem', fontWeight: 800, lineHeight: 1 }}>{totalItems} <span style={{ fontSize: '1.1rem', fontWeight: 500 }}>Items</span></div>
-                  <div style={{ fontSize: '0.95rem', fontWeight: 600, marginTop: 2 }}>Inventory Total</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', height: '100%' }}>
+                <div style={{ textAlign: 'left' }}>
+                  <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', margin: 0, lineHeight: 1 }}>{totalItems} Items</h1>
+                  <p style={{ margin: '4px 0 0 0', opacity: 0.9, fontSize: '1.1rem', fontWeight: 500 }}>Inventory Total</p>
                 </div>
-                <div style={{ fontSize: '0.95rem', fontWeight: 600, opacity: 0.8 }}>Inventory Management System</div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <h2 style={{ fontSize: '1.3rem', fontWeight: '600', margin: 0, opacity: 0.95 }}>Dashboard</h2>
+                    <p style={{ margin: '4px 0 0 0', opacity: 0.9, fontSize: '1rem' }}>System Overview</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', justifyContent: 'center' }}>
+                      <p style={{ margin: 0, opacity: 0.8, fontSize: '0.85rem' }}>
+                        Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      <button
+                        onClick={handleManualRefresh}
+                        disabled={refreshing}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          padding: '4px',
+                          borderRadius: '4px',
+                          opacity: refreshing ? 0.5 : 0.8,
+                          transition: 'all 0.2s ease'
+                        }}
+                        title="Refresh data"
+                      >
+                        <FaSyncAlt
+                          size={14}
+                          style={{
+                            color: '#fff',
+                            animation: refreshing ? 'spin 1s linear infinite' : 'none'
+                          }}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: '0.85rem', marginTop: 18, opacity: 0.8 }}>Updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</div>
             </div>
           </div>
-          {/* Stats Grid */}
-          <div className={styles.dashboardStatsGrid}>
-            <StatCard 
-              label="Needed Maintenance" 
-              value={neededMaintenance} 
-              date={new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-              priority={neededMaintenance > 0}
-              description="Items with poor status or pending maintenance"
+
+
+          {/* Dashboard Info Cards - 2x2 grid, custom markup */}
+          <div className={styles.dashboardInfoGrid}>
+            {/* Needed Maintenance */}
+            <div
+              className={`${styles.infoCard} ${styles.maintenanceCard}`}
               onClick={() => handleCardClick('needed-maintenance')}
-            />
-            <StatCard 
-              label="Total Maintenance" 
-              value={totalMaintenance} 
-              date={new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              style={{ cursor: 'pointer' }}
+              title="Click to view all items except those with Good status"
+            >
+              <div className={styles.cardTopRow}>
+                <span className={styles.cardNumber} style={{ color: belowGoodCount > 0 ? '#991b1b' : '#15803d' }}>{belowGoodCount}</span>
+                <span className={styles.cardIcon} style={{ background: belowGoodCount > 0 ? '#fef2f2' : '#f0fdf4' }}>
+                  <FaTools size={28} style={{ color: belowGoodCount > 0 ? '#991b1b' : '#15803d' }} />
+                </span>
+              </div>
+              <div className={styles.cardTitle}>Needs Maintenance</div>
+              <div className={styles.cardChange} style={{ color: belowGoodCount > 0 ? '#991b1b' : '#15803d' }}>
+                {belowGoodCount > 0 ? '↗ Items below Good status' : '✓ All items in good condition'}
+              </div>
+              <div className={styles.cardStatsRow}>
+                <div><span className={styles.cardStatValue}>{goodStatusCount}</span> <span className={styles.cardStatLabel}>GOOD</span></div>
+                <div><span className={styles.cardStatValue}>{belowGoodCount}</span> <span className={styles.cardStatLabel}>URGENT</span></div>
+              </div>
+              <div className={styles.cardFooterRow}>
+                <span className={styles.cardDate}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+            </div>
+            {/* Total Maintenance */}
+            <div
+              className={`${styles.infoCard} ${styles.totalCard}`}
               onClick={() => handleCardClick('total-maintenance')}
-            />
-            <StatCard 
-              label="Total Articles" 
-              value={totalArticles} 
-              date={new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-              description="Unique article types in inventory"
+              style={{ cursor: 'pointer' }}
+              title="Click to view items with pending maintenance"
+            >
+              <div className={styles.cardTopRow}>
+                <span className={styles.cardNumber} style={{ color: pendingMaintenance > 0 ? '#991b1b' : '#15803d' }}>{totalMaintenance}</span>
+                <span className={styles.cardIcon} style={{ background: pendingMaintenance > 0 ? '#fef2f2' : '#f0fdf4' }}>
+                  <FaChartBar size={28} style={{ color: pendingMaintenance > 0 ? '#991b1b' : '#15803d' }} />
+                </span>
+              </div>
+              <div className={styles.cardTitle}>Total Maintenance</div>
+              <div className={styles.cardChange} style={{ color: pendingMaintenance > 0 ? '#991b1b' : '#15803d' }}>
+                {pendingMaintenance > 0 ? `↗ ${pendingMaintenance} pending` : `✓ ${completedMaintenance} completed`}
+              </div>
+              <div className={styles.cardProgressBar}><div className={styles.cardProgress} style={{ width: `${totalMaintenance > 0 ? (completedMaintenance / totalMaintenance) * 100 : 0}%` }} /></div>
+              <div className={styles.cardStatsRow}>
+                <div><span className={styles.cardStatValue}>{completedMaintenance}</span> <span className={styles.cardStatLabel}>COMPLETED</span></div>
+                <div><span className={styles.cardStatValue}>{pendingMaintenance}</span> <span className={styles.cardStatLabel}>PENDING</span></div>
+              </div>
+              <div className={styles.cardFooterRow}>
+                <span className={styles.cardDate}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+            </div>
+            {/* Total Articles */}
+            <div
+              className={`${styles.infoCard} ${styles.articlesCard}`}
               onClick={() => handleCardClick('total-articles')}
-            />
-            <StatCard 
-              label="Recently Added" 
-              value={recentlyAdded} 
-              date={new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              style={{ cursor: 'pointer' }}
+              title="Click to view all inventory items"
+            >
+              <div className={styles.cardTopRow}>
+                <span className={styles.cardNumber} style={{ color: '#15803d' }}>{totalArticles}</span>
+                <span className={styles.cardIcon} style={{ background: '#f0fdf4' }}>
+                  <FaBoxes size={28} style={{ color: '#15803d' }} />
+                </span>
+              </div>
+              <div className={styles.cardTitle}>Total Articles</div>
+              <div className={styles.cardChange} style={{ color: '#6b7280' }}>→ No change</div>
+              <div className={styles.cardStatsRow}>
+                <div><span className={styles.cardStatValue}>{topCategoryCount}</span> <span className={styles.cardStatLabel}>{(topCategory || 'NONE').toUpperCase()}</span></div>
+                <div><span className={styles.cardStatValue}>{secondCategoryCount}</span> <span className={styles.cardStatLabel}>{(secondCategory || 'NONE').toUpperCase()}</span></div>
+              </div>
+              <div className={styles.cardFooterRow}>
+                <span className={styles.cardDate}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+            </div>
+            {/* Recently Added */}
+            <div
+              className={`${styles.infoCard} ${styles.recentCard}`}
               onClick={() => handleCardClick('recently-added')}
-            />
+              style={{ cursor: 'pointer' }}
+              title="Click to view all inventory items"
+            >
+              <div className={styles.cardTopRow}>
+                <span className={styles.cardNumber} style={{ color: '#d97706' }}>{recentlyAdded}</span>
+                <span className={styles.cardIcon} style={{ background: '#fffbeb' }}>
+                  <FaPlus size={28} style={{ color: '#d97706' }} />
+                </span>
+              </div>
+              <div className={styles.cardTitle}>Recently Added</div>
+              <div className={styles.cardChange} style={{ color: '#991b1b' }}>↗ +3 this week</div>
+              <div className={styles.cardStatsRow}>
+                <div><span className={styles.cardStatValue}>{todayAdded}</span> <span className={styles.cardStatLabel}>TODAY</span></div>
+                <div><span className={styles.cardStatValue}>{yesterdayAdded}</span> <span className={styles.cardStatLabel}>YESTERDAY</span></div>
+              </div>
+              <div className={styles.cardFooterRow}>
+                <span className={styles.cardDate}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+            </div>
           </div>
+
+
           {/* Recent Section */}
           <div className={styles.dashboardRecent}>
             <div className={styles.dashboardRecentTitle}>Recently Added Items</div>
@@ -231,16 +534,26 @@ export default function DashboardPage() {
                   color: '#6b7280',
                   fontSize: '0.9rem'
                 }}>
-                  No items added today
+                  {totalItems === 0 ? 'No items in inventory yet' : 'No recent items to display'}
+                  {totalItems > 0 && (
+                    <div style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
+                      Total items: {totalItems}
+                    </div>
+                  )}
                 </div>
               ) : (
                 recentItems.map((item) => (
-                  <div key={item.id} className={styles.dashboardRecentCard} onClick={() => router.push(`/inventory/${item.id}`)}>
+                  <div
+                    key={item.id}
+                    className={styles.dashboardRecentCard}
+                    onClick={() => router.push(`/inventory/${item.id}`)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       {item.image_url ? (
                         <img
                           src={getImageUrl(item.image_url)}
-                          alt={item.property_no}
+                          alt={item.article_type}
                           style={{
                             width: 48,
                             height: 48,
@@ -260,34 +573,34 @@ export default function DashboardPage() {
                           justifyContent: 'center',
                           border: '1px solid #e5e7eb'
                         }}>
-                          {item.article_type.toLowerCase().includes('desktop') && (
+                          {(item.article_type || '').toLowerCase().includes('desktop') && (
                             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
                               <line x1="8" y1="21" x2="16" y2="21"/>
                               <line x1="12" y1="17" x2="12" y2="21"/>
                             </svg>
                           )}
-                          {item.article_type.toLowerCase().includes('laptop') && (
+                          {(item.article_type || '').toLowerCase().includes('laptop') && (
                             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
                               <line x1="2" y1="10" x2="22" y2="10"/>
                             </svg>
                           )}
-                          {item.article_type.toLowerCase().includes('printer') && (
+                          {(item.article_type || '').toLowerCase().includes('printer') && (
                             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <polyline points="6,9 6,2 18,2 18,9"/>
                               <path d="M6,18H4a2,2 0 0,1 -2,-2v-5a2,2 0 0,1 2,-2h16a2,2 0 0,1 2,2v5a2,2 0 0,1 -2,2h-2"/>
                               <rect x="6" y="14" width="12" height="8"/>
                             </svg>
                           )}
-                          {item.article_type.toLowerCase().includes('monitor') && (
+                          {(item.article_type || '').toLowerCase().includes('monitor') && (
                             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
                               <line x1="8" y1="21" x2="16" y2="21"/>
                               <line x1="12" y1="17" x2="12" y2="21"/>
                             </svg>
                           )}
-                          {item.article_type.toLowerCase().includes('scanner') && (
+                          {(item.article_type || '').toLowerCase().includes('scanner') && (
                             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
                               <line x1="8" y1="21" x2="16" y2="21"/>
@@ -296,7 +609,7 @@ export default function DashboardPage() {
                               <line x1="6" y1="12" x2="18" y2="12"/>
                             </svg>
                           )}
-                          {item.article_type.toLowerCase().includes('server') && (
+                          {(item.article_type || '').toLowerCase().includes('server') && (
                             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
                               <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
@@ -304,7 +617,7 @@ export default function DashboardPage() {
                               <line x1="6" y1="18" x2="6" y2="18"/>
                             </svg>
                           )}
-                          {item.article_type.toLowerCase().includes('network') && (
+                          {(item.article_type || '').toLowerCase().includes('network') && (
                             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <circle cx="12" cy="12" r="3"/>
                               <path d="M12 1v6m0 6v6"/>
@@ -313,13 +626,13 @@ export default function DashboardPage() {
                               <path d="M4.22 4.22l4.24 4.24m6.36 6.36l4.24 4.24"/>
                             </svg>
                           )}
-                          {!item.article_type.toLowerCase().includes('desktop') && 
-                           !item.article_type.toLowerCase().includes('laptop') && 
-                           !item.article_type.toLowerCase().includes('printer') && 
-                           !item.article_type.toLowerCase().includes('monitor') && 
-                           !item.article_type.toLowerCase().includes('scanner') && 
-                           !item.article_type.toLowerCase().includes('server') && 
-                           !item.article_type.toLowerCase().includes('network') && (
+                          {!(item.article_type || '').toLowerCase().includes('desktop') &&
+                           !(item.article_type || '').toLowerCase().includes('laptop') &&
+                           !(item.article_type || '').toLowerCase().includes('printer') &&
+                           !(item.article_type || '').toLowerCase().includes('monitor') &&
+                           !(item.article_type || '').toLowerCase().includes('scanner') &&
+                           !(item.article_type || '').toLowerCase().includes('server') &&
+                           !(item.article_type || '').toLowerCase().includes('network') && (
                             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                               <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -330,16 +643,14 @@ export default function DashboardPage() {
                       )}
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 600, color: '#1f2937', fontSize: '0.9rem' }}>
-                          {item.qr_code || item.property_no}
+                          {item.article_type || 'Unnamed Item'}
                         </div>
-                        <div style={{ color: '#6b7280', fontSize: '0.8rem' }}>
-                          {item.article_type}
+                        <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
+                          QR: {item.qr_code}
                         </div>
-                        {item.has_pending_maintenance && (
-                          <div style={{ color: '#dc2626', fontSize: '0.75rem', fontWeight: 500, marginTop: '2px' }}>
-                            ⚠️ Pending Maintenance
-                          </div>
-                        )}
+                        <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
+                          Added: {new Date(item.created_at).toLocaleDateString()}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -349,66 +660,18 @@ export default function DashboardPage() {
           </div>
         </>
       )}
+
+
+      {/* Add CSS for spinning animation */}
+      <style jsx>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
 
-function StatCard({ label, value, date, priority = false, description, onClick }: { 
-  label: string; 
-  value: number; 
-  date: string; 
-  priority?: boolean; 
-  description?: string;
-  onClick?: () => void;
-}) {
-  return (
-    <div 
-      className={styles.dashboardStatCard} 
-      style={{
-        borderLeft: priority ? '4px solid #dc2626' : undefined,
-        backgroundColor: priority ? '#fef2f2' : undefined,
-      }}
-      onClick={onClick}
-    >
-      <div className={styles.dashboardStatValue} style={{
-        color: priority ? '#dc2626' : undefined,
-        fontWeight: priority ? '700' : undefined
-      }}>{value}</div>
-      <div className={styles.dashboardStatLabel}>{label}</div>
-      {description && (
-        <div style={{
-          fontSize: '0.75rem',
-          color: '#6b7280',
-          marginTop: '2px',
-          fontStyle: 'italic',
-          fontFamily: 'Poppins, sans-serif'
-        }}>
-          {description}
-        </div>
-      )}
-      <div className={styles.dashboardStatDate}>Updated: {date}</div>
-      {priority && (
-        <div style={{
-          fontSize: '0.75rem',
-          color: '#dc2626',
-          fontWeight: '600',
-          marginTop: '4px',
-          fontFamily: 'Poppins, sans-serif'
-        }}>
-          ⚠️ Requires Attention
-        </div>
-      )}
-      {onClick && (
-        <div style={{
-          fontSize: '0.75rem',
-          color: '#3b82f6',
-          fontWeight: '500',
-          marginTop: '4px',
-          fontFamily: 'Poppins, sans-serif'
-        }}>
-          Click to view →
-        </div>
-      )}
-    </div>
-  );
-}
+
+

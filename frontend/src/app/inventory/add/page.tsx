@@ -6,6 +6,7 @@ import { apiClient, getImageUrl } from "../../../config/api";
 import { Camera, Upload, X, Check, Plus, Trash2, ArrowRight, ArrowLeft, Info, Settings, CheckCircle, AlertTriangle, XCircle, AlertOctagon } from "lucide-react";
 import styles from './page.module.css';
 
+
 interface MaintenanceTask {
   id: string;
   task: string;
@@ -13,11 +14,13 @@ interface MaintenanceTask {
   notes: string;
 }
 
+
 interface Diagnostic {
   system_status: string;
   findings: string;
   recommendations: string;
 }
+
 
 export default function AddItemPage() {
   const [form, setForm] = useState({
@@ -31,7 +34,7 @@ export default function AddItemPage() {
     supply_officer: "",
     specifications: "",
   });
-  
+ 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [capturedImage, setCapturedImage] = useState<string>("");
@@ -55,10 +58,11 @@ export default function AddItemPage() {
   const [activeTab, setActiveTab] = useState<'details' | 'maintenance' | 'diagnostics'>('details');
   const [diagnosticsDropdownOpen, setDiagnosticsDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  
+ 
   const router = useRouter();
   const searchParams = useSearchParams();
   const webcamRef = useRef<Webcam>(null);
+
 
   const diagnosticsOptions = [
     { value: 'Good', label: 'Good', icon: <CheckCircle color="#22c55e" size={20} /> },
@@ -67,25 +71,30 @@ export default function AddItemPage() {
     { value: 'Critical', label: 'Critical', icon: <AlertOctagon color="#dc2626" size={20} /> },
   ];
 
+
   const selectedDiagnosticsOption = diagnosticsOptions.find(opt => opt.value === diagnostic.system_status) || diagnosticsOptions[0];
+
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+
   // Check for QR code parameter and auto-fill qr_code field
   useEffect(() => {
     if (!mounted) return;
-    
+   
     const qrCode = searchParams.get('qr');
     if (qrCode) {
       setForm(prev => ({ ...prev, qr_code: qrCode }));
     }
   }, [searchParams, mounted]);
 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -95,13 +104,13 @@ export default function AddItemPage() {
         setError("Please select a valid image file");
         return;
       }
-      
+     
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         setError("Image file size must be less than 5MB");
         return;
       }
-      
+     
       setImageFile(file);
       setCapturedImage(""); // Clear captured image when uploading
       setError(""); // Clear any previous errors
@@ -112,6 +121,7 @@ export default function AddItemPage() {
       reader.readAsDataURL(file);
     }
   };
+
 
   const capturePhoto = () => {
     if (webcamRef.current) {
@@ -125,11 +135,13 @@ export default function AddItemPage() {
     }
   };
 
+
   const retakePhoto = () => {
     setCapturedImage("");
     setShowCamera(true);
     setCameraError("");
   };
+
 
   const removeImage = () => {
     setImageFile(null);
@@ -138,11 +150,13 @@ export default function AddItemPage() {
     setCameraError("");
   };
 
+
   const handleCameraError = (error: string) => {
     setCameraError(error);
     setCameraLoading(false);
     console.error('Camera error:', error);
   };
+
 
   const handleCameraStart = () => {
     setCameraError("");
@@ -150,17 +164,20 @@ export default function AddItemPage() {
     setShowCamera(true);
   };
 
+
   const handleCameraReady = () => {
     setCameraLoading(false);
   };
 
+
   const handleMaintenanceTaskChange = (id: string, field: keyof MaintenanceTask, value: string | boolean) => {
-    setMaintenanceTasks(prev => 
-      prev.map(task => 
+    setMaintenanceTasks(prev =>
+      prev.map(task =>
         task.id === id ? { ...task, [field]: value } : task
       )
     );
   };
+
 
   const addCustomTask = () => {
     if (customTask.trim()) {
@@ -175,21 +192,24 @@ export default function AddItemPage() {
     }
   };
 
+
   const removeTask = (id: string) => {
     setMaintenanceTasks(prev => prev.filter(task => task.id !== id));
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+   
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         router.push("/login");
         return;
       }
+
 
       // Validate required fields
       if (!form.property_no.trim()) {
@@ -198,11 +218,13 @@ export default function AddItemPage() {
         return;
       }
 
+
       if (!form.article_type) {
         setError("Article Type is required");
         setLoading(false);
         return;
       }
+
 
       // Validate maintenance tasks
       if (maintenanceTasks.length === 0) {
@@ -210,6 +232,7 @@ export default function AddItemPage() {
         setLoading(false);
         return;
       }
+
 
       // Validate that all tasks have required fields
       const invalidTasks = maintenanceTasks.filter(task => !task.task.trim());
@@ -219,6 +242,7 @@ export default function AddItemPage() {
         return;
       }
 
+
       // Validate diagnostic data
       if (!diagnostic.system_status) {
         setError("System status is required");
@@ -226,20 +250,23 @@ export default function AddItemPage() {
         return;
       }
 
+
       // Debug: Log maintenance tasks before sending
       console.log('Maintenance tasks before submission:', maintenanceTasks);
       console.log('Maintenance tasks JSON:', JSON.stringify(maintenanceTasks));
       console.log('Diagnostic data:', diagnostic);
 
+
       // Create FormData for image upload
       const formData = new FormData();
-      
+     
       // Add item data (only the fields that belong in items table)
       Object.entries(form).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
           formData.append(key, value);
         }
       });
+
 
       // Add image if selected (either uploaded or captured)
       if (imageFile) {
@@ -258,11 +285,13 @@ export default function AddItemPage() {
         formData.append('image', capturedFile);
       }
 
+
       // Add maintenance data with automatic date and user info
       const maintenanceDate = new Date().toISOString().split('T')[0];
       formData.append('maintenance_date', maintenanceDate);
       formData.append('maintenance_tasks', JSON.stringify(maintenanceTasks));
       formData.append('diagnostic', JSON.stringify(diagnostic));
+
 
       // Debug: Log FormData contents
       console.log('FormData contents:');
@@ -270,21 +299,26 @@ export default function AddItemPage() {
         console.log(`${key}:`, value);
       }
 
+
       const response = await apiClient.post("/items", formData, {
-        headers: { 
+        headers: {
           Authorization: token,
           'Content-Type': 'multipart/form-data'
         },
       });
 
+
       console.log('Item created successfully:', response.data);
-      
+     
       // Show success message with details
-      const successMessage = `Item created successfully! 
+      const successMessage = `Item created successfully!
         - Item ID: ${response.data.id}
         - Maintenance logs: ${response.data.maintenance_logs_created || 0}
         - Diagnostic: ${response.data.diagnostic_created ? 'Yes' : 'No'}`;
-      
+     
+      // Trigger dashboard refresh by setting a timestamp
+      localStorage.setItem('dashboard_refresh_trigger', Date.now().toString());
+     
       alert(successMessage);
       router.push(`/inventory/${response.data.id}`);
     } catch (err: any) {
@@ -296,11 +330,13 @@ export default function AddItemPage() {
     }
   };
 
+
   const handleCancel = () => {
     if (confirm("Are you sure you want to cancel? All entered data will be lost.")) {
       router.push("/inventory");
     }
   };
+
 
   const TabButton = ({ tab, label, icon: Icon, isActive, className }: { tab: string; label: string; icon: any; isActive: boolean; className: string }) => (
     <button
@@ -313,10 +349,13 @@ export default function AddItemPage() {
     </button>
   );
 
+
   const completedTasks = maintenanceTasks.filter(task => task.completed).length;
   const completionPercentage = maintenanceTasks.length > 0 ? Math.round((completedTasks / maintenanceTasks.length) * 100) : 0;
 
+
   const previewSrc = getImageUrl(imagePreview || capturedImage);
+
 
   if (!mounted) {
     return (
@@ -326,6 +365,7 @@ export default function AddItemPage() {
       </div>
     );
   }
+
 
   return (
     <div className={styles.container}>
@@ -346,32 +386,34 @@ export default function AddItemPage() {
         </div>
       </div>
 
+
       {/* Main Content Card */}
       <form onSubmit={handleSubmit} className={styles.mainCard} encType="multipart/form-data">
         {/* Tab Navigation */}
         <div className={styles.tabNav}>
-          <TabButton 
-            tab="details" 
-            label="Item Details" 
-            icon={Info} 
-            isActive={activeTab === 'details'} 
+          <TabButton
+            tab="details"
+            label="Item Details"
+            icon={Info}
+            isActive={activeTab === 'details'}
             className={activeTab === 'details' ? styles.tabBtnActive : styles.tabBtn}
           />
-          <TabButton 
-            tab="maintenance" 
-            label="Maintenance Tasks" 
-            icon={Settings} 
-            isActive={activeTab === 'maintenance'} 
+          <TabButton
+            tab="maintenance"
+            label="Maintenance Tasks"
+            icon={Settings}
+            isActive={activeTab === 'maintenance'}
             className={activeTab === 'maintenance' ? styles.tabBtnActive : styles.tabBtn}
           />
-          <TabButton 
-            tab="diagnostics" 
-            label="System Diagnostics" 
-            icon={CheckCircle} 
-            isActive={activeTab === 'diagnostics'} 
+          <TabButton
+            tab="diagnostics"
+            label="System Diagnostics"
+            icon={CheckCircle}
+            isActive={activeTab === 'diagnostics'}
             className={activeTab === 'diagnostics' ? styles.tabBtnActive : styles.tabBtn}
           />
         </div>
+
 
         {/* Main Form Content */}
         <div className="p-8">
@@ -383,6 +425,7 @@ export default function AddItemPage() {
               </div>
             </div>
           )}
+
 
           {/* Item Details Tab */}
           {activeTab === 'details' && (
@@ -399,7 +442,7 @@ export default function AddItemPage() {
                     required
                   />
                 </div>
-                
+               
                 <div>
                   <label className={styles.label}>QR Code</label>
                   <input
@@ -411,7 +454,7 @@ export default function AddItemPage() {
                     placeholder="Enter QR code or scan to auto-fill"
                   />
                 </div>
-                
+               
                 <div>
                   <label className={styles.label}>Article Type *</label>
                   <select
@@ -433,6 +476,7 @@ export default function AddItemPage() {
                   </select>
                 </div>
 
+
                 <div>
                   <label className={styles.label}>Date Acquired</label>
                   <input
@@ -443,6 +487,7 @@ export default function AddItemPage() {
                     onChange={handleChange}
                   />
                 </div>
+
 
                 <div>
                   <label className={styles.label}>Price (₱)</label>
@@ -456,6 +501,7 @@ export default function AddItemPage() {
                   />
                 </div>
 
+
                 <div>
                   <label className={styles.label}>End User</label>
                   <input
@@ -467,6 +513,7 @@ export default function AddItemPage() {
                   />
                 </div>
 
+
                 <div>
                   <label className={styles.label}>Location</label>
                   <input
@@ -477,6 +524,7 @@ export default function AddItemPage() {
                     onChange={handleChange}
                   />
                 </div>
+
 
                 <div>
                   <label className={styles.label}>Supply Officer</label>
@@ -490,6 +538,7 @@ export default function AddItemPage() {
                 </div>
               </div>
 
+
               <div>
                 <label className={styles.specsLabel}>Specifications</label>
                 <textarea
@@ -501,6 +550,7 @@ export default function AddItemPage() {
                   onChange={handleChange}
                 />
               </div>
+
 
               <div>
                 <label className={styles.itemPictureLabel}>Item Picture</label>
@@ -597,6 +647,7 @@ export default function AddItemPage() {
             </div>
           )}
 
+
           {/* Maintenance Tasks Tab */}
           {activeTab === 'maintenance' && (
             <div className="space-y-8">
@@ -610,6 +661,7 @@ export default function AddItemPage() {
                   </div>
                 </div>
               </div>
+
 
               {/* Progress Card */}
               <div className={styles.maintenanceProgressCard}>
@@ -625,11 +677,13 @@ export default function AddItemPage() {
                 <div style={{ fontWeight: 700, fontSize: 32, color: '#22c55e', minWidth: 80, textAlign: 'right' }}>{completionPercentage}%</div>
               </div>
 
+
               {/* Checklist Title */}
               <div className={styles.maintenanceChecklistTitle}>
                 <Settings size={22} style={{ color: '#222b3a' }} />
                 Maintenance Tasks Checklist
               </div>
+
 
               {/* Checklist Items */}
               <div className={styles.maintenanceChecklist}>
@@ -668,6 +722,7 @@ export default function AddItemPage() {
                 ))}
               </div>
 
+
               {/* Add Custom Task */}
               <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
                 <input
@@ -687,6 +742,7 @@ export default function AddItemPage() {
               </div>
             </div>
           )}
+
 
           {/* System Diagnostics Tab */}
           {activeTab === 'diagnostics' && (
@@ -723,6 +779,7 @@ export default function AddItemPage() {
                 </div>
               </div>
 
+
               <div>
                 <label className={styles.diagnosticsLabel}>Findings</label>
                 <textarea
@@ -733,6 +790,7 @@ export default function AddItemPage() {
                   onChange={(e) => setDiagnostic(prev => ({ ...prev, findings: e.target.value }))}
                 />
               </div>
+
 
               <div>
                 <label className={styles.diagnosticsLabel}>Recommendations</label>
@@ -746,6 +804,7 @@ export default function AddItemPage() {
               </div>
             </div>
           )}
+
 
           {/* Navigation Footer */}
           <div className={styles.footerNav}>
@@ -771,6 +830,7 @@ export default function AddItemPage() {
                 </button>
               )}
             </div>
+
 
             <div className="flex gap-3">
               {activeTab === 'details' && (
@@ -818,4 +878,5 @@ export default function AddItemPage() {
       </form>
     </div>
   );
-} 
+}
+
