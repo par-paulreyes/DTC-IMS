@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Webcam from "react-webcam";
 import { apiClient, getImageUrl } from "../../config/api";
 import imageCompression from 'browser-image-compression';
-import { Camera, Upload, X } from "lucide-react";
+import { Camera, Upload, X, Edit, Check, UserPlus, LogOut } from "lucide-react";
 import './profile.css';
 import { supabase } from '../../config/supabase';
 
@@ -86,8 +86,6 @@ export default function ProfilePage() {
     setCameraError("");
     setCameraLoading(false);
   };
-
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -427,8 +425,86 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
+      {/* Blue notification for new profile photo upload */}
+      {(capturedImage || selectedImageFile) && (
+        <div className="profile-notification">
+          <div className="flex items-center gap-2 text-blue-700 text-sm">
+            <svg className="icon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+              <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+            </svg>
+            <span className="notification-title">New profile photo will be uploaded when you save changes</span>
+            {imageCompressionInfo && (
+              <span className="notification-detail">
+                (Compressed: {imageCompressionInfo.originalSize} → {imageCompressionInfo.compressedSize}, {imageCompressionInfo.ratio} smaller)
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+      {/* Success notification banner */}
+      {success && (
+        <div className="profile-notification" style={{ background: '#e0fbe8', border: '1.5px solid #22c55e', color: '#166534', marginBottom: '10px' }}>
+          <div className="flex items-center gap-2 text-green-700 text-sm">
+            <svg className="icon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <circle cx="8" cy="8" r="8" fill="#22c55e"/>
+              <path d="M5.5 8.5l2 2 3-3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span className="notification-title">Profile updated successfully!</span>
+          </div>
+        </div>
+      )}
+      {error && (
+        <div className="profile-notification" style={{ background: '#f8d7da', border: '1.5px solid #dc3545', color: '#721c24', marginBottom: '10px' }}>
+          <div className="flex items-center gap-2 text-red-700 text-sm">
+            <svg className="icon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <circle cx="8" cy="8" r="8" fill="#dc3545"/>
+              <path d="M5.5 8.5l2 2 3-3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span className="notification-title">{error}</span>
+          </div>
+        </div>
+      )}
+      {/* Button row above the profile-header-card */}
+      <div className={`profile-header-btn-row ${isEditing ? 'editing' : ''}`}>
+        {isEditing ? (
+          <>
+            <button
+              type="submit"
+              className="save-changes-btn"
+              disabled={saving}
+            >
+              <Check size={18} style={{ marginRight: 8 }} />
+              Save Changes
+            </button>
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="cancel-btn"
+              disabled={saving}
+            >
+              <X size={18} style={{ marginRight: 8 }} />
+              Cancel
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={handleEdit}
+            className="edit-btn"
+          >
+            <Edit size={18} style={{ marginRight: 8 }} />
+            Edit Profile
+          </button>
+        )}
+      </div>
       <div className="profile-header-card">
-        <h3 className="text-2xl font-bold mb-4">Profile</h3>
+        <h3 className="text-2xl font-bold mb-4 flex items-center">
+          <svg width="16" height="16" fill="#fff" viewBox="0 0 24 24" style={{ marginRight: 7, display: 'inline-block', verticalAlign: 'middle' }}>
+            <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z" />
+          </svg>
+          Profile
+        </h3>
       </div>
       <div className="profile-info-card">
         <form
@@ -436,24 +512,6 @@ export default function ProfilePage() {
           className="max-w-md bg-white rounded shadow p-6"
           style={{ marginLeft: 0 }}
         >
-          {error && <div className="mb-4 text-red-500">{error}</div>}
-          {success && <div className="mb-4 text-green-600">{success}</div>}
-          {(capturedImage || selectedImageFile) && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center gap-2 text-blue-700 text-sm">
-                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                  <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                </svg>
-                New profile photo will be uploaded when you save changes
-                {imageCompressionInfo && (
-                  <span className="text-xs text-blue-600 ml-2">
-                    (Compressed: {imageCompressionInfo.originalSize} → {imageCompressionInfo.compressedSize}, {imageCompressionInfo.ratio} smaller)
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
           <div className="mb-4">
             <label className="block mb-1 font-medium">Username</label>
             <input
@@ -532,57 +590,32 @@ export default function ProfilePage() {
               placeholder="Leave blank to keep current password"
             />
           </div>
-          {isEditing ? (
-            <div className="profile-btn-row">
-              <button
-                type="submit"
-                className="save-changes-btn"
-                disabled={saving}
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="cancel-btn"
-                disabled={saving}
-              >
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={handleEdit}
-              className="edit-btn"
-            >
-              Edit Profile
-            </button>
-          )}
         </form>
       </div>
       <div className="profile-btn-row">
-          {/* Admin-only section */}
-          {profile?.role === 'admin' && (
-            <div className="max-w-md mx-auto bg-white rounded shadow p-6 mt-6">
-              <button
-                onClick={() => router.push("/register")}
-                className="admin-register-btn"
-              >
-                Register New User
-              </button>
-            </div>
-          )}
-          {/* Logout button */}
-          <div className="max-w-md mx-auto mt-6">
+        {/* Admin-only section */}
+        {profile?.role === 'admin' && (
+          <div className="max-w-md mx-auto bg-white rounded shadow p-6 mt-6">
             <button
-              onClick={handleLogout}
-              className="logout-btn"
+              onClick={() => router.push("/register")}
+              className="admin-register-btn"
             >
-              Logout
+              <UserPlus size={18} style={{ marginRight: 8 }} />
+              Register New User
             </button>
           </div>
+        )}
+        {/* Logout button */}
+        <div className="max-w-md mx-auto mt-6">
+          <button
+            onClick={handleLogout}
+            className="logout-btn"
+          >
+            <LogOut size={18} style={{ marginRight: 8 }} />
+            Logout
+          </button>
         </div>
+      </div>
     </div>
   );
 } 
