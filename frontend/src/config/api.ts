@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// API Configuration for local development
-const API_BASE_URL = 'http://localhost:5000';
+// API Configuration for local development and production
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000';
 
 // Create Axios instance with configuration for self-signed certificates
 export const apiClient = axios.create({
