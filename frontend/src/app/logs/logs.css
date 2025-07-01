@@ -16,7 +16,7 @@
 
 
 .main-container {
-    max-width: 700px;
+    max-width: 1100px;
     margin: 40px auto 70px auto;
     background: #fff;
     border-radius: 24px;
@@ -56,14 +56,6 @@
         padding: 16px 0 8px 8px;
         height: auto;
         border-radius: 10px 10px 0 0;
-    }
-    .searchbar-row {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 8px 0 0 0;
-        gap: 8px;
-        margin-left: 0;
-        justify-content: flex-end;
     }
     .input {
         width: 100%;
@@ -132,14 +124,6 @@
         padding: 25px 0 10px 15px;
         height: 120px;
         border-radius: 15px 15px 0 0;
-    }
-    .searchbar-row {
-        flex-direction: row;
-        align-items: center;
-        padding: 15px 0 15px 0;
-        gap: 12px;
-        margin-left: 0;
-        justify-content: flex-end;
     }
     .input {
         width: 100%;
@@ -389,72 +373,13 @@
     font-weight: 400;
 }
 
-.searchbar-row {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    gap: 12px;
-    justify-content: flex-end;
-    padding: 10px 15px 10px 15px;
-}
-
-.inputContainer {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    margin: 0;
-    position: relative;
-}
-
-.inputIcon {
-  position: absolute;
-  top: 50%;
-  left: 1.2rem;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  pointer-events: none;
-  z-index: 2;
-  padding-left: 5px;
-}
-
-.inputIconSvg {
-  height: 0.75rem;
-  width: 0.75rem;
-  color: #9ca3af;
-}
-
-.input {
-  display: block;
-  width: 100%;
-  max-width: none;
-  padding-left: 2.5rem;
-  padding-right: 0.75rem;
-  padding-top: 0.7rem;
-  padding-bottom: 0.7rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  font-size: 0.95rem;
-  outline: none;
-  transition: all 0.2s;
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-}
-
-.input:focus {
-  border-color: #16a34a;
-  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-}
-
 .body-container {
     padding: 0 16px 0 16px;
     background: #fff;
     box-shadow: 0 4px 32px rgba(0,0,0,0.10);
     border-radius: 0 0 15px 15px;
     margin-top: 0;
-    padding-top: 0 0 15px 0;
 }
-
 
 /* Export Dropdown Styles */
 .export-dropdown {
@@ -462,6 +387,10 @@
   align-items: center;
   margin-left: 0;
   position: relative;
+}
+
+.export-dropdown-row {
+    margin: 0 0 5px 0;
 }
 
 .export-dropdown-btn {
@@ -566,4 +495,101 @@
     justify-content: space-between;
     margin-bottom: 10px;
     padding: 0 16px 0 16px;
+}
+
+/* Modern Searchbar Styles - Shared with inventory */
+/* .search-container,
+.search-container:focus,
+.search-container:focus-within {
+  ... (commented out)
+} */
+
+.logs-search-container {
+  overflow: hidden;
+}
+
+.logs-search-container .search-input {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  width: 100%;
+  height: 100%;
+  font-size: 1rem;
+  color: #1e293b;
+  font-family: 'Poppins', sans-serif;
+  padding: 12px 0;
+}
+
+.logs-search-container:focus-within {
+  border-color: #16a34a !important;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1) !important;
+  background: #fff !important;
+  border-radius: 12px !important;
+}
+
+.search-icon {
+  flex-shrink: 0;
+  margin-right: 10px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+}
+
+.search-input,
+.search-input:focus {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  font-size: 1rem;
+  width: 100%;
+  padding: 12px 0;
+  color: #1e293b;
+  font-family: 'Poppins', sans-serif;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
+/* Keep old logs searchbar for backward compatibility */
+.logs-search-bar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  margin-bottom: 18px;
+  margin-top: 15px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  height: 48px;
+  box-shadow: none;
+}
+
+.logs-search-icon {
+  flex-shrink: 0;
+  margin-right: 10px;
+  color: #64748b;
+}
+
+.logs-search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 1rem;
+  width: 100%;
+  padding: 12px 0;
+  color: #1e293b;
+  font-family: 'Poppins', sans-serif;
+}
+
+.logs-search-input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
 }

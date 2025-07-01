@@ -122,6 +122,40 @@ export default function InventoryPage() {
         </p>
       </div>
       <div className="body-container">
+        {/* Search Bar */}
+        <div
+          className="inventory-search-container"
+          style={{
+            background: '#fff',
+            border: '1.5px solid #d1d5db',
+            borderRadius: '12px',
+            marginBottom: '18px',
+            marginTop: '15px',
+            padding: '0 10px',
+            boxSizing: 'border-box',
+            height: '48px',
+            boxShadow: 'none',
+            position: 'relative',
+            zIndex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            width: '100%'
+          }}
+        >
+          <div className="search-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search with article id, QR code, or type"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
         {/* Filter Bar */}
         <div className="filterbar-row">
           <select
@@ -153,26 +187,6 @@ export default function InventoryPage() {
             <option value="pending">Pending Maintenance</option>
             <option value="completed">Completed Maintenance</option>
           </select>
-        </div>
-        {/* Search Bar */}
-        <div className="searchbar-row">
-          <div className="inputContainer">
-            <div className="inputIcon">
-              <svg className="inputIconSvg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8" strokeWidth="2" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </div>
-            <input
-              type="text"
-              name="full_name"
-              className="input"
-              placeholder="Search with article id"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              required
-            />
-          </div>
         </div>
         {/* Filter Status Display */}
         {maintenanceFilter === "pending" && (
