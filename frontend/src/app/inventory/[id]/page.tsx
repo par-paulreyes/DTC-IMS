@@ -68,6 +68,7 @@ export default function ItemDetailPage() {
   const [showLogs, setShowLogs] = useState(false);
   const [activeTab, setActiveTab] = useState<'diagnostics' | 'logs'>('diagnostics');
   const [diagnosticsFilter, setDiagnosticsFilter] = useState('all');
+  const [itemImageUrl, setItemImageUrl] = useState<string>('');
 
 
 
@@ -102,6 +103,12 @@ export default function ItemDetailPage() {
         setItem(response.data);
         setEditingItem(response.data);
         console.log('Item data loaded:', response.data);
+        
+        // Load signed URL for item image
+        if (response.data.image_url) {
+          const imageUrl = await getImageUrl(response.data.image_url);
+          setItemImageUrl(imageUrl);
+        }
       } catch (err: any) {
         console.error('Error fetching item:', err);
         if (err.response?.status === 401) {
@@ -187,6 +194,10 @@ export default function ItemDetailPage() {
     setIsEditing(false);
     setEditingItem(item);
     setError("");
+    // Reset the image URL to the original item's image
+    if (item?.image_url) {
+      getImageUrl(item.image_url).then(url => setItemImageUrl(url));
+    }
   };
 
 
@@ -197,21 +208,31 @@ export default function ItemDetailPage() {
     setSaving(true);
     setError("");
    
-    // Debug: Log what we're about to send
-    console.log('Sending item update with data:', editingItem);
-   
-    try {
+              try {
       // Recalculate maintenance_status and pending_maintenance_count
       const pendingCount = editingLogs.filter(log => log.status === 'pending').length;
-      const newStatus = pendingCount > 0 ? 'pending' : 'up_to_date';
-      const updatedItem = {
-        ...editingItem,
-        pending_maintenance_count: pendingCount,
-        maintenance_status: newStatus,
+      const newStatus = pendingCount > 0 ? 'pending' : 'completed';
+      
+      // Only send the fields that the backend expects (excluding maintenance fields that are filtered out)
+      const itemUpdateData = {
+        property_no: editingItem.property_no,
+        qr_code: editingItem.qr_code,
+        article_type: editingItem.article_type,
+        specifications: editingItem.specifications,
+        location: editingItem.location,
+        end_user: editingItem.end_user,
+        date_acquired: editingItem.date_acquired ? editingItem.date_acquired.split('T')[0] : null,
+        price: editingItem.price ? parseFloat(editingItem.price) : null,
+        supply_officer: editingItem.supply_officer,
+        company_name: editingItem.company_name,
+        image_url: editingItem.image_url,
       };
      
+      // Debug: Log what we're about to send
+      console.log('Sending item update with data:', itemUpdateData);
+     
       // Update item
-      await apiClient.put(`/items/${id}`, updatedItem);
+      await apiClient.put(`/items/${id}`, itemUpdateData);
      
       // Update diagnostics
       for (const diagnostic of editingDiagnostics) {
@@ -220,7 +241,7 @@ export default function ItemDetailPage() {
             system_status: diagnostic.system_status,
             findings: diagnostic.findings,
             recommendations: diagnostic.recommendations,
-            diagnostics_date: diagnostic.diagnostics_date
+            diagnostics_date: diagnostic.diagnostics_date ? diagnostic.diagnostics_date.split('T')[0] : (() => new Date().toISOString().split('T')[0])()
           });
         }
       }
@@ -232,13 +253,13 @@ export default function ItemDetailPage() {
             task_performed: log.task_performed,
             notes: log.notes,
             status: log.status,
-            maintenance_date: log.maintenance_date
+            maintenance_date: log.maintenance_date ? log.maintenance_date.split('T')[0] : (() => new Date().toISOString().split('T')[0])()
           });
         }
       }
      
-      setItem(updatedItem);
-      setEditingItem(updatedItem);
+      setItem(itemUpdateData);
+      setEditingItem(itemUpdateData);
       setDiagnostics(editingDiagnostics);
       setLogs(editingLogs);
       setIsEditing(false);
@@ -357,17 +378,37 @@ export default function ItemDetailPage() {
     setUploadingImage(true);
     try {
       const compressedFile = await imageCompression(file, options);
-      const formData = new FormData();
-      formData.append('image', compressedFile, file.name || 'item.png');
-      const response = await apiClient.post(`/items/${id}/image`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      
+      // Upload to Supabase
+      const { supabase } = await import('../../../config/supabase');
+      const timestamp = Date.now();
+      const fileExtension = file.name.split('.').pop() || 'jpg';
+      const fileName = `item-pictures/${id}-${timestamp}.${fileExtension}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('dtc-ims')
+        .upload(fileName, compressedFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+      
+      // Store file path instead of public URL
+      const filePath = fileName;
+      setEditingItem((prev: any) => ({ ...prev, image_url: filePath }));
+      
+      // Update the item in the backend with the new image path
+      await apiClient.put(`/items/${id}`, {
+        image_url: filePath
       });
-      if (response.data.url) {
-        setEditingItem((prev: any) => ({ ...prev, image_url: response.data.url }));
-      }
+      
+      // Update the signed URL for immediate display
+      const newImageUrl = await getImageUrl(filePath);
+      setItemImageUrl(newImageUrl);
+      
     } catch (err) {
+      console.error('Upload error:', err);
       alert('Failed to upload image.');
     } finally {
       setUploadingImage(false);
@@ -377,9 +418,7 @@ export default function ItemDetailPage() {
 
 
 
-  const imgSrc = isEditing
-    ? (editingItem && getImageUrl(editingItem.image_url))
-    : (item && getImageUrl(item.image_url));
+  // Remove imgSrc since we're using itemImageUrl state for async loading
 
 
 
@@ -449,8 +488,8 @@ export default function ItemDetailPage() {
       {/* Top Section */}
       <div className={styles.topCard}>
         <div className={styles.topImageBox} style={{position:'relative'}}>
-          {item.image_url || (isEditing && editingItem.image_url) ? (
-            <img src={isEditing ? getImageUrl(editingItem.image_url) : getImageUrl(item.image_url)} alt="item" className={styles.topImage} />
+          {itemImageUrl || (isEditing && editingItem.image_url) ? (
+            <img src={isEditing ? itemImageUrl : itemImageUrl} alt="item" className={styles.topImage} />
           ) : (
             isEditing ? null : <span>image</span>
           )}

@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
 const db = require('./db');
 const authRoutes = require('./routes/authRoutes');
 const companyRoutes = require('./routes/companyRoutes');
@@ -23,6 +24,11 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Configure multer for handling multipart/form-data
+const upload = multer({ dest: 'uploads/' });
+app.use(upload.any()); // Handle any multipart/form-data
 
 // Test database connection
 db.getConnection((err, connection) => {

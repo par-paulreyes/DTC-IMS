@@ -28,6 +28,7 @@ export default function InventoryPage() {
   const [status, setStatus] = useState("");
   const [maintenanceFilter, setMaintenanceFilter] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [itemImageUrls, setItemImageUrls] = useState<{[key: string]: string}>({});
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -60,6 +61,8 @@ export default function InventoryPage() {
           pending_maintenance_count: item.pending_maintenance_count || 0
         }));
         setItems(itemsWithMaintenance);
+        // Load image URLs for items
+        loadItemImageUrls(itemsWithMaintenance);
       })
       .catch((err) => setError("Error loading items"))
       .finally(() => setLoading(false));
@@ -85,6 +88,22 @@ export default function InventoryPage() {
     
     return matchesSearch && matchesArticleType && matchesStatus && matchesMaintenance;
   });
+
+  // Load image URLs for items
+  const loadItemImageUrls = async (items: Item[]) => {
+    const imageUrls: {[key: string]: string} = {};
+    for (const item of items) {
+      if (item.image_url) {
+        try {
+          const url = await getImageUrl(item.image_url);
+          imageUrls[item.id] = url;
+        } catch (err) {
+          console.error('Error loading image URL for item:', item.id, err);
+        }
+      }
+    }
+    setItemImageUrls(imageUrls);
+  };
 
   // Get unique article types and system statuses for dropdowns
   const articleTypes = Array.from(new Set(items.map((item) => item.article_type)));
@@ -196,9 +215,9 @@ export default function InventoryPage() {
             {filteredItems.map((item) => (
               <div key={item.id} className="inventory-card">
                 <Link href={`/inventory/${item.id}`} className="flex items-center w-full">
-                  {item.image_url ? (
+                  {itemImageUrls[item.id] ? (
                     <img
-                      src={getImageUrl(item.image_url)}
+                      src={itemImageUrls[item.id]}
                       alt={item.qr_code || item.property_no}
                       className="inventory-icon"
                       style={{ objectFit: 'cover' }}

@@ -42,6 +42,7 @@ export default function DashboardPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [itemImageUrls, setItemImageUrls] = useState<{[key: string]: string}>({});
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [criticalItems, setCriticalItems] = useState(0);
   const [completedMaintenance, setCompletedMaintenance] = useState(0);
@@ -176,6 +177,8 @@ export default function DashboardPage() {
       setTotalArticles(totalItems); // Total articles is the same as total items
       setRecentlyAdded(recentlyAddedCount);
       setRecentItems(recentItemsList);
+      // Load image URLs for recent items
+      loadItemImageUrls(recentItemsList);
       setCriticalItems(criticalItemsCount);
       setCompletedMaintenance(completedMaintenanceCount);
       setPendingMaintenance(pendingMaintenanceCount);
@@ -348,6 +351,21 @@ export default function DashboardPage() {
       default:
         break;
     }
+  };
+
+  const loadItemImageUrls = async (items: Item[]) => {
+    const imageUrls: {[key: string]: string} = {};
+    for (const item of items) {
+      if (item.image_url) {
+        try {
+          const url = await getImageUrl(item.image_url);
+          imageUrls[item.id] = url;
+        } catch (err) {
+          console.error('Error loading image URL for item:', item.id, err);
+        }
+      }
+    }
+    setItemImageUrls(imageUrls);
   };
 
 
@@ -602,9 +620,9 @@ export default function DashboardPage() {
                     style={{ cursor: 'pointer' }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      {item.image_url ? (
+                      {itemImageUrls[item.id] ? (
                         <img
-                          src={getImageUrl(item.image_url)}
+                          src={itemImageUrls[item.id]}
                           alt={item.article_type}
                           style={{
                             width: 48,

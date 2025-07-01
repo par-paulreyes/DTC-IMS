@@ -200,11 +200,7 @@ export default function AddItemPage() {
   };
 
 
-  // Helper to always get the public URL from Supabase
-  function getSupabasePublicUrl(filePath: string) {
-    const { data } = supabase.storage.from('dtc-ims').getPublicUrl(filePath);
-    return data?.publicUrl || '';
-  }
+
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -251,7 +247,16 @@ export default function AddItemPage() {
       const formData = new FormData();
       Object.entries(form).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
-          formData.append(key, value);
+          // Handle date formatting for MySQL
+          if (key === 'date_acquired' && typeof value === 'string') {
+            const formattedDate = value.split('T')[0]; // Convert ISO date to YYYY-MM-DD
+            formData.append(key, formattedDate);
+          } else if (key === 'price' && typeof value === 'string') {
+            // Convert price to number
+            formData.append(key, parseFloat(value).toString());
+          } else {
+            formData.append(key, value);
+          }
         }
       });
 
@@ -274,7 +279,7 @@ export default function AddItemPage() {
             contentType: fileToUpload.type || 'image/jpeg',
           });
         if (uploadError) throw uploadError;
-        uploadedImageUrl = getSupabasePublicUrl(filePath);
+        uploadedImageUrl = filePath; // Store file path instead of public URL
         setImageUrl(uploadedImageUrl);
         formData.append('image_url', uploadedImageUrl);
       }

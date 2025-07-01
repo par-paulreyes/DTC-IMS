@@ -51,8 +51,28 @@ export const getApiUrl = (endpoint: string) => {
 };
 
 // Helper function to get image URL (without /api prefix)
-export const getImageUrl = (imagePath: string) => {
+export const getImageUrl = async (imagePath: string) => {
   if (!imagePath) return '';
   if (imagePath.startsWith('http')) return imagePath;
+  
+  // If it's a Supabase file path (contains slashes but not http), generate signed URL
+  if (imagePath.includes('/') && !imagePath.startsWith('http')) {
+    try {
+      const { supabase } = await import('./supabase');
+      const { data, error } = await supabase.storage
+        .from('dtc-ims')
+        .createSignedUrl(imagePath, 3600); // 1 hour expiry
+      if (error) {
+        console.error('Error creating signed URL:', error);
+        return '';
+      }
+      return data?.signedUrl || '';
+    } catch (err) {
+      console.error('Error getting signed URL:', err);
+      return '';
+    }
+  }
+  
+  // Fallback to backend server path
   return `${API_BASE_URL}${imagePath}`;
 }; 

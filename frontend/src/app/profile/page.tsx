@@ -45,6 +45,10 @@ export default function ProfilePage() {
       .then((response) => {
         setProfile(response.data);
         setForm({ ...response.data, password: "", confirmPassword: "" });
+        // Load signed URL for profile picture
+        if (response.data.profile_picture) {
+          getImageUrl(response.data.profile_picture).then(url => setImageUrl(url));
+        }
       })
       .catch((err) => setError("Error loading profile"))
       .finally(() => setLoading(false));
@@ -80,11 +84,7 @@ export default function ProfilePage() {
     setImageCompressionInfo(null);
   };
 
-  // Helper to always get the public URL from Supabase
-  function getSupabasePublicUrl(filePath: string) {
-    const { data } = supabase.storage.from('dtc-ims').getPublicUrl(filePath);
-    return data?.publicUrl || '';
-  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,9 +127,8 @@ export default function ProfilePage() {
           setSaving(false);
           return;
         }
-        // Always get the public URL in the correct format
-        const { data } = supabase.storage.from('dtc-ims').getPublicUrl(filePath);
-        profilePictureUrl = data?.publicUrl || '';
+        // Store the file path instead of public URL for security
+        profilePictureUrl = filePath;
         setUploading(false);
       }
       // Prepare the data to send
@@ -147,6 +146,10 @@ export default function ProfilePage() {
       setImageCompressionInfo(null);
       const updatedResponse = await apiClient.get("/users/profile");
       setProfile(updatedResponse.data);
+      // Update signed URL for new profile picture
+      if (updatedResponse.data.profile_picture) {
+        getImageUrl(updatedResponse.data.profile_picture).then(url => setImageUrl(url));
+      }
     } catch (err: any) {
       // Show error from Supabase or backend
       setError(err.response?.data?.message || err.message || "Error updating profile");
@@ -247,8 +250,27 @@ export default function ProfilePage() {
     quality: 0.8, // 80% quality for good balance
   });
 
-  // For image display, always use the public URL
-  const imageUrl = form.profile_picture;
+  // For image display, use signed URL if it's a file path
+  const getImageUrl = async (filePath: string) => {
+    if (!filePath || filePath.startsWith('http')) {
+      return filePath; // Already a URL
+    }
+    try {
+      const { data, error } = await supabase.storage
+        .from('dtc-ims')
+        .createSignedUrl(filePath, 3600); // 1 hour expiry
+      if (error) {
+        console.error('Error creating signed URL:', error);
+        return '';
+      }
+      return data?.signedUrl || '';
+    } catch (err) {
+      console.error('Error getting signed URL:', err);
+      return '';
+    }
+  };
+
+  const [imageUrl, setImageUrl] = useState<string>('');
 
   // Helper to get preview URL for selected or captured images
   const getPreviewUrl = () => {
