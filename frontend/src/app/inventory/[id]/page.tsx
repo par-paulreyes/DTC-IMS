@@ -210,6 +210,7 @@ export default function ItemDetailPage() {
     setIsEditing(false);
     setEditingItem(item);
     setError("");
+    setUploadingImage(false); // Clear uploading state
     // Reset the image URL to the original item's image
     if (item?.image_url) {
       getImageUrl(item.image_url).then(url => setItemImageUrl(url));

@@ -78,10 +78,13 @@ export default function ProfilePage() {
     setForm({ ...profile, password: "", confirmPassword: "" });
     setError("");
     setSuccess("");
-    // Clear any stored images
+    // Clear any stored images and camera states
     setCapturedImage("");
     setSelectedImageFile(null);
     setImageCompressionInfo(null);
+    setShowCamera(false);
+    setCameraError("");
+    setCameraLoading(false);
   };
 
 

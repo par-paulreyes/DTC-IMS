@@ -339,6 +339,16 @@ export default function AddItemPage() {
           console.error('Error deleting uploaded image:', err);
         }
       }
+      
+      // Clear all image preview states
+      setImageFile(null);
+      setImagePreview("");
+      setCapturedImage("");
+      setImageUrl("");
+      setShowCamera(false);
+      setCameraError("");
+      setCameraLoading(false);
+      
       router.push("/inventory");
     }
   };
