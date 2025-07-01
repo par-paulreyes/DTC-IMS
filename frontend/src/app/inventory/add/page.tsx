@@ -79,7 +79,22 @@ export default function AddItemPage() {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    
+    // Cleanup function to delete uploaded image if component unmounts
+    return () => {
+      if (imageUrl && imageUrl.includes('/')) {
+        // Only delete if it's a Supabase path (contains '/')
+        (async () => {
+          try {
+            const { supabase } = await import('../../../config/supabase');
+            await supabase.storage.from('dtc-ims').remove([imageUrl]);
+          } catch (err) {
+            console.error('Error deleting uploaded image on unmount:', err);
+          }
+        })();
+      }
+    };
+  }, [imageUrl]);
 
 
   // Check for QR code parameter and auto-fill qr_code field
@@ -313,8 +328,17 @@ export default function AddItemPage() {
   };
 
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     if (confirm("Are you sure you want to cancel? All entered data will be lost.")) {
+      // Delete uploaded image if it exists
+      if (imageUrl && imageUrl.includes('/')) {
+        try {
+          const { supabase } = await import('../../../config/supabase');
+          await supabase.storage.from('dtc-ims').remove([imageUrl]);
+        } catch (err) {
+          console.error('Error deleting uploaded image:', err);
+        }
+      }
       router.push("/inventory");
     }
   };

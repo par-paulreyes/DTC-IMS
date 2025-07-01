@@ -69,13 +69,28 @@ export default function ItemDetailPage() {
   const [activeTab, setActiveTab] = useState<'diagnostics' | 'logs'>('diagnostics');
   const [diagnosticsFilter, setDiagnosticsFilter] = useState('all');
   const [itemImageUrl, setItemImageUrl] = useState<string>('');
+  const [uploadedImagesDuringEdit, setUploadedImagesDuringEdit] = useState<string[]>([]);
 
 
 
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    
+    // Cleanup function to delete uploaded images if component unmounts during edit
+    return () => {
+      if (isEditing && uploadedImagesDuringEdit.length > 0) {
+        uploadedImagesDuringEdit.forEach(async (image) => {
+          try {
+            const { supabase } = await import('../../../config/supabase');
+            await supabase.storage.from('dtc-ims').remove([image]);
+          } catch (err) {
+            console.error('Error deleting uploaded image on unmount:', err);
+          }
+        });
+      }
+    };
+  }, [isEditing, uploadedImagesDuringEdit]);
 
 
 
@@ -185,6 +200,7 @@ export default function ItemDetailPage() {
     setEditingItem({ ...item });
     setEditingDiagnostics(diagnostics.map(d => ({ ...d })));
     setEditingLogs(logs.map(l => ({ ...l })));
+    setUploadedImagesDuringEdit([]); // Clear uploaded images tracking when starting edit
   };
 
 
@@ -198,6 +214,12 @@ export default function ItemDetailPage() {
     if (item?.image_url) {
       getImageUrl(item.image_url).then(url => setItemImageUrl(url));
     }
+    // Delete uploaded images from Supabase when canceling
+    uploadedImagesDuringEdit.forEach(async (image) => {
+      const { supabase } = await import('../../../config/supabase');
+      await supabase.storage.from('dtc-ims').remove([image]);
+    });
+    setUploadedImagesDuringEdit([]);
   };
 
 
@@ -263,6 +285,7 @@ export default function ItemDetailPage() {
       setDiagnostics(editingDiagnostics);
       setLogs(editingLogs);
       setIsEditing(false);
+      setUploadedImagesDuringEdit([]); // Clear uploaded images tracking when saving successfully
      
       // Trigger dashboard refresh by setting a timestamp
       localStorage.setItem('dashboard_refresh_trigger', Date.now().toString());
@@ -407,6 +430,11 @@ export default function ItemDetailPage() {
       const newImageUrl = await getImageUrl(filePath);
       setItemImageUrl(newImageUrl);
       
+      // Track uploaded image (replace previous uploads during this edit session)
+      setUploadedImagesDuringEdit(prev => {
+        // Remove any previous uploaded images from tracking (they will be deleted on cancel)
+        return [filePath];
+      });
     } catch (err) {
       console.error('Upload error:', err);
       alert('Failed to upload image.');
