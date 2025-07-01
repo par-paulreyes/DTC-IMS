@@ -77,9 +77,19 @@
         font-size: 15px;
         padding: 10px 0;
     }
-    .log-card, .log-card-header, .log-card-main-row {
-        padding: 12px !important;
+    .log-card {
+        padding: 0 !important;
+        margin: 0 !important;
         border-radius: 12px;
+        background: #fff !important;
+    }
+    .log-card-header {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        border-radius: 12px 12px 0 0 !important;
+        background: linear-gradient(135deg, #fafafa, #f4f4f5) !important;
     }
     .log-icon, .log-image {
         width: 40px;
@@ -110,6 +120,37 @@
     }
     .detail-value {
         font-size: 0.95rem;
+    }
+    .logs-container {
+        gap: 10px;
+    }
+    .log-card-header, .log-card-main-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+        padding: 12px !important;
+    }
+    .log-main-info {
+        width: 100%;
+    }
+    .log-date {
+        width: 100%;
+        margin-top: 4px;
+        display: flex;
+        justify-content: flex-start;
+    }
+    .log-card-body {
+        padding: 10px !important;
+    }
+    .detail-section {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    .export-dropdown-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        padding: 0 !important;
     }
 }
 

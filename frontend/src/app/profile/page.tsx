@@ -27,6 +27,7 @@ export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const webcamRef = useRef<Webcam>(null);
   const router = useRouter();
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -470,9 +471,10 @@ export default function ProfilePage() {
         {isEditing ? (
           <>
             <button
-              type="submit"
+              type="button"
               className="save-changes-btn"
               disabled={saving}
+              onClick={() => formRef.current?.requestSubmit()}
             >
               <Check size={18} style={{ marginRight: 8 }} />
               Save Changes
@@ -508,6 +510,7 @@ export default function ProfilePage() {
       </div>
       <div className="profile-info-card">
         <form
+          ref={formRef}
           onSubmit={handleSubmit}
           className="max-w-md bg-white rounded shadow p-6"
           style={{ marginLeft: 0 }}
@@ -595,26 +598,22 @@ export default function ProfilePage() {
       <div className="profile-btn-row">
         {/* Admin-only section */}
         {profile?.role === 'admin' && (
-          <div className="max-w-md mx-auto bg-white rounded shadow p-6 mt-6">
-            <button
-              onClick={() => router.push("/register")}
-              className="admin-register-btn"
-            >
-              <UserPlus size={18} style={{ marginRight: 8 }} />
-              Register New User
-            </button>
-          </div>
+          <button
+            onClick={() => router.push("/register")}
+            className="admin-register-btn"
+          >
+            <UserPlus size={18} style={{ marginRight: 8 }} />
+            Register New User
+          </button>
         )}
         {/* Logout button */}
-        <div className="max-w-md mx-auto mt-6">
-          <button
-            onClick={handleLogout}
-            className="logout-btn"
-          >
-            <LogOut size={18} style={{ marginRight: 8 }} />
-            Logout
-          </button>
-        </div>
+        <button
+          onClick={handleLogout}
+          className="logout-btn"
+        >
+          <LogOut size={18} style={{ marginRight: 8 }} />
+          Logout
+        </button>
       </div>
     </div>
   );
