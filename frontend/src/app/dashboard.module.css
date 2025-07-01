@@ -28,17 +28,22 @@
 .dashboardCard {
   position: relative;
   background: transparent;
-  border-radius: 20px 20px 0 0;
+  border-radius:15px 15px 0 0;
   overflow: hidden;
-  min-height: 140px;
+  min-height: 200px;
   color: #ffffff;
-  padding: 32px 24px 24px 24px;
+  padding: 32px 32px 24px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  text-align: center;
   font-family: 'Poppins', sans-serif;
   margin-bottom: 0;
+  width: 100%;
+  max-width: 100vw;
+  min-width: 270  px;
+  box-sizing: border-box; /* Default for desktop, navbar is 64px + some gap */
 }
 
 
@@ -53,15 +58,23 @@
 
 
 .dashboardCardContent {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
   height: 100%;
-  justify-content: space-between;
-  font-family: 'Poppins', sans-serif;
-  text-align: center;
   width: 100%;
+  padding: 0 16px;
+  position: relative;
+  margin: 0 15px 0 20px;
+  z-index: 1;
+}
+
+
+.dashboardCard .dashboardTitle,
+.dashboardCard .dashboardStatValue,
+.dashboardCard .dashboardStatLabel {
+  font-size: 1.1rem;
 }
 
 
@@ -216,34 +229,58 @@
 
 .dashboardInfoGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: 1fr;
   gap: 20px;
   width: 100%;
-  justify-items: center;
+  max-width: 100vw;
+  box-sizing: border-box;
 }
 
 
 .infoCard {
-  width: 100%;
-  max-width: 280px;
+  width: 98%;
+  max-width: 98%;
   align-self: center;
   background: var(--bg-white);
   border-radius: 20px;
-  box-shadow: 0 8px 32px var(--shadow-medium);
-  padding: 20px 28px 20px 28px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 16px 20px 16px 20px;
   display: flex;
   flex-direction: column;
   position: relative;
   height: 250px;
   font-family: 'Poppins', sans-serif;
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition: background 0.2s, border-color 0.2s;
   border-left: none;
-  border: 1.5px solid rgba(37, 99, 235, 0.05); /* secondary-blue, 5% opacity */
-  }
+  border-color: #d1d5db;
+  border: 1.5px solid rgba(37, 99, 235, 0.08);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.infoCard::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: #162C49; /* blue by default */
+  border-radius: 20px 20px 0 0;
+  z-index: 1;
+  transition: background 0.2s;
+}
+
+.infoCard:hover::before {
+  background: #C1121F; /* red on hover */
+}
 
 .infoCard:hover {
-  box-shadow: 0 12px 40px var(--shadow-heavy);
-  transform: translateY(-4px) scale(1.01);
+  background: #f3f4f6;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-color: #d1d5db;
+  /* No border-top here, no transform or extra shadow */
 }
 
 .maintenanceCard {}
@@ -251,22 +288,20 @@
 .articlesCard {}
 .recentCard {}
 
-.infoCardTopBorder {
-  border-top: 4px solid #162C49;
-  border-radius: 20px 20px 0 0;
-}
-
 .cardTopRow {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 8px;
+  margin-top: 10px;
+  margin-left: 8px;
   position: relative;
+  color: #C1121F;
 }
 .cardNumber {
   font-size: 2.6rem;
   font-weight: 800;
   line-height: 1;
+  
 }
 .cardIcon {
   width: 44px;
@@ -360,6 +395,7 @@
   .dashboardCard {
     padding: 24px 20px 20px 20px;
     min-height: 120px;
+    margin-top: 10px;
   }
  
   .dashboardContentCard {
@@ -387,8 +423,10 @@
   }
  
   .dashboardCard {
-    min-height: 110px;
+    min-width: 260px;
+    min-height: 150px;
     padding: 20px 16px 16px 16px;
+    margin-top: 20px;
   }
  
   .dashboardContentCard {
@@ -436,6 +474,14 @@
   .cardNumber {
     font-size: 2.2rem;
   }
+  .dashboardCardContent {
+    font-size: 0.98rem;
+  }
+  .dashboardCard .dashboardTitle,
+  .dashboardCard .dashboardStatValue,
+  .dashboardCard .dashboardStatLabel {
+    font-size: 1rem;
+  }
 }
 
 
@@ -463,6 +509,46 @@
     min-height: 120px;
     height: auto;
   }
+  .dashboardCard {
+    min-width: 260px;
+    min-height: 150px;
+    padding: 20px 16px 16px 16px;
+    margin-top: 20px;
+  }
+  .dashboardCardContent {
+    font-size: 0.85rem;
+  }
+  .dashboardCard .dashboardTitle,
+  .dashboardCard .dashboardStatValue,
+  .dashboardCard .dashboardStatLabel {
+    font-size: 0.85rem;
+  }
+}
+
+
+@media (max-width: 400px) {
+  .dashboardInfoGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .infoCard {
+    padding: 12px 4vw 12px 4vw;
+    min-height: 150px;
+    height: auto;
+  }
+  .dashboardCard {
+    min-width: 260px;
+    min-height: 150px;
+    padding: 6px 2px 6px 2px;
+  }
+  .dashboardCardContent {
+    font-size: 0.85rem;
+  }
+  .dashboardCard .dashboardTitle,
+  .dashboardCard .dashboardStatValue,
+  .dashboardCard .dashboardStatLabel {
+    font-size: 0.85rem;
+  }
 }
 
 
@@ -470,4 +556,179 @@
 .cardChange--red: Use for negative/alert changes (red text)
 .cardChange--green: Use for positive/completed changes (green text)
 */
+
+
+@media (max-width: 700px) {
+  .infoCard {
+    max-width: 100%;
+    width: 100%;
+    padding: 10px 2vw 10px 2vw;
+    min-height: 100px;
+    height: auto;
+    box-sizing: border-box;
+  }
+  .dashboardCard {
+    min-height: 100px;
+    margin-top: 40px;
+  }
+}
+
+
+@media (max-width: 600px) {
+  .dashboardCard {
+    min-width: 180px;
+    padding: 12px 4px 10px 4px;
+    min-height: 80px;
+  }
+  .dashboardCardContent {
+    font-size: 0.92rem;
+  }
+  .dashboardCard .dashboardTitle,
+  .dashboardCard .dashboardStatValue,
+  .dashboardCard .dashboardStatLabel {
+    font-size: 0.92rem;
+  }
+}
+
+
+@media (max-width: 400px) {
+  .dashboardCard {
+    min-width: 265px;
+    min-height: 150px;
+    padding: 6px 2px 6px 2px;
+  }
+  .dashboardCardContent {
+    font-size: 0.85rem;
+  }
+  .dashboardCard .dashboardTitle,
+  .dashboardCard .dashboardStatValue,
+  .dashboardCard .dashboardStatLabel {
+    font-size: 0.85rem;
+  }
+}
+
+
+.dashboardCardTitle {
+  text-align: center;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.dashboardCardRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.dashboardCardStatBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+}
+
+.dashboardCardNumberRow {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.dashboardCardNumber {
+  font-size: clamp(1.1rem, 4vw, 1.7rem);
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+}
+
+.dashboardCardItemsLabel {
+  font-size: clamp(0.8rem, 2vw, 1rem);
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.dashboardCardBadge {
+  background: none;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 400;
+  border-radius: 0;
+  padding: 0;
+  margin-top: 2px;
+  display: inline-block;
+}
+
+.dashboardCardInfoBlock {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  color: #fff;
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  font-weight: 400;
+}
+
+.dashboardCardInfoTextBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  font-weight: 400;
+}
+
+@media (max-width: 480px) {
+  .dashboardCardTitle {
+    font-size: clamp(0.95rem, 4vw, 1.1rem);
+  }
+  .dashboardCardNumber {
+    font-size: clamp(1rem, 8vw, 1.3rem);
+  }
+  .dashboardCardItemsLabel {
+    font-size: clamp(0.7rem, 3vw, 0.9rem);
+  }
+  .dashboardCardInfoBlock, .dashboardCardInfoTextBlock {
+    font-size: clamp(0.7rem, 3vw, 0.9rem);
+  }
+  .dashboardCardRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .dashboardCardStatBlock,
+  .dashboardCardInfoBlock {
+    width: 100%;
+    align-items: flex-start;
+    text-align: left;
+  }
+  .dashboardCardInfoTextBlock {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+.dashboardCardDetailsRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+@media (max-width: 480px) {
+  .dashboardCardDetailsRow {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+}
 
