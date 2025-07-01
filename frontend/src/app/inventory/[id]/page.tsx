@@ -70,6 +70,8 @@ export default function ItemDetailPage() {
   const [diagnosticsFilter, setDiagnosticsFilter] = useState('all');
   const [itemImageUrl, setItemImageUrl] = useState<string>('');
   const [uploadedImagesDuringEdit, setUploadedImagesDuringEdit] = useState<string[]>([]);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string>('');
 
 
 
@@ -91,6 +93,15 @@ export default function ItemDetailPage() {
       }
     };
   }, [isEditing, uploadedImagesDuringEdit]);
+
+  // Cleanup function to revoke object URLs when selected image changes
+  useEffect(() => {
+    return () => {
+      if (selectedImagePreview) {
+        URL.revokeObjectURL(selectedImagePreview);
+      }
+    };
+  }, [selectedImagePreview]);
 
 
 
@@ -211,6 +222,11 @@ export default function ItemDetailPage() {
     setEditingItem(item);
     setError("");
     setUploadingImage(false); // Clear uploading state
+    
+    // Clear selected image states
+    setSelectedImageFile(null);
+    setSelectedImagePreview('');
+    
     // Reset the image URL to the original item's image
     if (item?.image_url) {
       getImageUrl(item.image_url).then(url => setItemImageUrl(url));
@@ -231,10 +247,31 @@ export default function ItemDetailPage() {
     setSaving(true);
     setError("");
    
-              try {
+    try {
       // Recalculate maintenance_status and pending_maintenance_count
       const pendingCount = editingLogs.filter(log => log.status === 'pending').length;
       const newStatus = pendingCount > 0 ? 'pending' : 'completed';
+      
+      let finalImageUrl = editingItem.image_url;
+      
+      // Upload image to Supabase if a new image was selected
+      if (selectedImageFile) {
+        const { supabase } = await import('../../../config/supabase');
+        const timestamp = Date.now();
+        const fileExtension = selectedImageFile.name.split('.').pop() || 'jpg';
+        const fileName = `item-pictures/${id}-${timestamp}.${fileExtension}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('dtc-ims')
+          .upload(fileName, selectedImageFile, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) throw uploadError;
+        
+        finalImageUrl = fileName;
+      }
       
       // Only send the fields that the backend expects (excluding maintenance fields that are filtered out)
       const itemUpdateData = {
@@ -248,7 +285,7 @@ export default function ItemDetailPage() {
         price: editingItem.price ? parseFloat(editingItem.price) : null,
         supply_officer: editingItem.supply_officer,
         company_name: editingItem.company_name,
-        image_url: editingItem.image_url,
+        image_url: finalImageUrl,
       };
      
       // Debug: Log what we're about to send
@@ -287,6 +324,16 @@ export default function ItemDetailPage() {
       setLogs(editingLogs);
       setIsEditing(false);
       setUploadedImagesDuringEdit([]); // Clear uploaded images tracking when saving successfully
+      
+      // Clear selected image states
+      setSelectedImageFile(null);
+      setSelectedImagePreview('');
+      
+      // Update the image URL for display
+      if (finalImageUrl) {
+        const newImageUrl = await getImageUrl(finalImageUrl);
+        setItemImageUrl(newImageUrl);
+      }
      
       // Trigger dashboard refresh by setting a timestamp
       localStorage.setItem('dashboard_refresh_trigger', Date.now().toString());
@@ -390,55 +437,46 @@ export default function ItemDetailPage() {
 
 
 
-  // Handle image upload for inventory item
+  // Handle image selection for inventory item (preview only, upload on save)
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
-    const options = {
-      maxSizeMB: 1,
-      maxWidthOrHeight: 800,
-      useWebWorker: true,
-    };
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select a valid image file');
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image file size must be less than 5MB');
+      return;
+    }
+    
     setUploadingImage(true);
     try {
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 800,
+        useWebWorker: true,
+      };
+      
       const compressedFile = await imageCompression(file, options);
       
-      // Upload to Supabase
-      const { supabase } = await import('../../../config/supabase');
-      const timestamp = Date.now();
-      const fileExtension = file.name.split('.').pop() || 'jpg';
-      const fileName = `item-pictures/${id}-${timestamp}.${fileExtension}`;
+      // Store the compressed file for later upload
+      setSelectedImageFile(compressedFile);
       
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('dtc-ims')
-        .upload(fileName, compressedFile, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) throw uploadError;
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(compressedFile);
+      setSelectedImagePreview(previewUrl);
       
-      // Store file path instead of public URL
-      const filePath = fileName;
-      setEditingItem((prev: any) => ({ ...prev, image_url: filePath }));
+      // Clear any previously uploaded images from tracking
+      setUploadedImagesDuringEdit([]);
       
-      // Update the item in the backend with the new image path
-      await apiClient.put(`/items/${id}`, {
-        image_url: filePath
-      });
-      
-      // Update the signed URL for immediate display
-      const newImageUrl = await getImageUrl(filePath);
-      setItemImageUrl(newImageUrl);
-      
-      // Track uploaded image (replace previous uploads during this edit session)
-      setUploadedImagesDuringEdit(prev => {
-        // Remove any previous uploaded images from tracking (they will be deleted on cancel)
-        return [filePath];
-      });
     } catch (err) {
-      console.error('Upload error:', err);
-      alert('Failed to upload image.');
+      console.error('Image processing error:', err);
+      alert('Failed to process image.');
     } finally {
       setUploadingImage(false);
     }
@@ -517,10 +555,12 @@ export default function ItemDetailPage() {
       {/* Top Section */}
       <div className={styles.topCard}>
         <div className={styles.topImageBox} style={{position:'relative'}}>
-          {itemImageUrl || (isEditing && editingItem.image_url) ? (
-            <img src={isEditing ? itemImageUrl : itemImageUrl} alt="item" className={styles.topImage} />
+          {isEditing && selectedImagePreview ? (
+            <img src={selectedImagePreview} alt="item preview" className={styles.topImage} />
+          ) : itemImageUrl ? (
+            <img src={itemImageUrl} alt="item" className={styles.topImage} />
           ) : (
-            isEditing ? null : <span>image</span>
+            <span>image</span>
           )}
           {isEditing && (
             <>
@@ -532,7 +572,7 @@ export default function ItemDetailPage() {
                 onChange={handleImageChange}
               />
               <button className={styles.changeImageBtn} onClick={handleImageButtonClick} disabled={uploadingImage} style={{position:'absolute',bottom:12,left:'50%',transform:'translateX(-50%)',zIndex:2}}>
-                {uploadingImage ? 'Uploading...' : 'Change Image'}
+                {uploadingImage ? 'Processing...' : 'Select Image'}
               </button>
             </>
           )}
