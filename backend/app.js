@@ -67,7 +67,7 @@ app.post('/test-supabase-upload', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Local development server - only listen on localhost
-app.listen(PORT, 'localhost', () => {
-  console.log(`Local development server running on http://localhost:${PORT}`);
+// Listen on all interfaces for Render compatibility
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 }); 
