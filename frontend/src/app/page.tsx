@@ -84,8 +84,8 @@ export default function DashboardPage() {
       // Calculate statistics
       const totalItems = items.length;
       const criticalItemsCount = items.filter((item: Item) => item.system_status === 'Poor' || item.system_status === 'Critical' || item.system_status === 'Fair' || item.system_status === 'Needs Repair' || item.system_status === 'Out of Order').length;
-      const completedMaintenanceCount = maintenanceLogs.filter(log => log.status === 'completed').length;
-      const pendingMaintenanceCount = maintenanceLogs.filter(log => log.status === 'pending').length;
+      const completedMaintenanceCount = maintenanceLogs.filter((log: any) => log.status === 'completed').length;
+      const pendingMaintenanceCount = maintenanceLogs.filter((log: any) => log.status === 'pending').length;
       const totalMaintenanceCount = maintenanceLogs.length;
      
       // Calculate items needing maintenance (system_status below 'Good')
