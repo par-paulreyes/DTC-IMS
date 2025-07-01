@@ -54,6 +54,8 @@ export default function DashboardPage() {
   const [yesterdayAdded, setYesterdayAdded] = useState(0);
   const [goodStatusCount, setGoodStatusCount] = useState(0);
   const [belowGoodCount, setBelowGoodCount] = useState(0);
+  const [othersAddedThisWeek, setOthersAddedThisWeek] = useState(0);
+  const [mostRecentOtherArticle, setMostRecentOtherArticle] = useState('');
   const router = useRouter();
 
 
@@ -117,26 +119,24 @@ export default function DashboardPage() {
       const today = new Date();
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
-     
+
       const todayAddedCount = items.filter(item => {
         if (!item || !item.created_at) return false;
         const itemDate = new Date(item.created_at);
         return itemDate.toDateString() === today.toDateString();
       }).length;
-     
+
       const yesterdayAddedCount = items.filter(item => {
         if (!item || !item.created_at) return false;
         const itemDate = new Date(item.created_at);
         return itemDate.toDateString() === yesterday.toDateString();
       }).length;
 
-
       // Get recently added items (last 5 items)
       const recentItemsList = items
         .filter(item => item && item.created_at) // Filter out items without creation date
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 5);
-
 
       // Calculate recently added count (items added in last 7 days)
       const sevenDaysAgo = new Date();
@@ -147,6 +147,27 @@ export default function DashboardPage() {
         return itemDate >= sevenDaysAgo;
       }).length;
 
+      // Calculate recently added articles this week
+      const recentlyAddedArticles = items.filter(item => {
+        if (!item || !item.created_at) return false;
+        const itemDate = new Date(item.created_at);
+        return itemDate >= sevenDaysAgo;
+      });
+      const recentlyAddedArticlesCount = recentlyAddedArticles.length;
+
+      // Calculate 'other' articles (not Desktop or Printer) added this week
+      const recentlyAddedOthers = recentlyAddedArticles.filter(item => {
+        const type = (item.article_type || '').toLowerCase();
+        return type !== 'desktop' && type !== 'printer';
+      });
+      const recentlyAddedOthersCount = recentlyAddedOthers.length;
+
+      // Find the most recently added article type this week (excluding Desktop and Printer)
+      let mostRecentOtherArticle = '';
+      if (recentlyAddedOthers.length > 0) {
+        mostRecentOtherArticle = recentlyAddedOthers[0].article_type || '';
+      }
+      setMostRecentOtherArticle(mostRecentOtherArticle);
 
       // Set all state variables
       setTotalItems(totalItems);
@@ -166,6 +187,7 @@ export default function DashboardPage() {
       setYesterdayAdded(yesterdayAddedCount);
       setGoodStatusCount(itemsWithGoodStatus);
       setBelowGoodCount(itemsNeedingMaintenance);
+      setOthersAddedThisWeek(recentlyAddedOthersCount);
      
       setLastUpdated(new Date());
      
@@ -425,99 +447,129 @@ export default function DashboardPage() {
           <div className={styles.dashboardInfoGrid}>
             {/* Needed Maintenance */}
             <div
-              className={`${styles.infoCard} ${styles.maintenanceCard}`}
+              className={`${styles.infoCard} ${styles.infoCardTopBorder}`}
               onClick={() => handleCardClick('needed-maintenance')}
               style={{ cursor: 'pointer' }}
               title="Click to view all items except those with Good status"
             >
               <div className={styles.cardTopRow}>
-                <span className={styles.cardNumber} style={{ color: belowGoodCount > 0 ? '#991b1b' : '#15803d' }}>{belowGoodCount}</span>
-                <span className={styles.cardIcon} style={{ background: belowGoodCount > 0 ? '#fef2f2' : '#f0fdf4' }}>
-                  <FaTools size={28} style={{ color: belowGoodCount > 0 ? '#991b1b' : '#15803d' }} />
+                <span className={styles.cardNumber} style={{ color: 'var(--primary-red-dark)' }}>{belowGoodCount}</span>
+                <span className={styles.cardIcon} style={{ background: 'var(--neutral-gray-200)' }}>
+                  <FaTools size={28} style={{ color: 'var(--primary-red-dark)' }} />
                 </span>
               </div>
-              <div className={styles.cardTitle}>Needs Maintenance</div>
-              <div className={styles.cardChange} style={{ color: belowGoodCount > 0 ? '#991b1b' : '#15803d' }}>
+              <div className={styles.cardTitle} style={{ color: 'var(--neutral-gray-900)' }}>Needs Action</div>
+              <div className={`${styles.cardChange} ${belowGoodCount > 0 ? styles['cardChange--red'] : styles['cardChange--green']}`}>
                 {belowGoodCount > 0 ? '↗ Items below Good status' : '✓ All items in good condition'}
               </div>
               <div className={styles.cardStatsRow}>
-                <div><span className={styles.cardStatValue}>{goodStatusCount}</span> <span className={styles.cardStatLabel}>GOOD</span></div>
-                <div><span className={styles.cardStatValue}>{belowGoodCount}</span> <span className={styles.cardStatLabel}>URGENT</span></div>
+                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{goodStatusCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>GOOD</span></div>
+                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{belowGoodCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>URGENT</span></div>
               </div>
               <div className={styles.cardFooterRow}>
-                <span className={styles.cardDate}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                <span className={styles.cardDate} style={{ color: 'var(--neutral-gray-900)' }}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
             </div>
             {/* Total Maintenance */}
             <div
-              className={`${styles.infoCard} ${styles.totalCard}`}
+              className={`${styles.infoCard} ${styles.infoCardTopBorder}`}
               onClick={() => handleCardClick('total-maintenance')}
               style={{ cursor: 'pointer' }}
               title="Click to view items with pending maintenance"
             >
               <div className={styles.cardTopRow}>
-                <span className={styles.cardNumber} style={{ color: pendingMaintenance > 0 ? '#991b1b' : '#15803d' }}>{totalMaintenance}</span>
-                <span className={styles.cardIcon} style={{ background: pendingMaintenance > 0 ? '#fef2f2' : '#f0fdf4' }}>
-                  <FaChartBar size={28} style={{ color: pendingMaintenance > 0 ? '#991b1b' : '#15803d' }} />
+                <span className={styles.cardNumber} style={{ color: 'var(--primary-red-dark)' }}>{totalMaintenance}</span>
+                <span className={styles.cardIcon} style={{ background: 'var(--neutral-gray-200)' }}>
+                  <FaChartBar size={28} style={{ color: 'var(--primary-red-dark)' }} />
                 </span>
               </div>
-              <div className={styles.cardTitle}>Total Maintenance</div>
-              <div className={styles.cardChange} style={{ color: pendingMaintenance > 0 ? '#991b1b' : '#15803d' }}>
+              <div className={styles.cardTitle} style={{ color: 'var(--neutral-gray-900)' }}>Total Maintenance</div>
+              <div className={`${styles.cardChange} ${pendingMaintenance > 0 ? styles['cardChange--red'] : styles['cardChange--green']}`}>
                 {pendingMaintenance > 0 ? `↗ ${pendingMaintenance} pending` : `✓ ${completedMaintenance} completed`}
               </div>
-              <div className={styles.cardProgressBar}><div className={styles.cardProgress} style={{ width: `${totalMaintenance > 0 ? (completedMaintenance / totalMaintenance) * 100 : 0}%` }} /></div>
+              <div className={styles.cardProgressBar} title={
+                totalMaintenance === 0
+                  ? 'No maintenance logs yet'
+                  : completedMaintenance === totalMaintenance
+                    ? 'All maintenance completed'
+                    : `${completedMaintenance} of ${totalMaintenance} completed`
+              }>
+                <div
+                  className={
+                    completedMaintenance === totalMaintenance && totalMaintenance > 0
+                      ? styles['cardProgress--green']
+                      : styles['cardProgress--red']
+                  }
+                  style={{ width: `${totalMaintenance > 0 ? (completedMaintenance / totalMaintenance) * 100 : 0}%` }}
+                />
+              </div>
               <div className={styles.cardStatsRow}>
-                <div><span className={styles.cardStatValue}>{completedMaintenance}</span> <span className={styles.cardStatLabel}>COMPLETED</span></div>
-                <div><span className={styles.cardStatValue}>{pendingMaintenance}</span> <span className={styles.cardStatLabel}>PENDING</span></div>
+                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{completedMaintenance}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>COMPLETED</span></div>
+                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{pendingMaintenance}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>PENDING</span></div>
               </div>
               <div className={styles.cardFooterRow}>
-                <span className={styles.cardDate}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                <span className={styles.cardDate} style={{ color: 'var(--neutral-gray-900)' }}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
             </div>
             {/* Total Articles */}
             <div
-              className={`${styles.infoCard} ${styles.articlesCard}`}
+              className={`${styles.infoCard} ${styles.infoCardTopBorder}`}
               onClick={() => handleCardClick('total-articles')}
               style={{ cursor: 'pointer' }}
               title="Click to view all inventory items"
             >
               <div className={styles.cardTopRow}>
-                <span className={styles.cardNumber} style={{ color: '#15803d' }}>{totalArticles}</span>
-                <span className={styles.cardIcon} style={{ background: '#f0fdf4' }}>
-                  <FaBoxes size={28} style={{ color: '#15803d' }} />
+                <span className={styles.cardNumber} style={{ color: 'var(--primary-red-dark)' }}>{totalArticles}</span>
+                <span className={styles.cardIcon} style={{ background: 'var(--neutral-gray-200)' }}>
+                  <FaBoxes size={28} style={{ color: 'var(--primary-red-dark)' }} />
                 </span>
               </div>
-              <div className={styles.cardTitle}>Total Articles</div>
-              <div className={styles.cardChange} style={{ color: '#6b7280' }}>→ No change</div>
+              <div className={styles.cardTitle} style={{ color: 'var(--neutral-gray-900)' }}>Total Articles</div>
+              {/* Show 'New {article} added' under the title if a new other article was added this week */}
+              {mostRecentOtherArticle && (
+                <div className={`${styles.cardChange} ${styles['cardChange--green']}`} style={{ marginBottom: '10px' }}>
+                  → New {mostRecentOtherArticle} added
+                </div>
+              )}
+              {recentlyAdded === 0 && !mostRecentOtherArticle ? (
+                <div className={styles.cardChange} style={{ color: '#6b7280' }}>→ No change</div>
+              ) : null}
               <div className={styles.cardStatsRow}>
-                <div><span className={styles.cardStatValue}>{topCategoryCount}</span> <span className={styles.cardStatLabel}>{(topCategory || 'NONE').toUpperCase()}</span></div>
-                <div><span className={styles.cardStatValue}>{secondCategoryCount}</span> <span className={styles.cardStatLabel}>{(secondCategory || 'NONE').toUpperCase()}</span></div>
+                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{topCategoryCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>{(topCategory || 'NONE').toUpperCase()}</span></div>
+                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{secondCategoryCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>{(secondCategory || 'NONE').toUpperCase()}</span></div>
+              </div>
+              {/* OTHERS section under Desktop and Printer */}
+              <div style={{ marginTop: 0, textAlign: 'center' }}>
+                <div style={{ marginTop: 0 }}>
+                  <span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{othersAddedThisWeek} </span>
+                  <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>OTHERS</span>
+                </div>
               </div>
               <div className={styles.cardFooterRow}>
-                <span className={styles.cardDate}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                <span className={styles.cardDate} style={{ color: 'var(--neutral-gray-900)' }}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
             </div>
             {/* Recently Added */}
             <div
-              className={`${styles.infoCard} ${styles.recentCard}`}
+              className={`${styles.infoCard} ${styles.infoCardTopBorder}`}
               onClick={() => handleCardClick('recently-added')}
               style={{ cursor: 'pointer' }}
               title="Click to view all inventory items"
             >
               <div className={styles.cardTopRow}>
-                <span className={styles.cardNumber} style={{ color: '#d97706' }}>{recentlyAdded}</span>
-                <span className={styles.cardIcon} style={{ background: '#fffbeb' }}>
-                  <FaPlus size={28} style={{ color: '#d97706' }} />
+                <span className={styles.cardNumber} style={{ color: 'var(--primary-red-dark)' }}>{recentlyAdded}</span>
+                <span className={styles.cardIcon} style={{ background: 'var(--neutral-gray-200)' }}>
+                  <FaPlus size={28} style={{ color: 'var(--primary-red-dark)' }} />
                 </span>
               </div>
-              <div className={styles.cardTitle}>Recently Added</div>
-              <div className={styles.cardChange} style={{ color: '#991b1b' }}>↗ +3 this week</div>
+              <div className={styles.cardTitle} style={{ color: 'var(--neutral-gray-900)' }}>Recently Added</div>
+              <div className={`${styles.cardChange} ${styles['cardChange--green']}`}>↗ +{recentlyAdded} this week</div>
               <div className={styles.cardStatsRow}>
-                <div><span className={styles.cardStatValue}>{todayAdded}</span> <span className={styles.cardStatLabel}>TODAY</span></div>
-                <div><span className={styles.cardStatValue}>{yesterdayAdded}</span> <span className={styles.cardStatLabel}>YESTERDAY</span></div>
+                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{todayAdded}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>TODAY</span></div>
+                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{yesterdayAdded}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>YESTERDAY</span></div>
               </div>
               <div className={styles.cardFooterRow}>
-                <span className={styles.cardDate}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                <span className={styles.cardDate} style={{ color: 'var(--neutral-gray-900)' }}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
             </div>
           </div>

@@ -97,27 +97,6 @@
     padding: 15px;
   }
   
-  .searchbar-input {
-    border: none;
-    outline: none;
-    background: none !important;
-    font-size: 1rem;
-    flex: 1;
-    padding: 0 16px;
-    font-family: 'Poppins', Arial, sans-serif;
-    background: transparent;
-    color: #444;
-    height: 40px;
-    border-radius: 999px;
-  }
-  
-  .searchbar-input::placeholder {
-    color: #bdbdbd;
-    font-weight: 400;
-    font-size: 1.05rem;
-    font-family: 'Poppins', Arial, sans-serif;
-  }
-  
   /* Previous filter bar styles */
   .filterbar-row {
     display: flex;
@@ -201,32 +180,6 @@
   text-decoration: none !important;
 }
 
-.search-input {
-  flex: 1;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 15px;
-  font-size: 16px;
-  font-family: 'Poppins', Arial, sans-serif;
-  outline: none;
-  background: #fafafa;
-  color: #374151;
-  height: 48px;
-  box-sizing: border-box;
-  margin-bottom: 0;
-}
-
-.search-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.search-input::placeholder {
-  color: #9ca3af;
-  font-weight: 400;
-}
-
-
 .status-poor {
   color: #dc2626; /* red-600 */
   font-weight: 600;
@@ -291,7 +244,7 @@
   background: #fff;
   box-shadow: 0 4px 32px rgba(0,0,0,0.10);
   border-radius: 0 0 15px 15px;
-  margin-top: 0; /* or a smaller value if you want a tiny gap */
+  margin-top: 0; 
   padding-top: 0;
 }
 
@@ -301,6 +254,37 @@ option {
   font-family: 'Poppins', Arial, sans-serif;
   font-size: 15px;
   font-weight: 500;
+}
+
+@media (max-width: 700px) {
+  .search-container, .searchbar-row {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .search-input {
+    width: 100%;
+    max-width: 100%;
+    font-size: 15px;
+    padding: 12px 0;
+    box-sizing: border-box;
+    margin: 0;
+  }
+}
+@media (min-width: 701px) {
+  .search-container, .searchbar-row {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .search-input {
+    width: 100%;
+    max-width: 500px;
+    font-size: 1rem;
+    padding: 16px 0;
+    box-sizing: border-box;
+    margin: 0;
+  }
 }
 
 
