@@ -83,26 +83,26 @@ export default function DashboardPage() {
      
       // Calculate statistics
       const totalItems = items.length;
-      const criticalItemsCount = items.filter(item => item.system_status === 'Poor' || item.system_status === 'Critical' || item.system_status === 'Fair' || item.system_status === 'Needs Repair' || item.system_status === 'Out of Order').length;
+      const criticalItemsCount = items.filter((item: Item) => item.system_status === 'Poor' || item.system_status === 'Critical' || item.system_status === 'Fair' || item.system_status === 'Needs Repair' || item.system_status === 'Out of Order').length;
       const completedMaintenanceCount = maintenanceLogs.filter(log => log.status === 'completed').length;
       const pendingMaintenanceCount = maintenanceLogs.filter(log => log.status === 'pending').length;
       const totalMaintenanceCount = maintenanceLogs.length;
      
       // Calculate items needing maintenance (system_status below 'Good')
-      const itemsNeedingMaintenance = items.filter(item =>
+      const itemsNeedingMaintenance = items.filter((item: Item) =>
         item.system_status &&
         ['Poor', 'Critical', 'Fair', 'Needs Repair', 'Out of Order'].includes(item.system_status)
       ).length;
      
       // Calculate items with Good status
-      const itemsWithGoodStatus = items.filter(item =>
+      const itemsWithGoodStatus = items.filter((item: Item) =>
         item.system_status &&
         item.system_status === 'Good'
       ).length;
      
       // Calculate category statistics (using article_type instead of category)
       const categoryCounts: { [key: string]: number } = {};
-      items.forEach(item => {
+      items.forEach((item: Item) => {
         const category = item.article_type || 'Uncategorized';
         categoryCounts[category] = (categoryCounts[category] || 0) + 1;
       });
@@ -121,13 +121,13 @@ export default function DashboardPage() {
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
 
-      const todayAddedCount = items.filter(item => {
+      const todayAddedCount = items.filter((item: Item) => {
         if (!item || !item.created_at) return false;
         const itemDate = new Date(item.created_at);
         return itemDate.toDateString() === today.toDateString();
       }).length;
 
-      const yesterdayAddedCount = items.filter(item => {
+      const yesterdayAddedCount = items.filter((item: Item) => {
         if (!item || !item.created_at) return false;
         const itemDate = new Date(item.created_at);
         return itemDate.toDateString() === yesterday.toDateString();
@@ -135,21 +135,21 @@ export default function DashboardPage() {
 
       // Get recently added items (last 5 items)
       const recentItemsList = items
-        .filter(item => item && item.created_at) // Filter out items without creation date
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .filter((item: Item) => item && item.created_at) // Filter out items without creation date
+        .sort((a: Item, b: Item) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 5);
 
       // Calculate recently added count (items added in last 7 days)
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const recentlyAddedCount = items.filter(item => {
+      const recentlyAddedCount = items.filter((item: Item) => {
         if (!item || !item.created_at) return false;
         const itemDate = new Date(item.created_at);
         return itemDate >= sevenDaysAgo;
       }).length;
 
       // Calculate recently added articles this week
-      const recentlyAddedArticles = items.filter(item => {
+      const recentlyAddedArticles = items.filter((item: Item) => {
         if (!item || !item.created_at) return false;
         const itemDate = new Date(item.created_at);
         return itemDate >= sevenDaysAgo;
@@ -157,7 +157,7 @@ export default function DashboardPage() {
       const recentlyAddedArticlesCount = recentlyAddedArticles.length;
 
       // Calculate 'other' articles (not Desktop or Printer) added this week
-      const recentlyAddedOthers = recentlyAddedArticles.filter(item => {
+      const recentlyAddedOthers = recentlyAddedArticles.filter((item: Item) => {
         const type = (item.article_type || '').toLowerCase();
         return type !== 'desktop' && type !== 'printer';
       });
