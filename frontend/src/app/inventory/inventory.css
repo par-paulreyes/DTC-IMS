@@ -76,7 +76,6 @@
   font-size: 1.5rem;
   color: white;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
 .inventory-info {
@@ -212,7 +211,7 @@
 .filterbar-select {
   flex: 1;
   min-width: 0;
-  background: linear-gradient(90deg, #182848 0%, #2d4a6b 100%);
+  background: #182848;
   border-radius: 8px;
   padding: 10px 16px;
   border: none;
@@ -254,7 +253,7 @@
 @media (max-width: 700px) {
   .inventory-header-row {
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     gap: 10px;
   }
   .filters-row {

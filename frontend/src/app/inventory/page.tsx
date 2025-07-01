@@ -327,11 +327,11 @@ function InventoryPageContent() {
                       System Status: {item.system_status ? item.system_status : "Unknown"}
                     </div>
                     {item.has_pending_maintenance && (
-                      <div className="text-red-500 text-xs font-medium mt-1">
+                      <div className="text-yellow-500 text-xs font-medium mt-1">
                         {(() => {
                           const count = item.pending_maintenance_count ?? 1;
                           return (
-                            <>⚠️ Pending Maintenance ({count} task{count > 1 ? 's' : ''})</>
+                            <>⚠️ <span style={{ color: '#92400e' }}>Pending Maintenance ({count} task{count > 1 ? 's' : ''})</span></>
                           );
                         })()}
                       </div>
