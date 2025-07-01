@@ -328,7 +328,12 @@ export default function InventoryPage() {
                     </div>
                     {item.has_pending_maintenance && (
                       <div className="text-red-500 text-xs font-medium mt-1">
-                        ⚠️ Pending Maintenance ({item.pending_maintenance_count || 1} task{item.pending_maintenance_count > 1 ? 's' : ''})
+                        {(() => {
+                          const count = item.pending_maintenance_count ?? 1;
+                          return (
+                            <>⚠️ Pending Maintenance ({count} task{count > 1 ? 's' : ''})</>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
