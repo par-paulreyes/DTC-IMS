@@ -110,7 +110,7 @@ export default function BottomNavbar() {
                 </svg>
               </Link>
             ) : (
-              <NavItem key={item.href} href={item.href} label={item.label} active={item.active} icon={item.icon} />
+              <NavItem key={item.href} href={item.href} label={item.label} active={!!item.active} icon={item.icon} />
             )
           )}
         </div>
