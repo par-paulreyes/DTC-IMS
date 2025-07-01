@@ -69,7 +69,6 @@ export default function ItemDetailPage() {
   const [activeTab, setActiveTab] = useState<'diagnostics' | 'logs'>('diagnostics');
   const [diagnosticsFilter, setDiagnosticsFilter] = useState('all');
   const [itemImageUrl, setItemImageUrl] = useState<string>('');
-  const [uploadedImagesDuringEdit, setUploadedImagesDuringEdit] = useState<string[]>([]);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string>('');
 
@@ -79,20 +78,9 @@ export default function ItemDetailPage() {
   useEffect(() => {
     setMounted(true);
     
-    // Cleanup function to delete uploaded images if component unmounts during edit
-    return () => {
-      if (isEditing && uploadedImagesDuringEdit.length > 0) {
-        uploadedImagesDuringEdit.forEach(async (image) => {
-          try {
-            const { supabase } = await import('../../../config/supabase');
-            await supabase.storage.from('dtc-ims').remove([image]);
-          } catch (err) {
-            console.error('Error deleting uploaded image on unmount:', err);
-          }
-        });
-      }
-    };
-  }, [isEditing, uploadedImagesDuringEdit]);
+    // No cleanup needed for uploaded images since we use upsert
+    // and consistent filenames - images are replaced, not duplicated
+  }, []);
 
   // Cleanup function to revoke object URLs when selected image changes
   useEffect(() => {
@@ -211,7 +199,6 @@ export default function ItemDetailPage() {
     setEditingItem({ ...item });
     setEditingDiagnostics(diagnostics.map(d => ({ ...d })));
     setEditingLogs(logs.map(l => ({ ...l })));
-    setUploadedImagesDuringEdit([]); // Clear uploaded images tracking when starting edit
   };
 
 
@@ -231,12 +218,8 @@ export default function ItemDetailPage() {
     if (item?.image_url) {
       getImageUrl(item.image_url).then(url => setItemImageUrl(url));
     }
-    // Delete uploaded images from Supabase when canceling
-    uploadedImagesDuringEdit.forEach(async (image) => {
-      const { supabase } = await import('../../../config/supabase');
-      await supabase.storage.from('dtc-ims').remove([image]);
-    });
-    setUploadedImagesDuringEdit([]);
+    // No need to delete uploaded images when canceling since we use upsert
+    // and consistent filenames - the original image remains unchanged
   };
 
 
@@ -257,15 +240,15 @@ export default function ItemDetailPage() {
       // Upload image to Supabase if a new image was selected
       if (selectedImageFile) {
         const { supabase } = await import('../../../config/supabase');
-        const timestamp = Date.now();
         const fileExtension = selectedImageFile.name.split('.').pop() || 'jpg';
-        const fileName = `item-pictures/${id}-${timestamp}.${fileExtension}`;
+        // Use consistent filename for each item to prevent duplicates
+        const fileName = `item-pictures/${id}.${fileExtension}`;
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('dtc-ims')
           .upload(fileName, selectedImageFile, {
             cacheControl: '3600',
-            upsert: false
+            upsert: true // Enable upsert to replace existing file
           });
 
         if (uploadError) throw uploadError;
@@ -323,7 +306,6 @@ export default function ItemDetailPage() {
       setDiagnostics(editingDiagnostics);
       setLogs(editingLogs);
       setIsEditing(false);
-      setUploadedImagesDuringEdit([]); // Clear uploaded images tracking when saving successfully
       
       // Clear selected image states
       setSelectedImageFile(null);
@@ -472,7 +454,6 @@ export default function ItemDetailPage() {
       setSelectedImagePreview(previewUrl);
       
       // Clear any previously uploaded images from tracking
-      setUploadedImagesDuringEdit([]);
       
     } catch (err) {
       console.error('Image processing error:', err);
