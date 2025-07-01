@@ -24,15 +24,6 @@ app.use(cors({
 
 app.use(express.json());
 
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Serve static files from uploads directory
-app.use('/uploads', express.static('uploads'));
-
 // Test database connection
 db.getConnection((err, connection) => {
   if (err) {
@@ -53,6 +44,20 @@ app.use('/api/items', itemRoutes);
 app.use('/api/logs', maintenanceLogRoutes);
 app.use('/api/diagnostics', diagnosticRoutes);
 app.use('/api/users', userRoutes);
+
+// Add a test endpoint for Supabase image upload
+app.post('/test-supabase-upload', (req, res) => {
+  const { image_url } = req.body;
+  if (!image_url || typeof image_url !== 'string') {
+    return res.status(400).json({ success: false, message: 'No image_url provided' });
+  }
+  // Basic validation for Supabase public URL
+  if (image_url.startsWith('https://') && image_url.includes('supabase.co/storage/v1/object/public/')) {
+    return res.json({ success: true, message: 'Supabase image URL is valid and accepted', image_url });
+  } else {
+    return res.status(400).json({ success: false, message: 'Invalid Supabase public image URL' });
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 

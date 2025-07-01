@@ -4,6 +4,8 @@ const Diagnostic = require('../models/diagnosticModel');
 const fs = require('fs');
 const path = require('path');
 
+const BASE_URL = process.env.BASE_URL || 'http://localhost:5000';
+
 exports.getAllItems = (req, res) => {
   console.log('Getting all items for company:', req.user.company_name);
   
@@ -30,38 +32,21 @@ exports.createItem = async (req, res) => {
   try {
     console.log('Creating item with data:', req.body);
     console.log('User:', req.user);
-    
     const company_name = req.user.company_name;
-    
-    // Filter out maintenance-related fields that don't belong in items table
     const { maintenance_date, maintained_by, maintenance_tasks, diagnostic, ...itemData } = req.body;
-    
     console.log('Extracted maintenance fields:', { maintenance_date, maintained_by, maintenance_tasks, diagnostic });
     console.log('Filtered item data:', itemData);
-    
     let item = { ...itemData, company_name };
-    
-    console.log('Final item data to insert:', item);
-    
-    // Handle image upload
-  if (req.file) {
-    item.image_url = `/uploads/${req.file.filename}`;
-      console.log('Image uploaded:', req.file.filename);
+    if (req.body.image_url) {
+      item.image_url = req.body.image_url;
     }
-
-    // Create the item first using Promise
+    console.log('Final item data to insert:', item);
     const itemId = await new Promise((resolve, reject) => {
       Item.create(item, (err, id) => {
-        if (err) {
-          console.error('Error creating item in database:', err);
-          reject(err);
-        } else {
-          console.log('Item created successfully with ID:', id);
-          resolve(id);
-        }
+        if (err) reject(err);
+        else resolve(id);
       });
     });
-    
     let maintenanceLogsCreated = 0;
     let diagnosticCreated = false;
     
@@ -166,21 +151,11 @@ exports.createItem = async (req, res) => {
 };
 
 exports.updateItem = (req, res) => {
-  // Filter out computed fields that don't exist in the items table
-  const { 
-    status, 
-    system_status, 
-    pending_maintenance_count, 
-    maintenance_status,
-    ...updateData 
-  } = req.body;
-  
-  if (req.file) {
-    updateData.image_url = `/uploads/${req.file.filename}`;
+  const { status, system_status, pending_maintenance_count, maintenance_status, ...updateData } = req.body;
+  if (req.body.image_url) {
+    updateData.image_url = req.body.image_url;
   }
-  
   console.log('Updating item with filtered data:', updateData);
-  
   Item.update(req.params.id, updateData, (err, result) => {
     if (err) {
       console.error('Error updating item:', err);
@@ -219,38 +194,5 @@ exports.getItemsNeedingMaintenance = (req, res) => {
   Item.findItemsNeedingMaintenance(company_name, (err, items) => {
     if (err) return res.status(500).json({ message: 'Error fetching items needing maintenance', error: err });
     res.json(items);
-  });
-};
-
-// Upload item image
-exports.uploadItemImage = (req, res) => {
-  const itemId = req.params.id;
-  if (!req.file) {
-    return res.status(400).json({ message: 'No image file uploaded' });
-  }
-  const imageUrl = `/uploads/${req.file.filename}`;
-  // First, get the previous item image
-  Item.findById(itemId, (err, item) => {
-    if (err || !item) {
-      return res.status(500).json({ message: 'Error finding item for image update' });
-    }
-    const prevImage = item.image_url;
-    // Update to new image
-    Item.update(itemId, { image_url: imageUrl }, (err, result) => {
-      if (err) {
-        console.error('Error updating item image:', err);
-        return res.status(500).json({ message: 'Error updating item image', error: err.message });
-      }
-      // Delete previous image if it exists and is different
-      if (prevImage && prevImage !== imageUrl && prevImage.startsWith('/uploads/')) {
-        const prevPath = path.join(__dirname, '..', prevImage);
-        fs.unlink(prevPath, (err) => {
-          if (err) {
-            console.warn('Failed to delete previous item image:', prevPath, err.message);
-          }
-        });
-      }
-      res.json({ message: 'Item image updated', url: imageUrl });
-    });
   });
 }; 

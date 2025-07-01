@@ -6,6 +6,7 @@ import { apiClient, getImageUrl } from "../../config/api";
 import imageCompression from 'browser-image-compression';
 import { Camera, Upload, X } from "lucide-react";
 import './profile.css';
+import { supabase } from '../../config/supabase';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
@@ -79,6 +80,12 @@ export default function ProfilePage() {
     setImageCompressionInfo(null);
   };
 
+  // Helper to always get the public URL from Supabase
+  function getSupabasePublicUrl(filePath: string) {
+    const { data } = supabase.storage.from('dtc-ims').getPublicUrl(filePath);
+    return data?.publicUrl || '';
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -88,102 +95,61 @@ export default function ProfilePage() {
       return;
     }
     setSaving(true);
-    
     try {
       let profilePictureUrl = form.profile_picture;
-      
       // Handle image upload if there's a captured image or selected file
       if (capturedImage || selectedImageFile) {
         setUploading(true);
-        
         let fileToUpload: File;
-        
         if (capturedImage) {
-          // Convert captured image to file and compress it
           const response = await fetch(capturedImage);
           const blob = await response.blob();
-          const originalFile = new File([blob], 'captured-profile.png', { type: 'image/png' });
-          
-          console.log('📸 Compressing captured image...', {
-            originalSize: `${(originalFile.size / 1024 / 1024).toFixed(2)} MB`,
-            originalType: originalFile.type
-          });
-          
-          // Compress the captured image
-          const compressionOptions = getCompressionOptions();
-          fileToUpload = await imageCompression(originalFile, compressionOptions);
-          
-          console.log('✅ Captured image compressed successfully', {
-            compressedSize: `${(fileToUpload.size / 1024 / 1024).toFixed(2)} MB`,
-            compressionRatio: `${((1 - fileToUpload.size / originalFile.size) * 100).toFixed(1)}%`,
-            compressedType: fileToUpload.type
-          });
+          fileToUpload = new File([blob], 'captured-profile.jpg', { type: 'image/jpeg' });
         } else {
-          // Selected file is already compressed from handleProfilePicChange
           fileToUpload = selectedImageFile!;
         }
-        
-        // Additional compression check (in case selectedImageFile wasn't compressed)
-        if (fileToUpload.size > 1024 * 1024) { // If still larger than 1MB
-          console.log('🔄 Additional compression needed...', {
-            currentSize: `${(fileToUpload.size / 1024 / 1024).toFixed(2)} MB`
+        // Use username or fallback to user id for file name
+        const fileName = `${form.username || form.id || 'user'}.jpg`;
+        const filePath = `profile-pictures/${fileName}`;
+        // Debug logging
+        console.log('Uploading to Supabase:', { fileToUpload, filePath });
+        // Upload with correct contentType
+        const { error: uploadError } = await supabase.storage
+          .from('dtc-ims')
+          .upload(filePath, fileToUpload, {
+            upsert: true,
+            contentType: fileToUpload.type || 'image/jpeg',
           });
-          
-          const compressionOptions = getCompressionOptions();
-          fileToUpload = await imageCompression(fileToUpload, compressionOptions);
-          
-          console.log('✅ Additional compression completed', {
-            finalSize: `${(fileToUpload.size / 1024 / 1024).toFixed(2)} MB`
-          });
+        if (uploadError) {
+          console.error('Supabase upload error:', uploadError);
+          setError(`Supabase upload error: ${uploadError.message || 'Unknown error'}`);
+          setUploading(false);
+          setSaving(false);
+          return;
         }
-        
-        const formData = new FormData();
-        formData.append('profile_picture', fileToUpload, fileToUpload.name || 'profile.jpg');
-        
-        const uploadResponse = await apiClient.post("/users/profile-picture", formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        
-        if (uploadResponse.data.url) {
-          profilePictureUrl = uploadResponse.data.url;
-        } else {
-          throw new Error("Failed to upload profile picture");
-        }
-        
+        // Always get the public URL in the correct format
+        const { data } = supabase.storage.from('dtc-ims').getPublicUrl(filePath);
+        profilePictureUrl = data?.publicUrl || '';
         setUploading(false);
       }
-      
       // Prepare the data to send
       const dataToSend = form.password ? { ...form, password: form.password } : form;
-      delete dataToSend.confirmPassword; // Remove confirmPassword from the request
-      
-      // Update profile picture URL if it was changed
+      delete dataToSend.confirmPassword;
       if (profilePictureUrl !== form.profile_picture) {
         dataToSend.profile_picture = profilePictureUrl;
       }
-      
-      console.log('📤 Sending profile update data:', dataToSend);
-      
       const response = await apiClient.put("/users/profile", dataToSend);
-      
-      console.log('✅ Profile update successful:', response.data);
       setSuccess("Profile updated successfully!");
       setForm({ ...form, password: "", confirmPassword: "" });
       setIsEditing(false);
-      
-      // Clear image states
       setCapturedImage("");
       setSelectedImageFile(null);
       setImageCompressionInfo(null);
-      
-      // Refresh profile data
       const updatedResponse = await apiClient.get("/users/profile");
       setProfile(updatedResponse.data);
     } catch (err: any) {
-      console.error('❌ Profile update failed:', err);
-      setError(err.response?.data?.message || "Error updating profile");
+      // Show error from Supabase or backend
+      setError(err.response?.data?.message || err.message || "Error updating profile");
     } finally {
       setSaving(false);
       setUploading(false);
@@ -281,8 +247,8 @@ export default function ProfilePage() {
     quality: 0.8, // 80% quality for good balance
   });
 
-  // Helper to get the correct image URL
-  const imageUrl = getImageUrl(form.profile_picture);
+  // For image display, always use the public URL
+  const imageUrl = form.profile_picture;
 
   // Helper to get preview URL for selected or captured images
   const getPreviewUrl = () => {

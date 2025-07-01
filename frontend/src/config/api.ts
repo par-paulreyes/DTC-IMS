@@ -53,8 +53,6 @@ export const getApiUrl = (endpoint: string) => {
 // Helper function to get image URL (without /api prefix)
 export const getImageUrl = (imagePath: string) => {
   if (!imagePath) return '';
-  // If the path already starts with http, return as is
   if (imagePath.startsWith('http')) return imagePath;
-  // Otherwise, prepend the base URL
   return `${API_BASE_URL}${imagePath}`;
 }; 

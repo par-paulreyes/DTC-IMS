@@ -5,6 +5,7 @@ import Webcam from "react-webcam";
 import { apiClient, getImageUrl } from "../../../config/api";
 import { Camera, Upload, X, Check, Plus, Trash2, ArrowRight, ArrowLeft, Info, Settings, CheckCircle, AlertTriangle, XCircle, AlertOctagon } from "lucide-react";
 import styles from './page.module.css';
+import { supabase } from '../../../config/supabase';
 
 
 interface MaintenanceTask {
@@ -58,6 +59,7 @@ export default function AddItemPage() {
   const [activeTab, setActiveTab] = useState<'details' | 'maintenance' | 'diagnostics'>('details');
   const [diagnosticsDropdownOpen, setDiagnosticsDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string>("");
  
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -198,11 +200,18 @@ export default function AddItemPage() {
   };
 
 
+  // Helper to always get the public URL from Supabase
+  function getSupabasePublicUrl(filePath: string) {
+    const { data } = supabase.storage.from('dtc-ims').getPublicUrl(filePath);
+    return data?.publicUrl || '';
+  }
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-   
+
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -210,96 +219,73 @@ export default function AddItemPage() {
         return;
       }
 
-
       // Validate required fields
       if (!form.property_no.trim()) {
         setError("Property No. is required");
         setLoading(false);
         return;
       }
-
-
       if (!form.article_type) {
         setError("Article Type is required");
         setLoading(false);
         return;
       }
-
-
-      // Validate maintenance tasks
       if (maintenanceTasks.length === 0) {
         setError("Please add at least one maintenance task");
         setLoading(false);
         return;
       }
-
-
-      // Validate that all tasks have required fields
       const invalidTasks = maintenanceTasks.filter(task => !task.task.trim());
       if (invalidTasks.length > 0) {
         setError("All maintenance tasks must have a task description");
         setLoading(false);
         return;
       }
-
-
-      // Validate diagnostic data
       if (!diagnostic.system_status) {
         setError("System status is required");
         setLoading(false);
         return;
       }
 
-
-      // Debug: Log maintenance tasks before sending
-      console.log('Maintenance tasks before submission:', maintenanceTasks);
-      console.log('Maintenance tasks JSON:', JSON.stringify(maintenanceTasks));
-      console.log('Diagnostic data:', diagnostic);
-
-
-      // Create FormData for image upload
+      // Create FormData for other fields
       const formData = new FormData();
-     
-      // Add item data (only the fields that belong in items table)
       Object.entries(form).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
           formData.append(key, value);
         }
       });
 
-
-      // Add image if selected (either uploaded or captured)
-      if (imageFile) {
-        formData.append('image', imageFile);
-      } else if (capturedImage) {
-        // Convert captured image to file
-        const base64Data = capturedImage.split(',')[1];
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
+      // Handle image upload to Supabase
+      let uploadedImageUrl = imageUrl;
+      if (imageFile || capturedImage) {
+        let fileToUpload: File;
+        if (capturedImage) {
+          const response = await fetch(capturedImage);
+          const blob = await response.blob();
+          fileToUpload = new File([blob], `captured-${Date.now()}.jpg`, { type: 'image/jpeg' });
+        } else {
+          fileToUpload = imageFile!;
         }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'image/png' });
-        const capturedFile = new File([blob], `captured-${Date.now()}.png`, { type: 'image/png' });
-        formData.append('image', capturedFile);
+        const filePath = `item-pictures/${form.property_no || 'item'}-${Date.now()}.jpg`;
+        const { error: uploadError } = await supabase.storage
+          .from('dtc-ims')
+          .upload(filePath, fileToUpload, {
+            upsert: true,
+            contentType: fileToUpload.type || 'image/jpeg',
+          });
+        if (uploadError) throw uploadError;
+        uploadedImageUrl = getSupabasePublicUrl(filePath);
+        setImageUrl(uploadedImageUrl);
+        formData.append('image_url', uploadedImageUrl);
       }
 
-
-      // Add maintenance data with automatic date and user info
+      // Add maintenance and diagnostic data
       const maintenanceDate = new Date().toISOString().split('T')[0];
       formData.append('maintenance_date', maintenanceDate);
       formData.append('maintenance_tasks', JSON.stringify(maintenanceTasks));
       formData.append('diagnostic', JSON.stringify(diagnostic));
 
-
-      // Debug: Log FormData contents
-      console.log('FormData contents:');
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-      }
-
-
+      // Submit to backend
       const response = await apiClient.post("/items", formData, {
         headers: {
           Authorization: token,
@@ -307,18 +293,9 @@ export default function AddItemPage() {
         },
       });
 
-
-      console.log('Item created successfully:', response.data);
-     
-      // Show success message with details
-      const successMessage = `Item created successfully!
-        - Item ID: ${response.data.id}
-        - Maintenance logs: ${response.data.maintenance_logs_created || 0}
-        - Diagnostic: ${response.data.diagnostic_created ? 'Yes' : 'No'}`;
-     
-      // Trigger dashboard refresh by setting a timestamp
+      // Success
+      const successMessage = `Item created successfully!\n  - Item ID: ${response.data.id}\n  - Maintenance logs: ${response.data.maintenance_logs_created || 0}\n  - Diagnostic: ${response.data.diagnostic_created ? 'Yes' : 'No'}`;
       localStorage.setItem('dashboard_refresh_trigger', Date.now().toString());
-     
       alert(successMessage);
       router.push(`/inventory/${response.data.id}`);
     } catch (err: any) {
@@ -354,7 +331,7 @@ export default function AddItemPage() {
   const completionPercentage = maintenanceTasks.length > 0 ? Math.round((completedTasks / maintenanceTasks.length) * 100) : 0;
 
 
-  const previewSrc = getImageUrl(imagePreview || capturedImage);
+  const previewSrc = imageUrl || imagePreview || capturedImage;
 
 
   if (!mounted) {
