@@ -418,19 +418,22 @@ export default function DashboardPage() {
               priority
             />
             <div className={styles.dashboardCardContent}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', height: '100%' }}>
-                <div style={{ textAlign: 'left' }}>
-                  <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', margin: 0, lineHeight: 1 }}>{totalItems} Items</h1>
-                  <p style={{ margin: '4px 0 0 0', opacity: 0.9, fontSize: '1.1rem', fontWeight: 500 }}>Inventory Total</p>
+              <div className={styles.dashboardCardTitle}>Dashboard</div>
+              <div className={styles.dashboardCardRow}>
+                <div className={styles.dashboardCardStatBlock}>
+                  <div className={styles.dashboardCardNumberRow}>
+                    <span className={styles.dashboardCardNumber}>{totalItems}</span>
+                    <span className={styles.dashboardCardItemsLabel}>items</span>
+                  </div>
+                  <div className={styles.dashboardCardDetailsRow}>
+                    <span className={styles.dashboardCardBadge} style={{ background: 'none', borderRadius: 0, padding: 0, fontWeight: 400 }}>Inventory Total</span>
+                  </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <h2 style={{ fontSize: '1.3rem', fontWeight: '600', margin: 0, opacity: 0.95 }}>Dashboard</h2>
-                    <p style={{ margin: '4px 0 0 0', opacity: 0.9, fontSize: '1rem' }}>System Overview</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', justifyContent: 'center' }}>
-                      <p style={{ margin: 0, opacity: 0.8, fontSize: '0.85rem' }}>
-                        Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                      </p>
+                <div className={styles.dashboardCardInfoBlock}>
+                  <div className={styles.dashboardCardInfoTextBlock}>
+                    <span>Inventory System</span>
+                    <div className={styles.dashboardCardDetailsRow}>
+                      <span>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                       <button
                         onClick={handleManualRefresh}
                         disabled={refreshing}
@@ -441,7 +444,8 @@ export default function DashboardPage() {
                           padding: '4px',
                           borderRadius: '4px',
                           opacity: refreshing ? 0.5 : 0.8,
-                          transition: 'all 0.2s ease'
+                          transition: 'all 0.2s ease',
+                          marginLeft: '8px'
                         }}
                         title="Refresh data"
                       >
@@ -555,13 +559,6 @@ export default function DashboardPage() {
               <div className={styles.cardStatsRow}>
                 <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{topCategoryCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>{(topCategory || 'NONE').toUpperCase()}</span></div>
                 <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{secondCategoryCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>{(secondCategory || 'NONE').toUpperCase()}</span></div>
-              </div>
-              {/* OTHERS section under Desktop and Printer */}
-              <div style={{ marginTop: 0, textAlign: 'center' }}>
-                <div style={{ marginTop: 0 }}>
-                  <span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{othersAddedThisWeek} </span>
-                  <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>OTHERS</span>
-                </div>
               </div>
               <div className={styles.cardFooterRow}>
                 <span className={styles.cardDate} style={{ color: 'var(--neutral-gray-900)' }}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
