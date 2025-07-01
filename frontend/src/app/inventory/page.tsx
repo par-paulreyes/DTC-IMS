@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -19,7 +19,7 @@ interface Item {
   qr_code?: string;
 }
 
-export default function InventoryPage() {
+function InventoryPageContent() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -344,5 +344,13 @@ export default function InventoryPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function InventoryPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <InventoryPageContent />
+    </Suspense>
   );
 } 

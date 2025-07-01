@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Webcam from "react-webcam";
 import { apiClient, getImageUrl } from "../../../config/api";
@@ -23,7 +23,7 @@ interface Diagnostic {
 }
 
 
-export default function AddItemPage() {
+function AddItemPageContent() {
   const [form, setForm] = useState({
     property_no: "",
     qr_code: "",
@@ -896,3 +896,35 @@ export default function AddItemPage() {
   );
 }
 
+// Loading component for Suspense fallback
+function AddItemPageLoading() {
+  return (
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <h1 className={styles.title}>Add New Item</h1>
+          <p className={styles.subtitle}>Enter item details and upload image</p>
+        </div>
+      </div>
+      <div className={styles.content}>
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded mb-6"></div>
+          <div className="h-32 bg-gray-200 rounded mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main component with Suspense wrapper
+export default function AddItemPage() {
+  return (
+    <Suspense fallback={<AddItemPageLoading />}>
+      <AddItemPageContent />
+    </Suspense>
+  );
+}
