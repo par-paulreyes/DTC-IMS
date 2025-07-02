@@ -178,19 +178,22 @@ exports.deleteItem = async (req, res) => {
 
       // If item has an image_url, delete the image from Supabase
       if (item.image_url) {
+        let filePath;
         try {
+          // Try to parse as URL
           const url = new URL(item.image_url);
           const pathParts = url.pathname.split('/object/public/');
-          const filePath = pathParts[1];
-          if (filePath) {
-            const { error: deleteError } = await supabase.storage.from('item-images').remove([filePath]);
-            if (deleteError) {
-              console.error('Error deleting image from Supabase:', deleteError);
-              // Continue with item deletion even if image deletion fails
-            }
+          filePath = pathParts[1];
+        } catch {
+          // If it's not a valid URL, treat as direct path
+          filePath = item.image_url;
+        }
+        if (filePath) {
+          const { error: deleteError } = await supabase.storage.from('item-images').remove([filePath]);
+          if (deleteError) {
+            console.error('Error deleting image from Supabase:', deleteError);
+            // Continue with item deletion even if image deletion fails
           }
-        } catch (e) {
-          console.error('Error parsing image_url or deleting from Supabase:', e);
         }
       }
 
