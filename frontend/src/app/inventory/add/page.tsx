@@ -6,6 +6,7 @@ import { apiClient, getImageUrl } from "../../../config/api";
 import { Camera, Upload, X, Check, Plus, Trash2, ArrowRight, ArrowLeft, Info, Settings, CheckCircle, AlertTriangle, XCircle, AlertOctagon } from "lucide-react";
 import styles from './page.module.css';
 import { supabase } from '../../../config/supabase';
+import imageCompression from 'browser-image-compression';
 
 
 interface MaintenanceTask {
@@ -144,7 +145,7 @@ function AddItemPageContent() {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc) {
-        setCapturedImage(imageSrc);
+        setCapturedImage(imageSrc); // This is a PNG base64
         setImageFile(null); // Clear uploaded file when capturing
         setImagePreview(""); // Clear uploaded preview
         setShowCamera(false);
@@ -292,22 +293,36 @@ function AddItemPageContent() {
       if (imageFile || capturedImage) {
         let fileToUpload: File;
         if (capturedImage) {
+          // capturedImage is a base64 PNG
           const response = await fetch(capturedImage);
           const blob = await response.blob();
-          fileToUpload = new File([blob], `captured-${Date.now()}.jpg`, { type: 'image/jpeg' });
+          // Use PNG extension and type for best quality
+          fileToUpload = new File([blob], `captured-${Date.now()}.png`, { type: 'image/png' });
         } else {
-          fileToUpload = imageFile!;
+          // Only compress if file is >5MB, and use high quality
+          if (imageFile!.size > 5 * 1024 * 1024) {
+            const options = {
+              maxSizeMB: 5,
+              maxWidthOrHeight: 2000,
+              useWebWorker: true,
+              fileType: imageFile!.type,
+              quality: 0.95,
+            };
+            fileToUpload = await imageCompression(imageFile!, options);
+          } else {
+            fileToUpload = imageFile!;
+          }
         }
 
         // Use item ID as filename
-        const fileExtension = fileToUpload.name.split('.').pop() || 'jpg';
+        const fileExtension = fileToUpload.name.split('.').pop() || 'png';
         const filePath = `item-pictures/${itemId}.${fileExtension}`;
         
         const { error: uploadError } = await supabase.storage
           .from('dtc-ims')
           .upload(filePath, fileToUpload, {
             upsert: true,
-            contentType: fileToUpload.type || 'image/jpeg',
+            contentType: fileToUpload.type || 'image/png',
           });
         
         if (uploadError) throw uploadError;
