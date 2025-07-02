@@ -215,9 +215,6 @@ function AddItemPageContent() {
   };
 
 
-
-
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -258,7 +255,7 @@ function AddItemPageContent() {
         return;
       }
 
-      // Create FormData for other fields
+      // Create FormData for other fields (without image initially)
       const formData = new FormData();
       Object.entries(form).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
@@ -275,8 +272,23 @@ function AddItemPageContent() {
         }
       });
 
-      // Handle image upload to Supabase
-      let uploadedImageUrl = imageUrl;
+      // Add maintenance and diagnostic data
+      const maintenanceDate = new Date().toISOString().split('T')[0];
+      formData.append('maintenance_date', maintenanceDate);
+      formData.append('maintenance_tasks', JSON.stringify(maintenanceTasks));
+      formData.append('diagnostic', JSON.stringify(diagnostic));
+
+      // First, create the item without image
+      const response = await apiClient.post("/items", formData, {
+        headers: {
+          Authorization: token,
+          'Content-Type': 'multipart/form-data'
+        },
+      });
+
+      const itemId = response.data.id;
+
+      // Now handle image upload to Supabase with item ID as filename
       if (imageFile || capturedImage) {
         let fileToUpload: File;
         if (capturedImage) {
@@ -286,38 +298,36 @@ function AddItemPageContent() {
         } else {
           fileToUpload = imageFile!;
         }
-        const filePath = `item-pictures/${form.property_no || 'item'}-${Date.now()}.jpg`;
+
+        // Use item ID as filename
+        const fileExtension = fileToUpload.name.split('.').pop() || 'jpg';
+        const filePath = `item-pictures/${itemId}.${fileExtension}`;
+        
         const { error: uploadError } = await supabase.storage
           .from('dtc-ims')
           .upload(filePath, fileToUpload, {
             upsert: true,
             contentType: fileToUpload.type || 'image/jpeg',
           });
+        
         if (uploadError) throw uploadError;
-        uploadedImageUrl = filePath; // Store file path instead of public URL
-        setImageUrl(uploadedImageUrl);
-        formData.append('image_url', uploadedImageUrl);
+        
+        // Update the item with the image URL
+        await apiClient.put(`/items/${itemId}`, {
+          image_url: filePath
+        }, {
+          headers: {
+            Authorization: token,
+            'Content-Type': 'application/json'
+          },
+        });
       }
 
-      // Add maintenance and diagnostic data
-      const maintenanceDate = new Date().toISOString().split('T')[0];
-      formData.append('maintenance_date', maintenanceDate);
-      formData.append('maintenance_tasks', JSON.stringify(maintenanceTasks));
-      formData.append('diagnostic', JSON.stringify(diagnostic));
-
-      // Submit to backend
-      const response = await apiClient.post("/items", formData, {
-        headers: {
-          Authorization: token,
-          'Content-Type': 'multipart/form-data'
-        },
-      });
-
       // Success
-      const successMessage = `Item created successfully!\n  - Item ID: ${response.data.id}\n  - Maintenance logs: ${response.data.maintenance_logs_created || 0}\n  - Diagnostic: ${response.data.diagnostic_created ? 'Yes' : 'No'}`;
+      const successMessage = `Item created successfully!\n  - Item ID: ${itemId}\n  - Maintenance logs: ${response.data.maintenance_logs_created || 0}\n  - Diagnostic: ${response.data.diagnostic_created ? 'Yes' : 'No'}`;
       localStorage.setItem('dashboard_refresh_trigger', Date.now().toString());
       alert(successMessage);
-      router.push(`/inventory/${response.data.id}`);
+      router.push(`/inventory/${itemId}`);
     } catch (err: any) {
       console.error('Error creating item:', err);
       const errorMessage = err.response?.data?.message || err.response?.data?.error || err.message || "Error adding item";
