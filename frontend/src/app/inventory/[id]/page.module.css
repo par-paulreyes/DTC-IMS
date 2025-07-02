@@ -22,6 +22,7 @@
   padding: 36px 40px 36px 40px;
   box-shadow: 0 2px 12px rgba(193,18,31,0.07);
   position: relative;
+  margin-top: 15px;
  
 }
 .topImageBox {
@@ -492,16 +493,31 @@
   border: 2px solid #182848;
 }
 
-
 .diagnosticEditBox {
   background: #e0e7ff;
   border: 2px solid #2563eb;
   border-radius: 14px;
   padding: 18px 18px 12px 18px;
   margin-bottom: 18px;
+  margin-top: 10px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  font-size: 1rem;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.diagnosticEditBox textarea {
+  font-size: 1rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  resize: vertical;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 .diagnosticEditHeader {
   display: flex;
@@ -556,6 +572,57 @@
     font-size: 1.5rem;
   }
 }
+.diagnosticsInfoCard {
+  font-size: 0.98rem;
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+.diagnosticEditBox {
+  font-size: 0.98rem;
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+.diagnosticEditBox textarea {
+  font-size: 0.98rem;
+  padding: 7px 10px;
+  width: 100%;
+  max-width: 100%;
+}
+@media (max-width: 600px) {
+.diagnosticsInfoCard {
+  font-size: 0.95rem;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.diagnosticEditBox {
+  font-size: 0.95rem;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.diagnosticEditBox textarea {
+  font-size: 0.95rem;
+  padding: 6px 6px;
+  width: 100%;
+  max-width: 100%;
+}
+}
+.diagnosticsInfoCard {
+border-radius: 10px;
+background: #f3f4f6;
+box-shadow: 0 8px 32px var(--shadow-medium);
+padding: 20px 28px;
+margin-top: 10px;
+transition: box-shadow 0.2s, border 0.2s;
+cursor: pointer;
+width: 100%;
+box-sizing: border-box;
+flex: 1;
+min-width: 0;
+}
+.diagnosticsInfoCard:hover {
+box-shadow: 0 12px 40px var(--shadow-heavy);
+}
+
 
 
 

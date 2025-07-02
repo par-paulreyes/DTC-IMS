@@ -686,20 +686,7 @@ export default function ItemDetailPage() {
                     </div>
                   </div>
                 ) : (
-                  <div key={diag.id} style={{
-                    borderRadius:'16px',
-                    background:'#eaf0ff',
-                    padding:'18px 20px',
-                    marginTop:24,
-                    boxShadow:'0 2px 8px #0001',
-                    maxWidth:700,
-                    border:'2px solid #e0e7ef',
-                    transition:'box-shadow 0.2s, border 0.2s',
-                    cursor:'pointer'
-                  }}
-                    onMouseOver={e=>{e.currentTarget.style.boxShadow='0 4px 16px #182c4c22';e.currentTarget.style.border='2px solid #182c4c'}}
-                    onMouseOut={e=>{e.currentTarget.style.boxShadow='0 2px 8px #0001';e.currentTarget.style.border='2px solid #e0e7ef'}}
-                  >
+                  <div key={diag.id} className={styles.diagnosticsInfoCard}>
                     <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:12}}>
                       {diag.system_status === 'Good' ? (
                         <span style={{color:'#22c55e',fontSize:22}}>&#10003;</span>
