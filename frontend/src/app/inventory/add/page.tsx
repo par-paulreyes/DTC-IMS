@@ -6,7 +6,7 @@ import { apiClient, getImageUrl } from "../../../config/api";
 import { Camera, Upload, X, Check, Plus, Trash2, ArrowRight, ArrowLeft, Info, Settings, CheckCircle, AlertTriangle, XCircle, AlertOctagon } from "lucide-react";
 import styles from './page.module.css';
 import { supabase } from '../../../config/supabase';
-import imageCompression from 'browser-image-compression';
+// No compression - upload raw files as-is
 
 
 interface MaintenanceTask {
@@ -302,20 +302,8 @@ function AddItemPageContent() {
             lastModified: Date.now()
           });
         } else {
-          // Only compress if file is >5MB, otherwise upload raw
-          if (imageFile!.size > 5 * 1024 * 1024) {
-            const options = {
-              maxSizeMB: 5,
-              maxWidthOrHeight: 4000,
-              useWebWorker: true,
-              fileType: imageFile!.type,
-              quality: 0.95,
-            };
-            fileToUpload = await imageCompression(imageFile!, options);
-          } else {
-            // Upload raw file without any compression
-            fileToUpload = imageFile!;
-          }
+          // Upload raw file exactly as-is, no compression or conversion
+          fileToUpload = imageFile!;
         }
 
         // Use item ID as filename
