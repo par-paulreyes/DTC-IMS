@@ -333,9 +333,9 @@ option {
 
 .inventory-borrowing-status {
   background: rgb(229, 231, 235); 
-  color: rgb(55, 65, 81); 
+  color: #117636; 
   padding: 4px 12px; 
-  border-radius: 16px; 
+  border-radius: 6px; 
   font-size: 0.875rem; 
   font-weight: 500; 
   border: 1px solid rgb(209, 213, 219);

@@ -307,16 +307,21 @@ function InventoryPageContent() {
                     </div>
                   )}
                   <div className="inventory-info">
-                    <div className="inventory-propno">
-                      {item.qr_code ? (
-                        <span style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1f2937' }}>
-                          {item.qr_code}
-                        </span>
-                      ) : (
-                        <span style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1f2937' }}>
-                          {item.property_no}
-                        </span>
-                      )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+                      <div className="inventory-propno">
+                        {item.qr_code ? (
+                          <span style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1f2937' }}>
+                            {item.qr_code}
+                          </span>
+                        ) : (
+                          <span style={{ fontWeight: 700, fontSize: '1.1rem', color: '#1f2937' }}>
+                            {item.property_no}
+                          </span>
+                        )}
+                      </div>
+                      <div className="inventory-borrowing-status" style={{ marginTop: 0, fontSize: '0.97em' }}>
+                        <span style={{ fontWeight: 500, color: '#117636' }}>Available</span>
+                      </div>
                     </div>
                     <div className="inventory-type">{item.article_type}</div>
                     <div className={`inventory-status ${
@@ -336,10 +341,6 @@ function InventoryPageContent() {
                         })()}
                       </div>
                     )}
-                    {/* Borrowing Status Placeholder */}
-                    <div className="inventory-borrowing-status" style={{marginTop:4, fontSize:'0.97em'}}>
-                      <span style={{fontWeight:500, color:'#22c55e'}}>Available</span>
-                    </div>
                   </div>
                 </Link>
               </div>

@@ -407,8 +407,7 @@ export default function DashboardPage() {
       )}
      
       {mounted && !loading && !error && (
-        <>
-          {/* Header Card - matching QR scanner style */}
+        <div className={styles.dashboardCardsWrapper}>
           <div className={styles.dashboardCard}>
             <Image
               src="/dtc.svg"
@@ -465,7 +464,6 @@ export default function DashboardPage() {
           </div>
 
 
-          {/* Dashboard Info Cards - 2x2 grid, custom markup */}
           <div className={styles.dashboardInfoGrid}>
             {/* Needed Maintenance */}
             <div
@@ -741,7 +739,7 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
-        </>
+        </div>
       )}
 
 
