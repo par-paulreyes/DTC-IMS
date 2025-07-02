@@ -43,6 +43,33 @@ function formatSpecifications(specs: string) {
 
 
 
+// Utility to fetch image as base64 and cache in localStorage
+async function fetchAndCacheImageBase64(imageUrl: string, cacheKey: string): Promise<string> {
+  try {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const reader = new FileReader();
+    return await new Promise((resolve, reject) => {
+      reader.onloadend = () => {
+        const base64data = reader.result as string;
+        try {
+          localStorage.setItem(cacheKey, base64data);
+        } catch (e) {
+          // If storage quota exceeded, ignore
+        }
+        resolve(base64data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (e) {
+    return '';
+  }
+}
+
+
+
+
 export default function ItemDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -118,10 +145,21 @@ export default function ItemDetailPage() {
         setEditingItem(response.data);
         console.log('Item data loaded:', response.data);
         
-        // Load signed URL for item image
+        // Load signed URL for item image with localStorage caching
         if (response.data.image_url) {
-          const imageUrl = await getImageUrl(response.data.image_url);
-          setItemImageUrl(imageUrl);
+          const cacheKey = `item-image-${id}`;
+          const cachedBase64 = localStorage.getItem(cacheKey);
+          if (cachedBase64) {
+            setItemImageUrl(cachedBase64);
+          } else {
+            const imageUrl = await getImageUrl(response.data.image_url);
+            if (imageUrl) {
+              const base64 = await fetchAndCacheImageBase64(imageUrl, cacheKey);
+              setItemImageUrl(base64);
+            }
+          }
+        } else {
+          setItemImageUrl('');
         }
       } catch (err: any) {
         console.error('Error fetching item:', err);
@@ -236,6 +274,7 @@ export default function ItemDetailPage() {
       const newStatus = pendingCount > 0 ? 'pending' : 'completed';
       
       let finalImageUrl = editingItem.image_url;
+      let imageChanged = false;
       
       // Upload image to Supabase if a new image was selected
       if (selectedImageFile) {
@@ -254,6 +293,7 @@ export default function ItemDetailPage() {
         if (uploadError) throw uploadError;
         
         finalImageUrl = fileName;
+        imageChanged = true;
       }
       
       // Only send the fields that the backend expects (excluding maintenance fields that are filtered out)
@@ -314,7 +354,15 @@ export default function ItemDetailPage() {
       // Update the image URL for display
       if (finalImageUrl) {
         const newImageUrl = await getImageUrl(finalImageUrl);
-        setItemImageUrl(newImageUrl);
+        // If image was changed, clear cache so it reloads
+        if (imageChanged) {
+          localStorage.removeItem(`item-image-${id}`);
+        }
+        // Always reload and cache the new image
+        if (newImageUrl) {
+          const base64 = await fetchAndCacheImageBase64(newImageUrl, `item-image-${id}`);
+          setItemImageUrl(base64);
+        }
       }
      
       // Trigger dashboard refresh by setting a timestamp
