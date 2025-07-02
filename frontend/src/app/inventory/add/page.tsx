@@ -293,20 +293,23 @@ function AddItemPageContent() {
       if (imageFile || capturedImage) {
         let fileToUpload: File;
         if (capturedImage) {
-          // capturedImage is a base64 PNG
+          // capturedImage is a base64 PNG - convert directly without quality loss
           const response = await fetch(capturedImage);
           const blob = await response.blob();
-          // Use PNG extension and type for best quality
-          fileToUpload = new File([blob], `captured-${Date.now()}.png`, { type: 'image/png' });
+          // Use PNG extension and type for best quality, preserve original quality
+          fileToUpload = new File([blob], `captured-${Date.now()}.png`, { 
+            type: 'image/png',
+            lastModified: Date.now()
+          });
         } else {
-          // Only compress if file is >5MB, and use high quality
-          if (imageFile!.size > 5 * 1024 * 1024) {
+          // Only compress if file is >10MB, and use very high quality
+          if (imageFile!.size > 10 * 1024 * 1024) {
             const options = {
-              maxSizeMB: 5,
-              maxWidthOrHeight: 2000,
+              maxSizeMB: 10,
+              maxWidthOrHeight: 3000,
               useWebWorker: true,
               fileType: imageFile!.type,
-              quality: 0.95,
+              quality: 0.98,
             };
             fileToUpload = await imageCompression(imageFile!, options);
           } else {
@@ -604,10 +607,12 @@ function AddItemPageContent() {
                           ref={webcamRef}
                           audio={false}
                           screenshotFormat="image/png"
+                          screenshotQuality={1}
                           videoConstraints={{
-                            width: { ideal: 640 },
-                            height: { ideal: 480 },
-                            facingMode: "environment"
+                            width: { ideal: 1920, min: 1280 },
+                            height: { ideal: 1080, min: 720 },
+                            facingMode: "environment",
+                            aspectRatio: { ideal: 16/9 }
                           }}
                           onUserMedia={() => handleCameraReady()}
                           onUserMediaError={(err) => handleCameraError(err instanceof Error ? err.name : 'Camera access denied')}
@@ -647,7 +652,8 @@ function AddItemPageContent() {
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
-                            background: '#fff'
+                            background: '#fff',
+                            imageRendering: '-webkit-optimize-contrast'
                           }}
                         />
                       </div>

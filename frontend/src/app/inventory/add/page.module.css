@@ -875,8 +875,8 @@
 
 
 .imagePreviewBox {
-  width: 160px;
-  height: 160px;
+  width: 300px;
+  height: 300px;
   border-radius: 12px;
   border: 3px solid #22c55e;
   background: #fff;
@@ -885,6 +885,8 @@
   justify-content: center;
   overflow: hidden;
   margin-bottom: 18px;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 
@@ -1086,22 +1088,22 @@
 /* Image preview responsiveness */
 @media (max-width: 800px) {
   .imagePreview, .imagePreviewBox {
-    max-width: 120px;
-    max-height: 120px;
+    width: 250px;
+    height: 250px;
     border-radius: 10px;
   }
 }
 @media (max-width: 600px) {
   .imagePreview, .imagePreviewBox {
-    max-width: 90px;
-    max-height: 90px;
+    width: 200px;
+    height: 200px;
     border-radius: 8px;
   }
 }
 @media (max-width: 400px) {
   .imagePreview, .imagePreviewBox {
-    max-width: 60px;
-    max-height: 60px;
+    width: 180px;
+    height: 180px;
     border-radius: 6px;
   }
 }
