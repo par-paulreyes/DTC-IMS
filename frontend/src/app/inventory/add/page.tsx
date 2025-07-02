@@ -594,22 +594,18 @@ function AddItemPageContent() {
                     onChange={handleChange}
                   />
                 </div>
+                <div>
+                  <label className={styles.specsLabel}>Specifications</label>
+                  <textarea
+                    name="specifications"
+                    rows={4}
+                    placeholder="Enter specifications separated by commas (e.g., Intel i7-10700K, 16GB RAM, 512GB SSD, Windows 11)"
+                    className={styles.textarea}
+                    value={form.specifications}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
-
-
-              <div>
-                <label className={styles.specsLabel}>Specifications</label>
-                <textarea
-                  name="specifications"
-                  rows={4}
-                  placeholder="Enter specifications separated by commas (e.g., Intel i7-10700K, 16GB RAM, 512GB SSD, Windows 11)"
-                  className={styles.textarea}
-                  value={form.specifications}
-                  onChange={handleChange}
-                />
-              </div>
-
-
               <div>
                 <label className={styles.itemPictureLabel}>Item Picture</label>
                 <div className={styles.imageUpload}>
@@ -846,13 +842,12 @@ function AddItemPageContent() {
                 </div>
               </div>
 
-
               <div>
                 <label className={styles.diagnosticsLabel}>Findings</label>
                 <textarea
                   rows={4}
                   placeholder="Describe any issues or observations..."
-                  className={styles.textarea}
+                  className={styles.textareaFindings}
                   value={diagnostic.findings}
                   onChange={(e) => setDiagnostic(prev => ({ ...prev, findings: e.target.value }))}
                 />
@@ -864,7 +859,7 @@ function AddItemPageContent() {
                 <textarea
                   rows={4}
                   placeholder="Suggest actions or improvements..."
-                  className={styles.textarea}
+                  className={styles.textareaRecommendations}
                   value={diagnostic.recommendations}
                   onChange={(e) => setDiagnostic(prev => ({ ...prev, recommendations: e.target.value }))}
                 />
