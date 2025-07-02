@@ -197,7 +197,7 @@
   border: none;
   outline: none;
   background: transparent;
-  font-size: 10px;
+  font-size: 9px;
   padding: 0 16px;
   border-radius: 999px;
   height: 40px;
@@ -209,13 +209,19 @@
 }
 
 .filterbar-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url('/filter-bg-2.svg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
   flex: 1;
   min-width: 0;
-  background: #182848;
   border-radius: 8px;
   padding: 10px 16px;
   border: none;
-  font-size: 1rem;
+  font-size: 14px;
   color: #fff;
   font-weight: 500;
   margin-right: 8px;
@@ -224,10 +230,6 @@
   line-height: 40px;
   padding-top: 0;
   padding-bottom: 0;
-}
-
-.filterbar-select:focus {
-  box-shadow: 0 0 0 2px #3b82f6;
 }
 
 .inventory-header-row {
@@ -282,50 +284,61 @@ font-weight: 600;
 }
 
 .body-container {
-padding: 0 16px 0 16px;
-background: #fff;
-box-shadow: 0 4px 32px rgba(0,0,0,0.10);
-border-radius: 0 0 15px 15px;
-margin-top: 0; 
-padding-top: 0;
+  padding: 0 16px 0 16px;
+  background: #fff;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+  border-radius: 0 0 15px 15px;
+  margin-top: 0; 
+  padding-top: 0;
 }
 
 option {
-background: #fff;
-color: #000;
-font-family: 'Poppins', Arial, sans-serif;
-font-size: 15px;
-font-weight: 500;
+  background: #fff;
+  color: #000;
+  font-family: 'Poppins', Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
 }
 
 @media (max-width: 700px) {
-.search-container, .searchbar-row {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-.search-input {
-  width: 100%;
-  max-width: 100%;
-  font-size: 15px;
-  padding: 12px 0;
-  box-sizing: border-box;
-  margin: 0;
-}
+  .search-container, .searchbar-row {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .search-input {
+    width: 100%;
+    max-width: 100%;
+    font-size: 15px;
+    padding: 12px 0;
+    box-sizing: border-box;
+    margin: 0;
+  }
 }
 @media (min-width: 701px) {
-.search-container, .searchbar-row {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-.search-input {
-  width: 100%;
-  max-width: 500px;
-  font-size: 1rem;
-  padding: 16px 0;
-  box-sizing: border-box;
-  margin: 0;
-}
+  .search-container, .searchbar-row {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .search-input {
+    width: 100%;
+    max-width: 500px;
+    font-size: 1rem;
+    padding: 16px 0;
+    box-sizing: border-box;
+    margin: 0;
+  }
 }
 
+.inventory-borrowing-status {
+  background: rgb(229, 231, 235); 
+  color: rgb(55, 65, 81); 
+  padding: 4px 12px; 
+  border-radius: 16px; 
+  font-size: 0.875rem; 
+  font-weight: 500; 
+  border: 1px solid rgb(209, 213, 219);
+  width: 72px;
+  align-items: center;
+}

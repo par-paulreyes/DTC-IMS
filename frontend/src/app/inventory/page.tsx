@@ -336,6 +336,10 @@ function InventoryPageContent() {
                         })()}
                       </div>
                     )}
+                    {/* Borrowing Status Placeholder */}
+                    <div className="inventory-borrowing-status" style={{marginTop:4, fontSize:'0.97em'}}>
+                      <span style={{fontWeight:500, color:'#22c55e'}}>Available</span>
+                    </div>
                   </div>
                 </Link>
               </div>
