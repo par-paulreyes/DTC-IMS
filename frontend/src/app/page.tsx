@@ -482,11 +482,15 @@ export default function DashboardPage() {
               </div>
               <div className={styles.cardTitle} style={{ color: 'var(--neutral-gray-900)' }}>Needs Action</div>
               <div className={`${styles.cardChange} ${belowGoodCount > 0 ? styles['cardChange--red'] : styles['cardChange--green']}`}>
-                {belowGoodCount > 0 ? '↗ Items below Good status' : '✓ All items in good condition'}
+                {belowGoodCount > 0 ? 'Items below Good status' : 'All items in good condition'}
               </div>
               <div className={styles.cardStatsRow}>
-                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{goodStatusCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>GOOD</span></div>
-                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{belowGoodCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>URGENT</span></div>
+                <div>
+                  <span className={`${styles.cardStatValue} ${styles['stat--green']}`}>{goodStatusCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>GOOD</span>
+                </div>
+                <div>
+                  <span className={`${styles.cardStatValue} ${styles['stat--red']}`}>{belowGoodCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>URGENT</span>
+                </div>
               </div>
               <div className={styles.cardFooterRow}>
                 <span className={styles.cardDate} style={{ color: 'var(--neutral-gray-900)' }}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
@@ -507,7 +511,7 @@ export default function DashboardPage() {
               </div>
               <div className={styles.cardTitle} style={{ color: 'var(--neutral-gray-900)' }}>Total Maintenance</div>
               <div className={`${styles.cardChange} ${pendingMaintenance > 0 ? styles['cardChange--red'] : styles['cardChange--green']}`}>
-                {pendingMaintenance > 0 ? `↗ ${pendingMaintenance} pending` : `✓ ${completedMaintenance} completed`}
+                {pendingMaintenance > 0 ? `${pendingMaintenance} pending` : `${completedMaintenance} completed`}
               </div>
               <div className={styles.cardProgressBar} title={
                 totalMaintenance === 0
@@ -526,8 +530,12 @@ export default function DashboardPage() {
                 />
               </div>
               <div className={styles.cardStatsRow}>
-                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{completedMaintenance}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>COMPLETED</span></div>
-                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{pendingMaintenance}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>PENDING</span></div>
+                <div>
+                  <span className={`${styles.cardStatValue} ${styles['stat--green']}`}>{completedMaintenance}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>COMPLETED</span>
+                </div>
+                <div>
+                  <span className={`${styles.cardStatValue} ${pendingMaintenance > 0 ? styles['stat--red'] : styles['stat--green']}`}>{pendingMaintenance}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>PENDING</span>
+                </div>
               </div>
               <div className={styles.cardFooterRow}>
                 <span className={styles.cardDate} style={{ color: 'var(--neutral-gray-900)' }}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
@@ -550,15 +558,19 @@ export default function DashboardPage() {
               {/* Show 'New {article} added' under the title if a new other article was added this week */}
               {mostRecentOtherArticle && (
                 <div className={`${styles.cardChange} ${styles['cardChange--green']}`} style={{ marginBottom: '10px' }}>
-                  → New {mostRecentOtherArticle} added
+                  New {mostRecentOtherArticle} added
                 </div>
               )}
               {recentlyAdded === 0 && !mostRecentOtherArticle ? (
-                <div className={styles.cardChange} style={{ color: '#6b7280' }}>→ No change</div>
+                <div className={`${styles.cardChange} ${styles['cardChange--neutral']}`}>No change</div>
               ) : null}
               <div className={styles.cardStatsRow}>
-                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{topCategoryCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>{(topCategory || 'NONE').toUpperCase()}</span></div>
-                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{secondCategoryCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>{(secondCategory || 'NONE').toUpperCase()}</span></div>
+                <div>
+                  <span className={`${styles.cardStatValue} ${styles['stat--green']}`}>{topCategoryCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>{(topCategory || 'NONE').toUpperCase()}</span>
+                </div>
+                <div>
+                  <span className={`${styles.cardStatValue} ${styles['stat--green']}`}>{secondCategoryCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>{(secondCategory || 'NONE').toUpperCase()}</span>
+                </div>
               </div>
               <div className={styles.cardFooterRow}>
                 <span className={styles.cardDate} style={{ color: 'var(--neutral-gray-900)' }}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
@@ -578,10 +590,14 @@ export default function DashboardPage() {
                 </span>
               </div>
               <div className={styles.cardTitle} style={{ color: 'var(--neutral-gray-900)' }}>Recently Added</div>
-              <div className={`${styles.cardChange} ${styles['cardChange--green']}`}>↗ +{recentlyAdded} this week</div>
+              <div className={`${styles.cardChange} ${styles['cardChange--green']}`}>+{recentlyAdded} this week</div>
               <div className={styles.cardStatsRow}>
-                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{todayAdded}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>TODAY</span></div>
-                <div><span className={styles.cardStatValue} style={{ color: 'var(--primary-red-dark)' }}>{yesterdayAdded}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>YESTERDAY</span></div>
+                <div>
+                  <span className={`${styles.cardStatValue} ${styles['stat--green']}`}>{todayAdded}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>TODAY</span>
+                </div>
+                <div>
+                  <span className={styles.cardStatValue} style={{ color: '#111' }}>{yesterdayAdded}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>YESTERDAY</span>
+                </div>
               </div>
               <div className={styles.cardFooterRow}>
                 <span className={styles.cardDate} style={{ color: 'var(--neutral-gray-900)' }}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
