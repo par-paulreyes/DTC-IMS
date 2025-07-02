@@ -355,21 +355,33 @@ export default function QRScannerPage() {
     if (cameraAvailable && !showFileUpload) {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Webcam
-            audio={false}
-            ref={webcamRef}
-            screenshotFormat="image/png"
-            videoConstraints={{ facingMode: "environment" }}
-            style={{
-              width: '320px',
-              height: '320px',
-              borderRadius: '15px',
-              border: '4px solid #182848',
-              boxShadow: '0 4px 32px rgba(0,0,0,0.10)'
-            }}
-          />
-          
-          <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+          <div style={{
+            width: '400px',
+            height: '400px',
+            borderRadius: '20px',
+            border: '5px solid #182848',
+            boxShadow: '0 4px 32px rgba(0,0,0,0.10)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: '#fff',
+            marginTop: '3rem',
+            marginBottom: '1rem',
+          }}>
+            <Webcam
+              audio={false}
+              ref={webcamRef}
+              screenshotFormat="image/png"
+              videoConstraints={{ facingMode: "environment" }}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                borderRadius: '16px',
+              }}
+            />
+          </div>
+          <div style={{ marginTop: '0', display: 'flex', gap: '0.5rem' }}>
             <button
               onClick={() => setShowFileUpload(true)}
               style={{

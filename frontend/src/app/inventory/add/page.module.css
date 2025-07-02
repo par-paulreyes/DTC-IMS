@@ -53,6 +53,70 @@
 }
 
 
+@media (max-width: 601px) and (min-width: 601px) {
+  .container {
+    max-width: 98vw;
+    padding: 25px 0 10px 15px;
+    margin: 40px auto 0 auto;
+    gap: 32px;
+    border-radius: 24px;
+  }
+  .headerCard {
+    padding: 25px 0 10px 15px;
+    min-height: 120px;
+    margin-bottom: 15px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+  .headerTitle {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+  }
+  .headerSubtitle {
+    margin: 8px 0 0 0;
+    opacity: 0.9;
+    text-align: center;
+  }
+}
+
+
+@media (max-width: 700px) and (min-width: 600px) {
+  .container {
+    max-width: 98vw !important;
+    padding: 32px 4vw 40px 4vw !important;
+    margin: 40px auto 0 auto !important;
+    gap: 32px !important;
+    border-radius: 24px !important;
+  }
+  .headerCard {
+    min-height: 120px !important;
+    padding: 25px 0 10px 15px !important;
+    margin-bottom: 15px !important;
+    border-radius: 15px 15px 0 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #fff !important;
+  }
+  .headerTitle {
+    font-size: 2rem !important;
+    font-weight: bold !important;
+    margin: 0 !important;
+  }
+  .headerSubtitle {
+    margin: 8px 0 0 0 !important;
+    opacity: 0.9 !important;
+    text-align: center !important;
+  }
+}
+
+
 .headerCard {
   background: linear-gradient(90deg, #b91c1c 60%, #ef4444 100%);
   border-radius: 15px 15px 0 0;
@@ -626,8 +690,14 @@
 
 
 .webcam {
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 400px !important;
+  height: 400px !important;
+  max-width: 98vw !important;
+  max-height: 98vw !important;
+  object-fit: cover !important;
+  border-radius: 16px !important;
+  background: #fff !important;
+  display: block;
 }
 
 
@@ -920,9 +990,11 @@
 
 
 .imagePreviewBox {
-  width: 300px;
-  height: 300px;
-  border-radius: 12px;
+  width: 400px;
+  height: 400px;
+  max-width: 98vw;
+  max-height: 98vw;
+  border-radius: 16px;
   border: 3px solid #22c55e;
   background: #fff;
   display: flex;
@@ -1312,6 +1384,26 @@
     font-size: 12px;
     border-radius: 6px;
     padding: 6px;
+  }
+}
+
+@media (max-width: 700px) {
+  .imagePreviewBox, .webcam {
+    width: 98vw !important;
+    height: 98vw !important;
+    max-width: 400px !important;
+    max-height: 400px !important;
+    border-radius: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .imagePreviewBox, .webcam {
+    width: 98vw !important;
+    height: 98vw !important;
+    max-width: 320px !important;
+    max-height: 320px !important;
+    border-radius: 10px !important;
   }
 }
 
