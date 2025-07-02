@@ -3,8 +3,12 @@ const MaintenanceLog = require('../models/maintenanceLogModel');
 const Diagnostic = require('../models/diagnosticModel');
 const fs = require('fs');
 const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:5000';
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 exports.getAllItems = (req, res) => {
   console.log('Getting all items for company:', req.user.company_name);
@@ -165,11 +169,41 @@ exports.updateItem = (req, res) => {
   });
 };
 
-exports.deleteItem = (req, res) => {
-  Item.delete(req.params.id, (err, result) => {
-    if (err) return res.status(500).json({ message: 'Error deleting item', error: err });
-    res.json({ message: 'Item deleted' });
-  });
+exports.deleteItem = async (req, res) => {
+  try {
+    // Fetch the item to get the image_url
+    Item.findById(req.params.id, async (err, item) => {
+      if (err) return res.status(500).json({ message: 'Error finding item', error: err });
+      if (!item) return res.status(404).json({ message: 'Item not found' });
+
+      // If item has an image_url, delete the image from Supabase
+      if (item.image_url) {
+        try {
+          const url = new URL(item.image_url);
+          const pathParts = url.pathname.split('/object/public/');
+          const filePath = pathParts[1];
+          if (filePath) {
+            const { error: deleteError } = await supabase.storage.from('item-images').remove([filePath]);
+            if (deleteError) {
+              console.error('Error deleting image from Supabase:', deleteError);
+              // Continue with item deletion even if image deletion fails
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing image_url or deleting from Supabase:', e);
+        }
+      }
+
+      // Now delete the item from the database
+      Item.delete(req.params.id, (err, result) => {
+        if (err) return res.status(500).json({ message: 'Error deleting item', error: err });
+        res.json({ message: 'Item and image deleted (if existed)' });
+      });
+    });
+  } catch (error) {
+    console.error('Error in deleteItem:', error);
+    res.status(500).json({ message: 'Error deleting item', error: error.message });
+  }
 };
 
 exports.getItemByQRCode = (req, res) => {
