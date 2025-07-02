@@ -69,7 +69,7 @@
   box-shadow: none;
   text-align: center;
   margin-bottom: 0;
-  margin-top: 5px;
+  margin-top: 10px;
   box-sizing: border-box;
 }
 
@@ -943,7 +943,7 @@
     padding: 24px 20px 20px 20px;
     min-height: 120px;
     min-width: unset;
-    margin-top: 30px;
+    margin-top: 10px;
   }
   .headerTitle {
     font-size: 1.5rem;
@@ -957,7 +957,7 @@
     min-width: 180px;
     padding: 12px 4px 10px 4px;
     min-height: 80px;
-    margin-top: 30px;
+    margin-top: 20px;
   }
   .headerTitle {
     font-size: 1.2rem;
@@ -971,7 +971,7 @@
     min-width: 260px;
     min-height: 150px;
     padding: 20px 16px 16px 16px;
-    margin-top: 40px;
+    margin-top: 20px;
     border-radius: 8px 8px 0 0;
   }
   .headerTitle {
