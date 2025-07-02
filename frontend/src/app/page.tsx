@@ -631,7 +631,8 @@ export default function DashboardPage() {
                     style={{ cursor: 'pointer' }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      {itemImageUrls[item.id] ? (
+                      {/* Remove image display */}
+                      {/* {itemImageUrls[item.id] ? (
                         <img
                           src={itemImageUrls[item.id]}
                           alt={item.article_type}
@@ -643,7 +644,7 @@ export default function DashboardPage() {
                             border: '1px solid #e5e7eb'
                           }}
                         />
-                      ) : (
+                      ) : ( */}
                         <div style={{
                           width: 48,
                           height: 48,
@@ -721,7 +722,7 @@ export default function DashboardPage() {
                             </svg>
                           )}
                         </div>
-                      )}
+                      {/* )} */}
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 600, color: '#1f2937', fontSize: '0.9rem' }}>
                           {item.article_type || 'Unnamed Item'}

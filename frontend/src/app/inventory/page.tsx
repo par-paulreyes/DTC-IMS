@@ -229,14 +229,15 @@ function InventoryPageContent() {
             {filteredItems.map((item) => (
               <div key={item.id} className="inventory-card">
                 <Link href={`/inventory/${item.id}`} className="flex items-center w-full">
-                  {itemImageUrls[item.id] ? (
+                  {/* Remove image display */}
+                  {/* {itemImageUrls[item.id] ? (
                     <img
                       src={itemImageUrls[item.id]}
                       alt={item.qr_code || item.property_no}
                       className="inventory-icon"
                       style={{ objectFit: 'cover' }}
                     />
-                  ) : (
+                  ) : ( */}
                     <div className="inventory-icon">
                       {item.article_type.toLowerCase().includes('desktop') && (
                         <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -305,7 +306,7 @@ function InventoryPageContent() {
                         </svg>
                       )}
                     </div>
-                  )}
+                  {/* )} */}
                   <div className="inventory-info">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
                       <div className="inventory-propno">
