@@ -143,12 +143,37 @@ function AddItemPageContent() {
 
   const capturePhoto = () => {
     if (webcamRef.current) {
-      const imageSrc = webcamRef.current.getScreenshot();
-      if (imageSrc) {
-        setCapturedImage(imageSrc); // This is a PNG base64
-        setImageFile(null); // Clear uploaded file when capturing
-        setImagePreview(""); // Clear uploaded preview
-        setShowCamera(false);
+      // Get the video element from webcam
+      const video = webcamRef.current.video;
+      if (video) {
+        // Create a canvas with the video's actual dimensions
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas to video's actual dimensions for maximum quality
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        if (ctx) {
+          // Draw the video frame to canvas at full resolution
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          
+          // Convert to high-quality PNG
+          const imageSrc = canvas.toDataURL('image/png', 1.0);
+          setCapturedImage(imageSrc);
+          setImageFile(null); // Clear uploaded file when capturing
+          setImagePreview(""); // Clear uploaded preview
+          setShowCamera(false);
+        }
+      } else {
+        // Fallback to webcam screenshot method
+        const imageSrc = webcamRef.current.getScreenshot();
+        if (imageSrc) {
+          setCapturedImage(imageSrc);
+          setImageFile(null);
+          setImagePreview("");
+          setShowCamera(false);
+        }
       }
     }
   };
@@ -601,12 +626,18 @@ function AddItemPageContent() {
                             width: { ideal: 3840, min: 1920 },
                             height: { ideal: 2160, min: 1080 },
                             facingMode: "environment",
-                            aspectRatio: { ideal: 16/9 }
+                            aspectRatio: { ideal: 16/9 },
+                            frameRate: { ideal: 30, min: 24 }
                           }}
                           onUserMedia={() => handleCameraReady()}
                           onUserMediaError={(err) => handleCameraError(err instanceof Error ? err.name : 'Camera access denied')}
                           className={styles.webcam}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', background: '#fff' }}
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            objectFit: 'cover', 
+                            background: '#fff'
+                          }}
                         />
                       </div>
                       <div className={styles.imageUploadActions}>
