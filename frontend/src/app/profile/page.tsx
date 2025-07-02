@@ -8,6 +8,30 @@ import { Camera, Upload, X, Edit, Check, UserPlus, LogOut } from "lucide-react";
 import './profile.css';
 import { supabase } from '../../config/supabase';
 
+// Utility to fetch image as base64 and cache in localStorage
+async function fetchAndCacheImageBase64(imageUrl: string, cacheKey: string): Promise<string> {
+  try {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const reader = new FileReader();
+    return await new Promise((resolve, reject) => {
+      reader.onloadend = () => {
+        const base64data = reader.result as string;
+        try {
+          localStorage.setItem(cacheKey, base64data);
+        } catch (e) {
+          // If storage quota exceeded, ignore
+        }
+        resolve(base64data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (e) {
+    return '';
+  }
+}
+
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
   const [form, setForm] = useState<any>({});
@@ -43,12 +67,22 @@ export default function ProfilePage() {
     }
 
     apiClient.get("/users/profile")
-      .then((response) => {
+      .then(async (response) => {
         setProfile(response.data);
         setForm({ ...response.data, password: "", confirmPassword: "" });
-        // Load signed URL for profile picture
+        // Load signed URL for profile picture with localStorage caching
         if (response.data.profile_picture) {
-          getImageUrl(response.data.profile_picture).then(url => setImageUrl(url));
+          const cacheKey = `profile-image-${response.data.username || response.data.id}`;
+          const cachedBase64 = localStorage.getItem(cacheKey);
+          if (cachedBase64) {
+            setImageUrl(cachedBase64);
+          } else {
+            const url = await getImageUrl(response.data.profile_picture);
+            if (url) {
+              const base64 = await fetchAndCacheImageBase64(url, cacheKey);
+              setImageUrl(base64);
+            }
+          }
         }
       })
       .catch((err) => setError("Error loading profile"))
@@ -99,6 +133,7 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       let profilePictureUrl = form.profile_picture;
+      let imageChanged = false;
       // Handle image upload if there's a captured image or selected file
       if (capturedImage || selectedImageFile) {
         setUploading(true);
@@ -131,6 +166,7 @@ export default function ProfilePage() {
         }
         // Store the file path instead of public URL for security
         profilePictureUrl = filePath;
+        imageChanged = true;
         setUploading(false);
       }
       // Prepare the data to send
@@ -150,7 +186,16 @@ export default function ProfilePage() {
       setProfile(updatedResponse.data);
       // Update signed URL for new profile picture
       if (updatedResponse.data.profile_picture) {
-        getImageUrl(updatedResponse.data.profile_picture).then(url => setImageUrl(url));
+        const cacheKey = `profile-image-${updatedResponse.data.username || updatedResponse.data.id}`;
+        // If image was changed, clear cache so it reloads
+        if (imageChanged) {
+          localStorage.removeItem(cacheKey);
+        }
+        const url = await getImageUrl(updatedResponse.data.profile_picture);
+        if (url) {
+          const base64 = await fetchAndCacheImageBase64(url, cacheKey);
+          setImageUrl(base64);
+        }
       }
     } catch (err: any) {
       // Show error from Supabase or backend
