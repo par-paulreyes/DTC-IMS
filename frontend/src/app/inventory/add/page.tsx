@@ -302,17 +302,18 @@ function AddItemPageContent() {
             lastModified: Date.now()
           });
         } else {
-          // Only compress if file is >10MB, and use very high quality
-          if (imageFile!.size > 10 * 1024 * 1024) {
+          // Only compress if file is >5MB, otherwise upload raw
+          if (imageFile!.size > 5 * 1024 * 1024) {
             const options = {
-              maxSizeMB: 10,
-              maxWidthOrHeight: 3000,
+              maxSizeMB: 5,
+              maxWidthOrHeight: 4000,
               useWebWorker: true,
               fileType: imageFile!.type,
-              quality: 0.98,
+              quality: 0.95,
             };
             fileToUpload = await imageCompression(imageFile!, options);
           } else {
+            // Upload raw file without any compression
             fileToUpload = imageFile!;
           }
         }
@@ -609,8 +610,8 @@ function AddItemPageContent() {
                           screenshotFormat="image/png"
                           screenshotQuality={1}
                           videoConstraints={{
-                            width: { ideal: 1920, min: 1280 },
-                            height: { ideal: 1080, min: 720 },
+                            width: { ideal: 3840, min: 1920 },
+                            height: { ideal: 2160, min: 1080 },
                             facingMode: "environment",
                             aspectRatio: { ideal: 16/9 }
                           }}
