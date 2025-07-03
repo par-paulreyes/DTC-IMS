@@ -18,7 +18,7 @@
   align-items: center;
   gap: 40px;
   background: linear-gradient(90deg, #b91c1c 60%, #ef4444 100%);
-  border-radius: 24px 24px 24px 24px;
+  border-radius: 24px 24px 0 0;
   padding: 36px 40px 36px 40px;
   box-shadow: 0 2px 12px rgba(193,18,31,0.07);
   position: relative;
@@ -42,7 +42,7 @@
   width: 200px;
   height: 200px;
   object-fit: cover;
-  border-radius: 18px;
+  border-radius: 10px;
   display: block;
 }
 .topMain {
@@ -55,13 +55,13 @@
 }
 .centeredTitle {
   font-size: 2.5rem;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
   font-family: 'Poppins', Arial, sans-serif;
   color: #fff;
   letter-spacing: 2px;
   text-align: center;
-  margin-bottom: 0.2em;
+ 
 }
 .centeredSubtitle {
   font-size: 1.3rem;
@@ -73,8 +73,7 @@
 }
 .topButtonRow {
   display: flex;
-  gap: 18px;
-  margin-top: 10px;
+  gap: 20px;
   justify-content: center;
 }
 .editBtn, .saveBtn {
@@ -86,7 +85,7 @@
   border-radius: 14px;
   padding: 10px 32px;
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 600;
   font-family: 'Poppins', Arial, sans-serif;
   cursor: pointer;
   transition: background 0.18s, color 0.18s, border 0.18s;
@@ -106,16 +105,16 @@
   border-radius: 14px;
   padding: 10px 32px;
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 600;
   font-family: 'Poppins', Arial, sans-serif;
   cursor: pointer;
   transition: background 0.18s, color 0.18s, border 0.18s;
   outline: none;
 }
 .cancelBtn:hover, .deleteBtn:hover {
-  background: #fff0f0;
-  color: #c1121f;
-  border: 2px solid #fff0f0;
+  background: #c1121f;
+  color: #fff;
+  border: 2px solid #fff; 
 }
 
 
