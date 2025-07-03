@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
+
 .container {
   min-height: 100vh;
   height: 100vh;
@@ -13,6 +14,7 @@
   padding: 20px 0;
   box-sizing: border-box;
 }
+
 
 .loginBox {
   width: 100%;
@@ -29,6 +31,7 @@
   margin: auto;
 }
 
+
 .topSection {
   width: 100%;
   min-height: 210px;
@@ -38,6 +41,7 @@
   align-items: center;
   justify-content: center;
 }
+
 
 .backgroundImage {
   position: absolute;
@@ -50,6 +54,7 @@
   filter: brightness(0.7);
 }
 
+
 .logoContainer {
   position: relative;
   width: 160px;
@@ -58,9 +63,11 @@
   z-index: 2;
 }
 
+
 .logoImage {
   object-fit: contain;
 }
+
 
 .title {
   color: white;
@@ -76,6 +83,7 @@
   text-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
 
+
 .formSection {
   width: 100%;
   padding: 32px 20px 28px 20px;
@@ -85,6 +93,7 @@
   align-items: center;
   justify-content: center;
 }
+
 
 .formContainer {
   width: 100%;
@@ -96,11 +105,13 @@
   gap: 16px;
 }
 
+
 .header {
   text-align: center;
   margin-bottom: 8px;
   width: 100%;
 }
+
 
 .welcomeText {
   color: white;
@@ -110,12 +121,14 @@
   font-family: 'Poppins', Arial, sans-serif;
 }
 
+
 .subtitle {
   color: #e5e7eb;
   font-size: 12px;
   margin-bottom: 8px;
   font-family: 'Poppins', Arial, sans-serif;
 }
+
 
 .form {
   width: 100%;
@@ -124,6 +137,7 @@
   gap: 16px;
   align-items: center;
 }
+
 
 .errorContainer {
   background-color: #fef2f2;
@@ -134,10 +148,12 @@
   width: 100%;
 }
 
+
 .errorContent {
   display: flex;
   align-items: center;
 }
+
 
 .errorIcon {
   width: 1rem;
@@ -146,6 +162,7 @@
   margin-right: 0.5rem;
 }
 
+
 .errorText {
   color: #b91c1c;
   font-size: 0.85rem;
@@ -153,11 +170,13 @@
   font-family: 'Poppins', Arial, sans-serif;
 }
 
+
 .inputGroup {
   width: 100%;
   position: relative;
   margin-bottom: 0;
 }
+
 
 .label {
   color: white;
@@ -168,9 +187,11 @@
   font-family: 'Poppins', Arial, sans-serif;
 }
 
+
 .inputContainer {
   position: relative;
 }
+
 
 .icon {
   position: absolute;
@@ -182,6 +203,7 @@
   pointer-events: none;
   color: #9ca3af;
 }
+
 
 .input {
   width: 90%;
@@ -196,6 +218,7 @@
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   font-family: 'Poppins', Arial, sans-serif;
 }
+
 
 .submitButton {
   width: 100%;
@@ -214,10 +237,12 @@
   font-family: 'Poppins', Arial, sans-serif;
 }
 
+
 .submitButton:disabled {
   cursor: not-allowed;
   opacity: 0.7;
 }
+
 
 .forgotPassword {
   text-align: center;
@@ -225,11 +250,13 @@
   width: 100%;
 }
 
+
 .forgotText {
   color: #e5e7eb;
   font-size: 12px;
   font-family: 'Poppins', Arial, sans-serif;
 }
+
 
 .forgotLink {
   color: #c1121f;
@@ -239,37 +266,40 @@
   font-family: 'Poppins', Arial, sans-serif;
 }
 
+
 /* Responsive adjustments for small devices */
 @media (max-height: 700px) {
   .container {
     padding: 10px 0;
   }
-  
+ 
   .topSection {
     min-height: 180px;
   }
-  
+ 
   .formSection {
     padding: 24px 20px 20px 20px;
   }
 }
 
+
 @media (max-height: 600px) {
   .container {
     padding: 5px 0;
   }
-  
+ 
   .topSection {
     min-height: 150px;
   }
-  
+ 
   .logoContainer {
     width: 140px;
     height: 70px;
     margin-top: 16px;
   }
-  
+ 
   .formSection {
     padding: 20px 20px 16px 20px;
   }
-} 
+}
+
