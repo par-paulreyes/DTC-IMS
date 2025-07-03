@@ -3,7 +3,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { apiClient, getImageUrl } from "../../config/api";
+import { apiClient } from "../../config/api";
 import './inventory.css';
 
 interface Item {
@@ -28,7 +28,7 @@ function InventoryPageContent() {
   const [status, setStatus] = useState("");
   const [maintenanceFilter, setMaintenanceFilter] = useState("");
   const [mounted, setMounted] = useState(false);
-  const [itemImageUrls, setItemImageUrls] = useState<{[key: string]: string}>({});
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -61,8 +61,6 @@ function InventoryPageContent() {
           pending_maintenance_count: item.pending_maintenance_count || 0
         }));
         setItems(itemsWithMaintenance);
-        // Load image URLs for items
-        loadItemImageUrls(itemsWithMaintenance);
       })
       .catch((err) => setError("Error loading items"))
       .finally(() => setLoading(false));
@@ -89,21 +87,7 @@ function InventoryPageContent() {
     return matchesSearch && matchesArticleType && matchesStatus && matchesMaintenance;
   });
 
-  // Load image URLs for items
-  const loadItemImageUrls = async (items: Item[]) => {
-    const imageUrls: {[key: string]: string} = {};
-    for (const item of items) {
-      if (item.image_url) {
-        try {
-          const url = await getImageUrl(item.image_url);
-          imageUrls[item.id] = url;
-        } catch (err) {
-          console.error('Error loading image URL for item:', item.id, err);
-        }
-      }
-    }
-    setItemImageUrls(imageUrls);
-  };
+
 
   // Get unique article types and system statuses for dropdowns
   const articleTypes = Array.from(new Set(items.map((item) => item.article_type)));
