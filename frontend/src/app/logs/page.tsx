@@ -107,40 +107,6 @@ export default function LogsPage() {
         </p>
       </div>
       <div className="body-container">
-        {/* Search Bar */}
-        <div
-          className="logs-search-container"
-          style={{
-            background: '#fff',
-            border: '1.5px solid #d1d5db',
-            borderRadius: '12px',
-            marginBottom: '18px',
-            marginTop: '15px',
-            padding: '0 10px',
-            boxSizing: 'border-box',
-            height: '48px',
-            boxShadow: 'none',
-            position: 'relative',
-            zIndex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            width: '100%'
-          }}
-        >
-          <div className="search-icon">
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-          </div>
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Search with article id or type"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-        </div>
         <div className="export-dropdown-row">
           <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, textAlign: 'center' }}>
             Download maintenance records as PDF or CSV files
@@ -183,6 +149,40 @@ export default function LogsPage() {
               </div>
             )}
           </div>
+        </div>
+        {/* Search Bar */}
+        <div
+          className="logs-search-container"
+          style={{
+            background: '#fff',
+            border: '1.5px solid #d1d5db',
+            borderRadius: '12px',
+            marginBottom: '18px',
+            marginTop: '15px',
+            padding: '0 10px',
+            boxSizing: 'border-box',
+            height: '48px',
+            boxShadow: 'none',
+            position: 'relative',
+            zIndex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            width: '100%'
+          }}
+        >
+          <div className="search-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search with article id or type"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
         </div>
         {!mounted && <div className="loading">Loading...</div>}
         {mounted && loading && <div className="loading">Loading...</div>}

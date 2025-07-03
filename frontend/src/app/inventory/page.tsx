@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -28,6 +28,9 @@ function InventoryPageContent() {
   const [status, setStatus] = useState("");
   const [maintenanceFilter, setMaintenanceFilter] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -87,8 +90,6 @@ function InventoryPageContent() {
     return matchesSearch && matchesArticleType && matchesStatus && matchesMaintenance;
   });
 
-
-
   // Get unique article types and system statuses for dropdowns
   const articleTypes = Array.from(new Set(items.map((item) => item.article_type)));
   const statuses = Array.from(
@@ -96,6 +97,47 @@ function InventoryPageContent() {
       items.map((item) => (item.system_status ? item.system_status : "Unknown")).map((s) => s || "Unknown")
     )
   );
+
+  // Handle clicking outside dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowExportDropdown(false);
+      }
+    };
+    if (showExportDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showExportDropdown]);
+
+  // Export handler for inventory
+  const handleExport = async (format: string) => {
+    setExporting(true);
+    try {
+      const response = await apiClient.get(`/items/export?format=${format}`, {
+        responseType: 'blob',
+      });
+      const blob = new Blob([response.data], {
+        type: format === 'pdf' ? 'application/pdf' : 'text/csv'
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `inventory.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <div className="main-container">
@@ -106,6 +148,50 @@ function InventoryPageContent() {
         </p>
       </div>
       <div className="body-container">
+        {/* Export Dropdown Row */}
+        <div className="export-dropdown-row">
+          <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0, textAlign: 'center' }}>
+            Download inventory records as PDF or CSV files
+          </p>
+          <div className={`export-dropdown ${showExportDropdown ? 'open' : ''}`} ref={dropdownRef}>
+            <button
+              className="export-dropdown-btn"
+              onClick={() => setShowExportDropdown(!showExportDropdown)}
+              disabled={exporting}
+            >
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Export
+            </button>
+            {showExportDropdown && (
+              <div className="export-dropdown-menu">
+                <button
+                  className="export-dropdown-item"
+                  onClick={() => {
+                    handleExport("csv");
+                    setShowExportDropdown(false);
+                  }}
+                  disabled={exporting}
+                >
+                  {exporting ? "Exporting..." : "Export CSV"}
+                </button>
+                <button
+                  className="export-dropdown-item"
+                  onClick={() => {
+                    handleExport("pdf");
+                    setShowExportDropdown(false);
+                  }}
+                  disabled={exporting}
+                >
+                  {exporting ? "Exporting..." : "Export PDF"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
         {/* Search Bar */}
         <div
           className="inventory-search-container"
