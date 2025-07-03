@@ -13,6 +13,8 @@
 }
 
 
+
+
 .topCard {
   display: flex;
   align-items: center;
@@ -114,8 +116,10 @@
 .cancelBtn:hover, .deleteBtn:hover {
   background: #c1121f;
   color: #fff;
-  border: 2px solid #fff; 
+  border: 2px solid #fff;
 }
+
+
 
 
 .middleSection {
@@ -197,6 +201,8 @@
 }
 
 
+
+
 .grayRect {
   background: #f3f4f6;
   border-radius: 10px;
@@ -235,6 +241,8 @@
 }
 
 
+
+
 .bottomSection {
   background: #fff;
   border-radius: 0 0 24px 24px;
@@ -247,6 +255,8 @@
 .tabsContent {
   padding: 18px 18px 0 18px;
 }
+
+
 
 
 .bottomHalf {
@@ -320,6 +330,8 @@
 }
 
 
+
+
 .changeImageBtn {
   margin-top: 16px;
   background: #fff;
@@ -342,6 +354,8 @@
 }
 
 
+
+
 /* Blue header for info/specs */
 .blueHeader {
   background: linear-gradient(90deg, #182848 60%, #2563eb 100%);
@@ -355,6 +369,8 @@
   font-family: 'Poppins', Arial, sans-serif;
   margin-bottom: 0;
 }
+
+
 
 
 /* Tabs for diagnostics/logs */
@@ -393,6 +409,8 @@
 }
 
 
+
+
 /* Solid blue header for diagnostics/logs */
 .blueHeader, .solidBlueHeader, .solidBlueHeaderLogs {
   background: #182848;
@@ -413,6 +431,8 @@
 }
 
 
+
+
 .redHeader {
   background: #182848;
   color: #fff;
@@ -427,6 +447,8 @@
 }
 
 
+
+
 .statusIcon {
   font-size: 1.2rem;
   margin-right: 8px;
@@ -437,6 +459,8 @@
   margin-right: 6px;
   vertical-align: middle;
 }
+
+
 
 
 .filterDropdown {
@@ -455,6 +479,8 @@
 .filterDropdown:focus {
   border: 1.5px solid #2563eb;
 }
+
+
 
 
 .checklist {
@@ -491,6 +517,7 @@
   background: #c7d2fe;
   border: 2px solid #182848;
 }
+
 
 .diagnosticEditBox {
   background: #e0e7ff;
@@ -539,6 +566,8 @@
   color: #888;
   margin-left: 12px;
 }
+
+
 
 
 @media (max-width: 800px) {
@@ -621,6 +650,13 @@ min-width: 0;
 .diagnosticsInfoCard:hover {
 box-shadow: 0 12px 40px var(--shadow-heavy);
 }
+
+
+
+
+
+
+
 
 
 

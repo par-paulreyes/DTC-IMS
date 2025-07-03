@@ -342,3 +342,110 @@ option {
   width: 72px;
   align-items: center;
 }
+
+.export-dropdown {
+  display: flex;
+  align-items: center;
+  margin-left: 0;
+  position: relative;
+}
+
+.export-dropdown-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0 10px 0;
+  padding: 0 16px 0 16px;
+}
+
+.export-dropdown-btn {
+  background: rgba(185, 28, 28, 0.1);
+  color: #b91c1c;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 100px;
+  justify-content: center;
+  height: 40px;
+}
+
+.export-dropdown-btn:hover {
+  background: rgba(185, 28, 28, 0.2);
+}
+
+.export-dropdown-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.export-dropdown-btn svg {
+  transition: transform 0.2s;
+  width: 14px;
+  height: 14px;
+}
+
+.export-dropdown-btn:not(:disabled):hover svg {
+  transform: translateY(1px);
+}
+
+.export-dropdown.open .export-dropdown-btn svg {
+  transform: rotate(180deg);
+}
+
+.export-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  min-width: 120px;
+  max-width: 220px;
+  z-index: 1000;
+  margin-top: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.export-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: #333;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.export-dropdown-item:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.export-dropdown-item:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.export-dropdown-item:hover {
+  background-color: #f3f4f6;
+}
+
+.export-dropdown-item:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.export-dropdown-item:disabled:hover {
+  background-color: transparent;
+}
