@@ -127,3 +127,29 @@ SELECT id, property_no, article_type, company_name FROM items;
 
 SELECT 'Companies:' as info;
 SELECT * FROM companies;
+
+CREATE TABLE students (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    role VARCHAR(50) DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE borrow_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    item_ids TEXT,
+    status VARCHAR(50),
+    pickup_date DATE,
+    return_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES students(id)
+);
+
+CREATE TABLE borrow_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    request_id INT,
+    scanned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    action VARCHAR(50),
+    FOREIGN KEY (request_id) REFERENCES borrow_requests(id)
+); 
