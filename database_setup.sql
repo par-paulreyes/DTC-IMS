@@ -2,11 +2,17 @@
 -- This script drops the existing database and creates a fresh one
 
 -- Step 1: Drop existing database (if it exists)
-DROP DATABASE IF EXISTS ims_db;
+-- DROP DATABASE IF EXISTS ims_db;
 
 -- Step 2: Create fresh database
-CREATE DATABASE ims_db;
+-- CREATE DATABASE ims_db;
 USE ims_db;
+
+DROP TABLE IF EXISTS maintenance_logs;
+DROP TABLE IF EXISTS diagnostics;
+DROP TABLE IF EXISTS items;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS companies;
 
 -- Step 3: Create users table
 CREATE TABLE users (
@@ -47,6 +53,12 @@ CREATE TABLE items (
     next_maintenance_date DATE,
     pending_maintenance_count INT DEFAULT 0,
     maintenance_status VARCHAR(50) DEFAULT 'pending',
+    serial_no VARCHAR(100) DEFAULT NULL,
+    brand VARCHAR(100) DEFAULT NULL,
+    category ENUM('Electronic', 'Utility', 'Tool', 'Supply') DEFAULT NULL,
+    quantity INT DEFAULT 1,
+    item_status ENUM('Available', 'Bad Condition', 'To be Borrowed', 'Borrowed') DEFAULT 'Available',
+    remarks TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -85,12 +97,12 @@ INSERT INTO users (username, full_name, email, password, company_name, role) VAL
 ('admin', 'System Administrator', 'admin@dtc.com', '$2b$10$SMLogd9V0jzJyyorAIoejOpc98XJ1Vw5xPAWM5lP07XWyALG9SoJa', 'DTC', 'admin');
 
 -- Step 10: Insert sample items
-INSERT INTO items (property_no, qr_code, article_type, specifications, date_acquired, end_user, price, location, supply_officer, company_name) VALUES 
-('PC-001','ICTCE-PC-001', 'Desktop Computer', 'Intel i7, 16GB RAM, 512GB SSD', '2024-01-15', 'John Doe', 45000.00, 'IT Office', 'Supply Officer 1', 'DTC'),
-('PC-002','ICTCE-PC-002', 'Laptop', 'Dell Latitude, Intel i5, 8GB RAM', '2024-02-20', 'Jane Smith', 35000.00, 'Admin Office', 'Supply Officer 1', 'DTC'),
-('PR-001','ICTCE-PR-001', 'Printer', 'HP LaserJet Pro, Wireless', '2024-03-10', 'Print Room', 25000.00, 'Print Room', 'Supply Officer 2', 'DTC'),
-('PC-003','ICTCE-PC-003', 'Desktop Computer', 'Intel i3, 4GB RAM, 256GB HDD', '2023-06-15', 'Mike Johnson', 25000.00, 'HR Office', 'Supply Officer 1', 'DTC'),
-('PR-002','ICTCE-PR-002', 'Printer', 'Canon Printer, Basic Model', '2023-08-20', 'Finance Office', 15000.00, 'Finance Office', 'Supply Officer 2', 'DTC');
+INSERT INTO items (property_no, qr_code, article_type, specifications, date_acquired, end_user, price, location, supply_officer, company_name, image_url, next_maintenance_date, pending_maintenance_count, maintenance_status, serial_no, brand, category, quantity, item_status, remarks) VALUES 
+('PC-001','ICTCE-PC-001', 'Desktop Computer', 'Intel i7, 16GB RAM, 512GB SSD', '2024-01-15', 'John Doe', 45000.00, 'IT Office', 'Supply Officer 1', 'DTC', NULL, NULL, 0, 'pending', 'SN-PC-001', 'Dell', 'Electronic', 1, 'Available', 'Main IT desktop'),
+('PC-002','ICTCE-PC-002', 'Laptop', 'Dell Latitude, Intel i5, 8GB RAM', '2024-02-20', 'Jane Smith', 35000.00, 'Admin Office', 'Supply Officer 1', 'DTC', NULL, NULL, 0, 'pending', 'SN-PC-002', 'Dell', 'Electronic', 1, 'Available', NULL),
+('PR-001','ICTCE-PR-001', 'Printer', 'HP LaserJet Pro, Wireless', '2024-03-10', 'Print Room', 25000.00, 'Print Room', 'Supply Officer 2', 'DTC', NULL, NULL, 0, 'pending', 'SN-PR-001', 'HP', 'Electronic', 1, 'Available', 'Wireless printer'),
+('PC-003','ICTCE-PC-003', 'Desktop Computer', 'Intel i3, 4GB RAM, 256GB HDD', '2023-06-15', 'Mike Johnson', 25000.00, 'HR Office', 'Supply Officer 1', 'DTC', NULL, NULL, 0, 'pending', 'SN-PC-003', NULL, 'Electronic', 1, 'Bad Condition', 'Needs RAM upgrade'),
+('PR-002','ICTCE-PR-002', 'Printer', 'Canon Printer, Basic Model', '2023-08-20', 'Finance Office', 15000.00, 'Finance Office', 'Supply Officer 2', 'DTC', NULL, NULL, 0, 'pending', 'SN-PR-002', 'Canon', 'Electronic', 2, 'To be Borrowed', NULL);
 
 -- Step 11: Insert sample maintenance logs
 INSERT INTO maintenance_logs (item_id, maintenance_date, task_performed, maintained_by, status) VALUES 
@@ -127,7 +139,7 @@ SELECT id, property_no, article_type, company_name FROM items;
 
 SELECT 'Companies:' as info;
 SELECT * FROM companies;
-
+/*
 CREATE TABLE students (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,

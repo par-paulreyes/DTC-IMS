@@ -23,7 +23,8 @@ interface Item {
   next_maintenance_date?: string;
   pending_maintenance_count?: number;
   maintenance_status?: string;
-  status?: string;
+  item_status?: string;
+  category?: string;
   system_status?: string;
   created_at: string;
   updated_at?: string;
@@ -57,6 +58,9 @@ export default function DashboardPage() {
   const [belowGoodCount, setBelowGoodCount] = useState(0);
   const [othersAddedThisWeek, setOthersAddedThisWeek] = useState(0);
   const [mostRecentOtherArticle, setMostRecentOtherArticle] = useState('');
+  const [goodConditionCount, setGoodConditionCount] = useState(0);
+  const [badConditionCount, setBadConditionCount] = useState(0);
+  const [categoryCounts, setCategoryCounts] = useState<{ [key: string]: number }>({});
   const router = useRouter();
 
 
@@ -170,6 +174,20 @@ export default function DashboardPage() {
       }
       setMostRecentOtherArticle(mostRecentOtherArticle);
 
+      // Calculate item_status counts
+      const goodCondition = items.filter((item: Item) => item.item_status === 'Available').length;
+      const badCondition = items.filter((item: Item) => item.item_status === 'Bad Condition').length;
+      setGoodConditionCount(goodCondition);
+      setBadConditionCount(badCondition);
+      // Calculate category counts (Electronic, Utility, Tool, Supply)
+      const catCounts: { [key: string]: number } = { Electronic: 0, Utility: 0, Tool: 0, Supply: 0 };
+      items.forEach((item: Item) => {
+        if (item.category && catCounts.hasOwnProperty(item.category)) {
+          catCounts[item.category]++;
+        }
+      });
+      setCategoryCounts(catCounts);
+     
       // Set all state variables
       setTotalItems(totalItems);
       setNeededMaintenance(itemsNeedingMaintenance);
@@ -452,29 +470,59 @@ export default function DashboardPage() {
 
           {/* Dashboard Info Cards - 2x2 grid, custom markup */}
           <div className={styles.dashboardInfoGrid}>
-            {/* Needed Maintenance */}
+            {/* Status Card: Need Action = Bad Condition, Good Condition = Available */}
             <div
               className={`${styles.infoCard} ${styles.infoCardTopBorder}`}
-              onClick={() => handleCardClick('needed-maintenance')}
+              onClick={() => router.push('/inventory?item_status=Bad%20Condition')}
               style={{ cursor: 'pointer' }}
-              title="Click to view all items except those with Good status"
+              title="Click to view all items with Bad Condition status"
             >
               <div className={styles.cardTopRow}>
-                <span className={styles.cardNumber} style={{ color: 'var(--primary-red-dark)' }}>{belowGoodCount}</span>
+                <span className={styles.cardNumber} style={{ color: 'var(--primary-red-dark)' }}>{badConditionCount}</span>
                 <span className={styles.cardIcon} style={{ background: 'var(--neutral-gray-200)' }}>
                   <FaTools size={28} style={{ color: 'var(--primary-red-dark)' }} />
                 </span>
               </div>
               <div className={styles.cardTitle} style={{ color: 'var(--neutral-gray-900)' }}>Needs Action</div>
-              <div className={`${styles.cardChange} ${belowGoodCount > 0 ? styles['cardChange--red'] : styles['cardChange--green']}`}>
-                {belowGoodCount > 0 ? 'Items below Good status' : 'All items in good condition'}
-              </div>
+              <div className={`${styles.cardChange} ${badConditionCount > 0 ? styles['cardChange--red'] : styles['cardChange--green']}`}>{badConditionCount > 0 ? 'Items need action' : 'All items in good condition'}</div>
               <div className={styles.cardStatsRow}>
                 <div>
-                  <span className={`${styles.cardStatValue} ${styles['stat--green']}`}>{goodStatusCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>GOOD</span>
+                  <span className={`${styles.cardStatValue} ${styles['stat--green']}`}>{goodConditionCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>GOOD CONDITION</span>
                 </div>
                 <div>
-                  <span className={`${styles.cardStatValue} ${styles['stat--red']}`}>{belowGoodCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>URGENT</span>
+                  <span className={`${styles.cardStatValue} ${styles['stat--red']}`}>{badConditionCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>NEED ACTION</span>
+                </div>
+              </div>
+              <div className={styles.cardFooterRow}>
+                <span className={styles.cardDate} style={{ color: 'var(--neutral-gray-900)' }}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+            </div>
+            {/* Article Card: Total Articles and breakdown */}
+            <div
+              className={`${styles.infoCard} ${styles.infoCardTopBorder}`}
+              onClick={() => router.push('/inventory')}
+              style={{ cursor: 'pointer' }}
+              title="Click to view all inventory items"
+            >
+              <div className={styles.cardTopRow}>
+                <span className={styles.cardNumber} style={{ color: 'var(--primary-red-dark)' }}>{Object.values(categoryCounts).reduce((a, b) => a + b, 0)}</span>
+                <span className={styles.cardIcon} style={{ background: 'var(--neutral-gray-200)' }}>
+                  <FaBoxes size={28} style={{ color: 'var(--primary-red-dark)' }} />
+                </span>
+              </div>
+              <div className={styles.cardTitle} style={{ color: 'var(--neutral-gray-900)' }}>Total Articles</div>
+              <div className={styles.cardStatsRow}>
+                <div>
+                  <span className={`${styles.cardStatValue} ${styles['stat--green']}`}>{categoryCounts['Electronic']}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>ELECTRONIC</span>
+                </div>
+                <div>
+                  <span className={`${styles.cardStatValue} ${styles['stat--green']}`}>{categoryCounts['Utility']}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>UTILITY</span>
+                </div>
+                <div>
+                  <span className={`${styles.cardStatValue} ${styles['stat--green']}`}>{categoryCounts['Tool']}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>TOOL</span>
+                </div>
+                <div>
+                  <span className={`${styles.cardStatValue} ${styles['stat--green']}`}>{categoryCounts['Supply']}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>SUPPLY</span>
                 </div>
               </div>
               <div className={styles.cardFooterRow}>
@@ -520,41 +568,6 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <span className={`${styles.cardStatValue} ${pendingMaintenance > 0 ? styles['stat--red'] : styles['stat--green']}`}>{pendingMaintenance}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>PENDING</span>
-                </div>
-              </div>
-              <div className={styles.cardFooterRow}>
-                <span className={styles.cardDate} style={{ color: 'var(--neutral-gray-900)' }}>Updated: {lastUpdated.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
-              </div>
-            </div>
-            {/* Total Articles */}
-            <div
-              className={`${styles.infoCard} ${styles.infoCardTopBorder}`}
-              onClick={() => handleCardClick('total-articles')}
-              style={{ cursor: 'pointer' }}
-              title="Click to view all inventory items"
-            >
-              <div className={styles.cardTopRow}>
-                <span className={styles.cardNumber} style={{ color: 'var(--primary-red-dark)' }}>{totalArticles}</span>
-                <span className={styles.cardIcon} style={{ background: 'var(--neutral-gray-200)' }}>
-                  <FaBoxes size={28} style={{ color: 'var(--primary-red-dark)' }} />
-                </span>
-              </div>
-              <div className={styles.cardTitle} style={{ color: 'var(--neutral-gray-900)' }}>Total Articles</div>
-              {/* Show 'New {article} added' under the title if a new other article was added this week */}
-              {mostRecentOtherArticle && (
-                <div className={`${styles.cardChange} ${styles['cardChange--green']}`} style={{ marginBottom: '10px' }}>
-                  New {mostRecentOtherArticle} added
-                </div>
-              )}
-              {recentlyAdded === 0 && !mostRecentOtherArticle ? (
-                <div className={`${styles.cardChange} ${styles['cardChange--neutral']}`}>No change</div>
-              ) : null}
-              <div className={styles.cardStatsRow}>
-                <div>
-                  <span className={`${styles.cardStatValue} ${styles['stat--green']}`}>{topCategoryCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>{(topCategory || 'NONE').toUpperCase()}</span>
-                </div>
-                <div>
-                  <span className={`${styles.cardStatValue} ${styles['stat--green']}`}>{secondCategoryCount}</span> <span className={styles.cardStatLabel} style={{ color: 'var(--neutral-gray-900)' }}>{(secondCategory || 'NONE').toUpperCase()}</span>
                 </div>
               </div>
               <div className={styles.cardFooterRow}>
